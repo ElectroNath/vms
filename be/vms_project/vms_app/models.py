@@ -6,7 +6,6 @@ import qrcode
 from io import BytesIO
 from django.core.files import File
 from PIL import Image  # type: ignore
-import uuid
 from .generate import generate_short_token
 
 class User(AbstractUser):
@@ -17,6 +16,9 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='employee')
     is_active = models.BooleanField(default=True)
+    must_change_password = models.BooleanField(default=True)
+
+
     
 
 class EmployeeProfile(models.Model):
@@ -27,6 +29,9 @@ class EmployeeProfile(models.Model):
     staff_id = models.CharField(max_length=50, unique=True)
     id_qr_code = models.ImageField(upload_to='qr_codes/', blank=True)
     date_registered = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
 
     def save(self, *args, **kwargs):
         if not self.id_qr_code:
@@ -44,6 +49,9 @@ class Device(models.Model):
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True)
     date_registered = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.device_name
 
     def save(self, *args, **kwargs):
         if not self.qr_code:
