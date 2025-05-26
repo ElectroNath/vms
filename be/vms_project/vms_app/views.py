@@ -4,9 +4,9 @@ from rest_framework.permissions import IsAuthenticated # type: ignore
 from django.contrib.auth import get_user_model
 from .serializers import (
     RegisterEmployeeSerializer, EmployeeProfileSerializer, DeviceSerializer,
-    GuestSerializer, GuestDeviceSerializer, AccessLogSerializer
+    GuestSerializer, AccessLogSerializer
 )
-from .models import EmployeeProfile, Device, Guest, AccessLog, GuestDevice
+from .models import EmployeeProfile, Device, Guest, AccessLog
 from .permissions import IsAdmin, IsEmployee, IsSecurity
 import qrcode
 from io import BytesIO
@@ -18,6 +18,15 @@ from rest_framework_simplejwt.views import TokenObtainPairView # type: ignore
 from .serializers import CustomTokenObtainPairSerializer
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core.mail import EmailMessage
+from django.core.mail import send_mail, BadHeaderError
+from smtplib import SMTPException
+from rest_framework.decorators import api_view, permission_classes # type: ignore
+from rest_framework.views import APIView # type: ignore
+
+
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -34,6 +43,32 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = User.objects.filter(role='employee')
     serializer_class = RegisterEmployeeSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+
+        try:
+            sent_count = send_mail(
+                subject="Welcome to NETCO Visitor Management System",
+                message=f"Hi {user.username}, your account has been created Pasword: Welcome$. Please log in and change your password.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+            print(f"send_mail returned: {sent_count}")  # Debug: check if email was sent
+            if sent_count == 1:
+                print("Email sent successfully!")
+            else:
+                print("Email was not sent.")
+        except BadHeaderError:
+            print("Invalid header found while sending email.")
+            raise ValidationError({"detail": "Invalid header found while sending email."})
+        except SMTPException as e:
+            print(f"SMTP error occurred: {str(e)}")
+            raise ValidationError({"detail": f"SMTP error occurred: {str(e)}"})
+        except Exception as e:
+            print(f"An error occurred while sending email: {str(e)}")
+            raise ValidationError({"detail": f"An error occurred while sending email: {str(e)}"})
 
     def get_queryset(self):
         # Admin sees all employees
@@ -90,10 +125,20 @@ class EmployeeProfileViewSet(viewsets.ReadOnlyModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=False, methods=['post'], url_path='scan-qr')
+    def scan_qr(self, request):
+        staff_id = request.data.get('staff_id')
+        if not staff_id:
+            return Response({"detail": "staff_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            profile = EmployeeProfile.objects.get(staff_id=staff_id)
+            return Response(profile.get_full_info())  # <-- Ensure this line returns get_full_info()
+        except EmployeeProfile.DoesNotExist:
+            return Response({"detail": "EmployeeProfile not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class DeviceViewSet(viewsets.ModelViewSet):
     """
-    Employee registers devices; Security can list and verify devices.
+    Security registers devices; Employees can view their own devices.
     """
     serializer_class = DeviceSerializer
     permission_classes = [IsAuthenticated]
@@ -108,10 +153,9 @@ class DeviceViewSet(viewsets.ModelViewSet):
             return Device.objects.none()
 
     def perform_create(self, serializer):
-        # Only employees can create devices
-        if self.request.user.role != 'employee':
-            return Response({"detail": "Only employees can register devices."},
-                            status=status.HTTP_403_FORBIDDEN)
+        # Only security can register devices
+        if self.request.user.role != 'security':
+            raise PermissionDenied("Only security can register devices.")
 
         serial = serializer.validated_data['serial_number']
         img = qrcode.make(serial)
@@ -119,9 +163,23 @@ class DeviceViewSet(viewsets.ModelViewSet):
         img.save(buffer)
         qr_image = ContentFile(buffer.getvalue(), f'{serial}.png')
 
-        employee_profile = EmployeeProfile.objects.get(user=self.request.user)
-        serializer.save(owner=employee_profile, qr_code=qr_image)
+        # Set owner manually from validated data or foreign key
+        employee = serializer.validated_data.get('owner')
+        if not employee:
+            raise ValidationError("Device must be linked to an employee.")
 
+        serializer.save(qr_code=qr_image)
+
+    @action(detail=False, methods=['post'], url_path='scan-qr')
+    def scan_qr(self, request):
+        serial_number = request.data.get('serial_number')
+        if not serial_number:
+            return Response({"detail": "serial_number is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            device = Device.objects.get(serial_number=serial_number)
+            return Response(device.get_full_info())  # <-- Ensure this line returns get_full_info()
+        except Device.DoesNotExist:
+            return Response({"detail": "Device not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class GuestViewSet(viewsets.ModelViewSet):
     """
@@ -135,44 +193,32 @@ class GuestViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("Only employees can invite guests.")
 
         invited_by = EmployeeProfile.objects.get(user=self.request.user)
-        # Create guest with token but DO NOT generate QR code here
+        
+        # Create guest object with token
         guest = serializer.save(invited_by=invited_by)
-        guest.save()  # Just save without QR code
 
-    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated, IsSecurity])
-    def verify_token(self, request):
-        token = request.data.get("token")
-        if not token:
-            return Response({"detail": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            guest = Guest.objects.get(token=token)
-        except Guest.DoesNotExist:
-            return Response({"detail": "Invalid token."}, status=status.HTTP_404_NOT_FOUND)
-
-        now = datetime.now(timezone.utc)
-        if guest.created_at < now - timedelta(hours=24):
-            return Response({"detail": "Token has expired."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if guest.is_verified:
-            return Response({"detail": "Guest already verified."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Mark guest as verified
-        guest.is_verified = True
-
-        # Generate QR code NOW and save
+        # Generate QR code image from token
         qr_img = qrcode.make(str(guest.token))
         buffer = BytesIO()
         qr_img.save(buffer)
+        buffer.seek(0)
+
+        # Save QR to guest instance
         qr_file = ContentFile(buffer.getvalue(), f'{guest.token}.png')
         guest.token_qr_code.save(f'{guest.token}.png', qr_file)
         guest.save()
 
-        return Response({
-            "detail": "Guest token verified and QR code generated successfully.",
-            "guest_name": guest.full_name,
-            "visit_date": guest.visit_date
-        }, status=status.HTTP_200_OK)
+        # Send email to guest with QR code attached
+        if guest.email:
+            email = EmailMessage(
+                subject="You're Invited to NETCO",
+                body=f"Dear {guest.full_name},\n\nYou have been invited to visit NETCO.\n"
+                     f"Please find your visit token QR code attached.\n\nThank you.",
+                from_email="emmanuelakinmolayan1@gmail.com",
+                to=[guest.email],
+            )
+            email.attach(f'{guest.token}.png', buffer.getvalue(), 'image/png')
+            email.send(fail_silently=False)
 
     def get_queryset(self):
         user = self.request.user
@@ -184,16 +230,18 @@ class GuestViewSet(viewsets.ModelViewSet):
         else:
             return Guest.objects.none()
 
+    @action(detail=False, methods=['post'], url_path='scan-qr')
+    def scan_qr(self, request):
+        token = request.data.get('token')
+        if not token:
+            return Response({"detail": "token is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            guest = Guest.objects.get(token=token)
+            return Response(guest.get_full_info())  # <-- Ensure this line returns get_full_info()
+        except Guest.DoesNotExist:
+            return Response({"detail": "Guest not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class GuestDeviceViewSet(viewsets.ModelViewSet):
-    """
-    Security registers guest devices optionally.
-    """
-    serializer_class = GuestDeviceSerializer
-    permission_classes = [IsAuthenticated, IsSecurity]
 
-    def get_queryset(self):
-        return GuestDevice.objects.all()
 
 
 class AccessLogViewSet(viewsets.ModelViewSet):

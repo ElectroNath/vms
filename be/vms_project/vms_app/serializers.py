@@ -1,6 +1,6 @@
 from rest_framework import serializers # type: ignore
 from django.contrib.auth import get_user_model
-from .models import EmployeeProfile, Device, Guest, GuestDevice, AccessLog
+from .models import EmployeeProfile, Device, Guest, AccessLog
 # serializers.py
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer # type: ignore
 
@@ -36,16 +36,16 @@ class RegisterEmployeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'role']
+        fields = ['username', 'email', 'password']  # Removed 'role'
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        return User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            role='employee'
+            role='employee'  # Still set internally
         )
-        return user
+
 
 
 class EmployeeProfileSerializer(serializers.ModelSerializer):
@@ -70,14 +70,18 @@ class GuestSerializer(serializers.ModelSerializer):
         read_only_fields = ['token', 'token_qr_code', 'is_verified', 'created_at']
 
 
-class GuestDeviceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GuestDevice
-        fields = ['id', 'guest', 'device_name', 'serial_number', 'qr_code', 'date_registered']
-        read_only_fields = ['qr_code', 'date_registered']
+
 
 
 class AccessLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessLog
         fields = ['id', 'person_type', 'person_id', 'device_serial', 'scanned_by', 'time_in', 'time_out', 'status']
+
+# If your scan-qr endpoints are returning only the id, it's likely because your ViewSets are using ModelSerializers for responses.
+# To return full info, update your scan_qr actions to return the output of get_full_info(), not the serializer.
+
+# In your views.py, make sure you have:
+# return Response(instance.get_full_info())
+# instead of
+# return Response(self.get_serializer(instance).data)
