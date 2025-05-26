@@ -1,0 +1,89 @@
+/* Microsoft Outlook style login/signup form styles */
+.outlook-auth-container {
+  background: #fff;
+  max-width: 700px;
+  min-width: 392px;
+  min-height: 445px;
+  margin: 60px auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+  padding: 5rem 4rem 4rem 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.outlook-auth-logo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 2.5rem;
+}
+.outlook-auth-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1b1b1b;
+  margin-bottom: 1.2rem;
+}
+.outlook-auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.outlook-auth-input {
+  padding: 0.7rem 1rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid #c6c6c6;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #f9f9f9;
+  color: #222;
+}
+.outlook-auth-input:focus {
+  outline: 2px solid #0078d4;
+  border-color: #0078d4;
+  background: #fff;
+}
+.outlook-auth-btn {
+  background: #0078d4;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.7rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0.7rem;
+  transition: background 0.2s;
+}
+.outlook-auth-btn:hover {
+  background: #005fa3;
+}
+.outlook-auth-link {
+  color: #0078d4;
+  text-align: right;
+  font-size: 0.95rem;
+  text-decoration: none;
+  margin-bottom: 1.2rem;
+  cursor: pointer;
+}
+.outlook-auth-switch {
+  margin-top: 1.2rem;
+  color: #444;
+  font-size: 0.97rem;
+}
+.outlook-auth-switch span {
+  color: #0078d4;
+  cursor: pointer;
+  margin-left: 0.3rem;
+  font-weight: 500;
+}
+.outlook-auth-error {
+  color: #d83b01;
+  background: #fff4f2;
+  border: 1px solid #d83b01;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.98rem;
+  width: 100%;
+  text-align: left;
+}
