@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Login.css";
+import Cookies from "js-cookie";
 
 const OutlookAuth = () => {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -31,9 +32,16 @@ const OutlookAuth = () => {
         password: form.password,
       });
 
-      // Assuming your token is in response.data.token
-      localStorage.setItem("token", response.data.token);
-      navigate("/home");
+      // Debug: log the response to verify token structure
+      console.log("Token response:", response.data);
+
+      // Defensive: check for access token key
+      if (response.data && response.data.access) {
+        Cookies.set("token", response.data.access, { secure: false, sameSite: "Lax" });
+        navigate("/home");
+      } else {
+        setError("Login failed: No access token received.");
+      }
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
