@@ -9,13 +9,17 @@ function Home() {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
+        // Debug: log the token value
+        const token = Cookies.get("token");
+        console.log("Token in cookie:", token);
+
         const response = await axios.get(
           "http://127.0.0.1:8000/api/employee-profiles/me/",
           {
             withCredentials: true,
-            headers: {
-              Authorization: `Bearer ${Cookies.get("token")}`,
-            },
+            headers: token
+              ? { Authorization: `Bearer ${token}` }
+              : {},
           }
         );
         if (response.data.username) {

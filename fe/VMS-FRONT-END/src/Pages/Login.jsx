@@ -32,14 +32,25 @@ const OutlookAuth = () => {
         password: form.password,
       });
 
-      // Assuming your token is in response.data.token
-      localStorage.setItem("token", response.data.token);
-      navigate("/home");
-    } catch (err) {
-      if (err.response?.data?.detail) {
-        setError(err.response.data.detail); // JWT error message
+      // Debug: log the response to verify token structure
+      console.log("Token response:", response.data);
+
+      // Remove testcookie logic for clarity
+      // For SimpleJWT, the tokens are in response.data.access and response.data.refresh
+      if (response.data && response.data.access) {
+        // Set cookie for both localhost and 127.0.0.1
+        Cookies.set("token", response.data.access, { path: "/", secure: false, sameSite: "Lax" });
+        // Debug: log the cookie value after setting
+        console.log("Cookie after set:", Cookies.get("token"));
+        navigate("/home");
       } else {
-        setError("Incorrect username or Password .");
+        setError("Login failed: No access token received.");
+      }
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.detail) {
+        setError(err.response.data.detail);
+      } else {
+        setError("An error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
