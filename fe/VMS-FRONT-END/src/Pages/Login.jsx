@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../styles/Login.css";
 
 const OutlookAuth = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -12,11 +14,35 @@ const OutlookAuth = () => {
     setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Navigate immediately (you can add checks later if needed)
-    navigate("/home");
+    if (!form.username || !form.password) {
+      setError("Please enter both username and password.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/token/", {
+        username: form.username,
+        password: form.password,
+      });
+
+      // Assuming your token is in response.data.token
+      localStorage.setItem("token", response.data.token);
+      navigate("/home");
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("An error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,10 +57,10 @@ const OutlookAuth = () => {
         {error && <div className="outlook-auth-error">{error}</div>}
         <input
           className="outlook-auth-input"
-          type="email"
-          name="email"
-          placeholder="Email, phone, or Skype"
-          value={form.email}
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={form.username}
           onChange={handleChange}
         />
         <input
@@ -48,8 +74,8 @@ const OutlookAuth = () => {
         <a className="outlook-auth-link" href="#">
           Forgot password?
         </a>
-        <button className="outlook-auth-btn" type="submit">
-          Sign in
+        <button className="outlook-auth-btn" type="submit" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
     </div>
