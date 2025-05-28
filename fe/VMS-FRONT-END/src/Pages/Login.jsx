@@ -26,17 +26,21 @@ const OutlookAuth = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/token/", {
-        username: form.username,
-        password: form.password,
-      });
+      await axios.post(
+        "http://127.0.0.1:8000/api/token/",
+        {
+          username: form.username,
+          password: form.password,
+        },
+        {
+          withCredentials: true, // 👈 crucial for cookies
+        }
+      );
 
-      // Assuming your token is in response.data.token
-      localStorage.setItem("token", response.data.token);
-      navigate("/home");
+      navigate("/home"); // move to home if login succeeds
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail); // JWT error message
       } else {
         setError("An error occurred. Please try again.");
       }
