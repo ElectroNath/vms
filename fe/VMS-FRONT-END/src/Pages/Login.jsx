@@ -42,7 +42,7 @@ const OutlookAuth = () => {
       if (err.response?.data?.detail) {
         setError(err.response.data.detail); // JWT error message
       } else {
-        setError("An error occurred. Please try again.");
+        setError("Incorrect username or Password .");
       }
     } finally {
       setLoading(false);
