@@ -32,19 +32,12 @@ const OutlookAuth = () => {
         password: form.password,
       });
 
-      // Debug: log the response to verify token structure
-      console.log("Token response:", response.data);
-
-      // Defensive: check for access token key
-      if (response.data && response.data.access) {
-        Cookies.set("token", response.data.access, { secure: false, sameSite: "Lax" });
-        navigate("/home");
-      } else {
-        setError("Login failed: No access token received.");
-      }
+      // Assuming your token is in response.data.token
+      localStorage.setItem("token", response.data.token);
+      navigate("/home");
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail); // JWT error message
       } else {
         setError("An error occurred. Please try again.");
       }
