@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Login.css";
 import Cookies from "js-cookie";
-
+import Logo from "../assets/3D_App_Icon_Mockup_[Qorecraft]w[1](1).png";
+import "@fontsource/montserrat"; // Defaults to weight 400
 const OutlookAuth = () => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
@@ -32,16 +33,12 @@ const OutlookAuth = () => {
         password: form.password,
       });
 
-      // Debug: log the response to verify token structure
-      console.log("Token response:", response.data);
-
-      // Remove testcookie logic for clarity
-      // For SimpleJWT, the tokens are in response.data.access and response.data.refresh
       if (response.data && response.data.access) {
-        // Set cookie for both localhost and 127.0.0.1
-        Cookies.set("token", response.data.access, { path: "/", secure: false, sameSite: "Lax" });
-        // Debug: log the cookie value after setting
-        console.log("Cookie after set:", Cookies.get("token"));
+        Cookies.set("token", response.data.access, {
+          path: "/",
+          secure: false,
+          sameSite: "Lax",
+        });
         navigate("/home");
       } else {
         setError("Login failed: No access token received.");
@@ -58,38 +55,67 @@ const OutlookAuth = () => {
   };
 
   return (
-    <div className="outlook-auth-container">
-      <img
-        className="outlook-auth-logo"
-        src="/src/assets/nnpc-logo.png"
-        alt="NNPC Logo"
-      />
-      <div className="outlook-auth-title">LOGIN</div>
-      <form className="outlook-auth-form" onSubmit={handleSubmit}>
-        {error && <div className="outlook-auth-error">{error}</div>}
-        <input
-          className="outlook-auth-input"
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
+    <div className="login-root">
+      <div className="login-left">
+        <div
+          className="login-title"
+          style={{ marginTop: "2.5rem", marginBottom: "auto" }}
+        >
+          VISITORS MANAGEMENT
+          <br />
+          SYSTEM(NETCO)
+        </div>
+      </div>
+      <img className="login-3d-icon" src={Logo} alt="3D App Icon" />
+      <div className="login-right">
+        <img
+          className="login-nnpc-logo"
+          src="/src/assets/nnpc-logo.png"
+          alt="NNPC Logo"
         />
-        <input
-          className="outlook-auth-input"
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        />
-        <a className="outlook-auth-link" href="#">
-          Forgot password?
-        </a>
-        <button className="outlook-auth-btn" type="submit" disabled={loading}>
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+        <div className="login-nnpc-label"></div>
+        <div className="login-form-title">Log-In To Your Account</div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          {error && <div className="login-error">{error}</div>}
+          <div className="login-input-group">
+            <input
+              className="login-input"
+              type="text"
+              id="username"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              autoComplete="username"
+              placeholder=" "
+            />
+            <span className="login-input-label">Username</span>
+          </div>
+          <div className="login-input-group">
+            <input
+              className="login-input"
+              type="password"
+              id="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              autoComplete="current-password"
+              placeholder=" "
+            />
+            <span className="login-input-label">Password</span>
+          </div>
+          <button className="login-btn" type="submit" disabled={loading}>
+            {loading ? "Signing in..." : "Log In"}
+          </button>
+          <div className="login-form-row">
+            <label className="login-remember">
+              <input type="checkbox" /> Remember me
+            </label>
+            <a className="login-forgot" href="#">
+              Forget Password
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
