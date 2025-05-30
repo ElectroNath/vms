@@ -222,42 +222,46 @@ body {
   .login-right {
     flex: unset;
     width: 100%;
-    max-width: unset;
-    min-width: unset;
-    min-height: 320px;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
     height: auto;
     align-items: flex-start;
-    padding: 0 0 0 0;
+    padding: 0;
   }
   .login-title {
     margin-left: 0;
-    margin-top: 1.5rem;
-    font-size: 20px;
-    padding-top: 18px;
+    margin-top: 1.2rem;
+    font-size: 18px;
+    padding-top: 12px;
     text-align: center;
     width: 100%;
+    line-height: 1.3;
   }
   .login-3d-icon {
     position: absolute;
-    left: 65%;
-    top: 35%;
+    left: 50%;
+    top: 32%;
     transform: translate(-50%, -50%);
     margin: 0;
-    width: 180px;
-    height: 140px;
-    max-width: 80vw;
-    max-height: 20vh;
+    width: 60vw;
+    height: auto;
+    max-width: 340px;
+    max-height: 32vh;
+    min-width: 120px;
+    min-height: 80px;
     display: block;
     background: none;
     box-shadow: none;
-    z-index: 15;
+    z-index: 30;
     pointer-events: none;
+    overflow: visible;
   }
   .login-left {
     background: rgba(40, 114, 80, 1);
     padding-bottom: 0;
     min-height: unset;
-    height: 40vh;
+    height: 32vh;
     align-items: center;
     justify-content: flex-start;
     overflow: visible;
@@ -267,7 +271,7 @@ body {
     background: rgba(40, 114, 80, 1) !important;
   }
   .login-right {
-    padding: 24px 8px;
+    padding: 16px 2vw;
     align-items: flex-start;
     height: auto;
     min-height: 60vh;
@@ -281,7 +285,6 @@ body {
     max-width: 100vw;
     min-width: 0;
     box-sizing: border-box;
-    /* Make the white part fill down */
     flex: 1 1 auto;
   }
   .login-form {
@@ -289,28 +292,66 @@ body {
     max-width: 100vw;
     min-width: 0;
     box-sizing: border-box;
-    padding: 0 8px;
+    padding: 0 2vw;
   }
   .login-input-group {
     width: 100vw;
     max-width: 100vw;
     min-width: 0;
     box-sizing: border-box;
-    padding: 0 8px;
+    padding: 0 2vw;
+    margin-bottom: 1rem;
   }
   .login-nnpc-logo {
     display: none;
   }
   .login-form-title {
-    font-size: 28px;
-    margin-bottom: 1.2rem;
+    font-size: 20px;
+    margin-bottom: 2rem;
     max-width: 100%;
     padding-left: 0;
     letter-spacing: -1px;
+    text-align: center;
+    width: 100%;
   }
   .login-form,
   .login-input-group {
     max-width: 100%;
+  }
+  .login-btn {
+    width: 100%;
+    min-width: 0;
+    font-size: 1rem;
+  }
+  .login-error {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.5rem;
+  }
+}
+/* Extra small devices */
+@media (max-width: 600px) {
+  .login-title {
+    font-size: 15px;
+    padding-top: 8px;
+    margin-top: 0.7rem;
+  }
+  .login-3d-icon {
+    width: 90vw;
+    max-width: 220px;
+    min-width: 80px;
+    top: 28%;
+  }
+  .login-form-title {
+    font-size: 16px;
+    margin-bottom: 1.2rem;
+  }
+  .login-form,
+  .login-input-group {
+    padding: 0 1vw;
+  }
+  .login-btn {
+    font-size: 0.97rem;
+    padding: 0.8rem 0;
   }
 }
 html,
