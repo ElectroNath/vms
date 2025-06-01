@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { API_BASE_URL } from "../api";
 
 function Home() {
   const [username, setUsername] = useState("");
@@ -9,12 +10,11 @@ function Home() {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        // Debug: log the token value
         const token = Cookies.get("token");
         console.log("Token in cookie:", token);
 
         const response = await axios.get(
-          "http://127.0.0.1:8000/api/employee-profiles/me/",
+          `${API_BASE_URL}/api/employee-profiles/me/`,
           {
             withCredentials: true,
             headers: token
