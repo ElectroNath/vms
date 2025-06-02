@@ -44,7 +44,7 @@ function Home() {
             className="home-avatar"
           />
           <div className="home-welcome">
-            WELCOME {username && <h2>{username.toUpperCase()}</h2>}
+            WELCOME {username && <h2>{username}</h2>}
             {error && <p className="home-error">{error}</p>}
           </div>
         </div>
