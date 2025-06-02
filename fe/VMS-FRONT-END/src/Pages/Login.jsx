@@ -5,6 +5,8 @@ import "../styles/Login.css";
 import Cookies from "js-cookie";
 import Logo from "../assets/3D_App_Icon_Mockup_[Qorecraft]w[1](1).png";
 import "@fontsource/montserrat"; // Defaults to weight 400
+import { API_BASE_URL } from "../api";
+
 const OutlookAuth = () => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
@@ -28,10 +30,13 @@ const OutlookAuth = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/token/", {
-        username: form.username,
-        password: form.password,
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/token/`,
+        {
+          username: form.username,
+          password: form.password,
+        }
+      );
 
       if (response.data && response.data.access) {
         Cookies.set("token", response.data.access, {

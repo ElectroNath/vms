@@ -32,28 +32,30 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RegisterEmployeeSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']  # Removed 'role'
+        fields = ['username', 'email']  # No password field
 
     def create(self, validated_data):
         return User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
-            password=validated_data['password'],
-            role='employee'  # Still set internally
+            password="Welcome$",  # Always set default password
+            role='employee'
         )
 
 
 
 class EmployeeProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    profile_picture = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = EmployeeProfile
-        fields = ['id', 'user', 'full_name', 'department', 'position', 'staff_id', 'id_qr_code', 'date_registered']
+        fields = [
+            'id', 'user', 'full_name', 'department', 'position', 'staff_id',
+            'id_qr_code', 'profile_picture', 'date_registered'
+        ]
 
 
 class DeviceSerializer(serializers.ModelSerializer):

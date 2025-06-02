@@ -14,7 +14,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'role', 'must_change_password'),
+            'fields': ('username', 'email', 'role', 'must_change_password'),  # Removed password1 and password2
         }),
     )
 
@@ -22,12 +22,18 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ['role', 'is_active']
     search_fields = ['username', 'email']
 
+    def save_model(self, request, obj, form, change):
+        if not change and not obj.pk:
+            # Set default password only when creating a new user via admin
+            obj.set_password("Welcome$")
+        super().save_model(request, obj, form, change)
+
 # Register User using the custom admin
 admin.site.register(User, UserAdmin)
 
 @admin.register(EmployeeProfile)
 class EmployeeProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'full_name', 'department', 'position', 'staff_id', 'id_qr_code', 'date_registered']
+    list_display = ['user', 'full_name', 'department', 'position', 'staff_id', 'id_qr_code', 'profile_picture', 'date_registered']
     search_fields = ['full_name', 'department', 'staff_id']
 
 @admin.register(Device)
