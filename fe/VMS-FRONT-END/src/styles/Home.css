@@ -74,3 +74,195 @@
   letter-spacing: 2px;
   color: #111;
 }
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.dashboard-profile {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.dashboard-profile p {
+  margin: 5px 0;
+  font-size: 1em;
+}
+
+.dashboard-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start; /* or center, as you prefer */
+}
+
+.dashboard-card {
+  flex: 1 1 220px;
+  min-width: 220px;
+  max-width: 320px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.dashboard-card h3 {
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.dashboard-card p {
+  font-size: 1.5em;
+  color: #1abc9c;
+  margin: 0;
+}
+
+.dashboard-devices {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.device-item {
+  padding: 10px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.device-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.dashboard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(30, 30, 30, 0.45);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  opacity: 1;
+  pointer-events: all;
+  transition: opacity 0.4s ease;
+}
+
+.dashboard-overlay-fade {
+  animation: fadeInOverlay 0.4s;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dashboard-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #e0e0e0;
+  border-top: 5px solid #1abc9c;
+  border-radius: 50%;
+  animation: spin 0.7s cubic-bezier(0.4,0,0.2,1) infinite;
+  margin-bottom: 18px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dashboard-loading-text {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  text-shadow: 0 2px 8px #000;
+}
+
+.blurred {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
+
+/* QR Code card */
+.dashboard-qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-qr-card .qr-thumbnail {
+  width: 80px;
+  height: 80px;
+  margin-top: 8px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* QR Modal styles */
+.qr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.qr-modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  position: relative;
+}
+
+.qr-modal-img {
+  width: 250px;
+  height: 250px;
+  object-fit: contain;
+  margin: 15px 0;
+}
+
+.qr-modal-close-btn {
+  background: #4CAF50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.qr-modal-close-btn:hover {
+  background: #388E3C;
+}
