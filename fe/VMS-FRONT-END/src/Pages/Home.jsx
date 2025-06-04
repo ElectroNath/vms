@@ -19,6 +19,7 @@ function Home() {
   const [error, setError] = useState("");
   const [showQrModal, setShowQrModal] = useState(false);
   const [modalQrUrl, setModalQrUrl] = useState(""); // For modal QR
+  const [attendanceLogs, setAttendanceLogs] = useState([]);
 
   // Remove QR code fetching from useEffect, only set profileId
   useEffect(() => {
@@ -54,6 +55,17 @@ function Home() {
         setAttendanceIn(res.data.attendance_in);
         setAttendanceOut(res.data.attendance_out);
         setDevices(res.data.devices);
+
+        // Fetch attendance logs
+        const attendanceRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/attendance/`,
+          {
+            withCredentials: true,
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
+        setAttendanceLogs(attendanceRes.data);
+
         setError("");
       } catch (err) {
         setError("Unable to fetch dashboard. Please log in again.");
@@ -65,12 +77,20 @@ function Home() {
     fetchDashboard();
   }, []);
 
-  // Handler to open modal and fetch QR code only when needed
-  const handleShowQrModal = () => {
-    if (profileId) {
-      const qrUrl = `${API_BASE_URL}/api/employee-profiles/${profileId}/qr-code/?t=${Date.now()}`;
-      setModalQrUrl(qrUrl);
-    } else {
+  // Handler to open modal and fetch QR code using staffId dynamically in the path
+  const handleShowQrModal = async () => {
+    if (!staffId) {
+      setModalQrUrl("");
+      setShowQrModal(true);
+      return;
+    }
+    try {
+      // Construct the correct media path for the QR code image
+      const qrUrl = `${API_BASE_URL}/media/qr_codes/${staffId}_qr.png`;
+      const res = await axios.get(qrUrl, { responseType: "blob" });
+      const qrBlobUrl = URL.createObjectURL(res.data);
+      setModalQrUrl(qrBlobUrl);
+    } catch (err) {
       setModalQrUrl("");
     }
     setShowQrModal(true);
@@ -122,10 +142,10 @@ function Home() {
           <div className="dashboard-container">
             <div className="dashboard-profile">
               <p>
-                <strong>Full Name:</strong> {fullName}
+                <strong>{fullName}</strong> 
               </p>
               <p>
-                <strong>Staff ID:</strong> {staffId}
+                <strong>{staffId}</strong> 
               </p>
             </div>
             <div className="dashboard-metrics">
@@ -137,24 +157,17 @@ function Home() {
                 <h3>Guests</h3>
                 <p>{guestCount}</p>
               </div>
-              <div className="dashboard-card">
-                <h3>Checked In</h3>
-                <p>{attendanceIn}</p>
-              </div>
-              <div className="dashboard-card">
-                <h3>Checked Out</h3>
-                <p>{attendanceOut}</p>
-              </div>
+             
 
               {/* QR Code Card */}
               <div
                 className="dashboard-card dashboard-qr-card"
                 onClick={handleShowQrModal}
-                style={{ cursor: profileId ? "pointer" : "default" }}
-                title={profileId ? "Click to view QR Code" : ""}
+                style={{ cursor: staffId ? "pointer" : "default" }}
+                title={staffId ? "Click to view QR Code" : ""}
               >
                 <h3>Staff QR Code</h3>
-                {profileId ? (
+                {staffId ? (
                   <span style={{ fontSize: 12, color: "#888" }}>
                     Click to view
                   </span>
@@ -163,21 +176,34 @@ function Home() {
                 )}
               </div>
             </div>
-            <div className="dashboard-devices">
-              <h3>Registered Devices</h3>
-              {devices.length > 0 ? (
-                devices.map((device, index) => (
-                  <div key={index} className="device-item">
-                    <p>
-                      <strong>Name:</strong> {device.name}
-                    </p>
-                    <p>
-                      <strong>Serial Number:</strong> {device.serial_number}
-                    </p>
-                  </div>
-                ))
+            
+
+            {/* Attendance Table */}
+            <div className="dashboard-attendance">
+              <h3>Attendance Logs</h3>
+              {attendanceLogs.length > 0 ? (
+                <table className="attendance-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Time In</th>
+                      <th>Time Out</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendanceLogs.map((log, idx) => (
+                      <tr key={idx}>
+                        <td>{log.date}</td>
+                        <td>{log.time_in || "-"}</td>
+                        <td>{log.time_out || "-"}</td>
+                        <td>{log.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               ) : (
-                <p>No devices registered.</p>
+                <p>No attendance records found.</p>
               )}
             </div>
           </div>
