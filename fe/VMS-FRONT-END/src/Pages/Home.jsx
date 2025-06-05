@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import "../styles/Home.css";
 import { API_BASE_URL } from "../api";
 
@@ -20,14 +21,19 @@ function Home() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [modalQrUrl, setModalQrUrl] = useState(""); // For modal QR
   const [attendanceLogs, setAttendanceLogs] = useState([]);
+  const [activeMenu, setActiveMenu] = useState(0);
+  const [role, setRole] = useState("");
+  const navigate = useNavigate();
 
-  // Remove QR code fetching from useEffect, only set profileId
   useEffect(() => {
     const fetchDashboard = async () => {
+      const token = Cookies.get("token");
+      if (!token) {
+        navigate("/login", { replace: true });
+        return;
+      }
       try {
-        const token = Cookies.get("token");
-
-        // Fetch employee profile for username and id
+        // Fetch employee profile for username, id, and role
         const profileRes = await axios.get(
           `${API_BASE_URL}/api/employee-profiles/me/`,
           {
@@ -38,6 +44,9 @@ function Home() {
         setUsername(profileRes.data.username);
         if (profileRes.data.id) {
           setProfileId(profileRes.data.id);
+        }
+        if (profileRes.data.role) {
+          setRole(profileRes.data.role);
         }
 
         // Fetch dashboard data
@@ -68,14 +77,19 @@ function Home() {
 
         setError("");
       } catch (err) {
-        setError("Unable to fetch dashboard. Please log in again.");
+        // If unauthorized, redirect to login
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          navigate("/login", { replace: true });
+        } else {
+          setError("Unable to fetch dashboard. Please log in again.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboard();
-  }, []);
+  }, [navigate]);
 
   // Handler to open modal and fetch QR code using staffId dynamically in the path
   const handleShowQrModal = async () => {
@@ -96,6 +110,32 @@ function Home() {
     setShowQrModal(true);
   };
 
+  // Print QR code function
+  const handlePrintQr = () => {
+    if (!modalQrUrl) return;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print QR Code</title>
+          <style>
+            body { display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+            img { width: 300px; height: 300px; object-fit: contain; }
+          </style>
+        </head>
+        <body>
+          <img src="${modalQrUrl}" alt="QR Code" />
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = () => {
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
   return (
     <div className="home-root">
       {/* Overlay for loading */}
@@ -105,32 +145,6 @@ function Home() {
           <div className="dashboard-loading-text">Loading Dashboard...</div>
         </div>
       )}
-      {/* Sidebar */}
-      <div className={`home-sidebar${loading ? " blurred" : ""}`}>
-        <div className="home-sidebar-header">
-          <img
-            src="https://randomuser.me/api/portraits/men/1.jpg"
-            alt="avatar"
-            className="home-avatar"
-          />
-          <div className="home-welcome">
-            HI {username && <span>{username.toUpperCase()}</span>}
-            {error && <p className="home-error">{error}</p>}
-          </div>
-        </div>
-        {/* Optionally show QR code in sidebar */}
-        {profileId && (
-          <div style={{ margin: "20px auto", textAlign: "center" }}>
-            <div style={{ fontSize: 12, color: "#fff" }}>My QR Code</div>
-          </div>
-        )}
-        <div className="home-menu">
-          <div className="home-menu-item home-menu-item-active">Home</div>
-          <div className="home-menu-item">Register Staff</div>
-          <div className="home-menu-item">Invite Guest</div>
-          <div className="home-menu-item">Register Devices</div>
-        </div>
-      </div>
       {/* Main Content */}
       <div className={`home-main${loading ? " blurred" : ""}`}>
         <div className="home-main-title"></div>
@@ -142,10 +156,10 @@ function Home() {
           <div className="dashboard-container">
             <div className="dashboard-profile">
               <p>
-                <strong>{fullName}</strong> 
+                <strong>{fullName}</strong>
               </p>
               <p>
-                <strong>{staffId}</strong> 
+                <strong>{staffId}</strong>
               </p>
             </div>
             <div className="dashboard-metrics">
@@ -157,7 +171,6 @@ function Home() {
                 <h3>Guests</h3>
                 <p>{guestCount}</p>
               </div>
-             
 
               {/* QR Code Card */}
               <div
@@ -176,7 +189,6 @@ function Home() {
                 )}
               </div>
             </div>
-            
 
             {/* Attendance Table */}
             <div className="dashboard-attendance">
@@ -219,19 +231,29 @@ function Home() {
           <div className="qr-modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Your Staff ID QR Code</h3>
             {modalQrUrl ? (
-              <img
-                src={modalQrUrl}
-                alt="Full QR Code"
-                className="qr-modal-img"
-                onError={e => {
-                  e.target.style.display = "none";
-                  // Show a fallback message if the image fails to load
-                  const fallback = document.createElement("p");
-                  fallback.textContent = "QR Code not available (no id_qr_code found for your profile).";
-                  fallback.style.color = "#c00";
-                  e.target.parentNode.appendChild(fallback);
-                }}
-              />
+              <>
+                <img
+                  src={modalQrUrl}
+                  alt="Full QR Code"
+                  className="qr-modal-img"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    // Show a fallback message if the image fails to load
+                    const fallback = document.createElement("p");
+                    fallback.textContent =
+                      "QR Code not available (no id_qr_code found for your profile).";
+                    fallback.style.color = "#c00";
+                    e.target.parentNode.appendChild(fallback);
+                  }}
+                />
+                <button
+                  className="qr-modal-print-btn"
+                  style={{ marginRight: 10 }}
+                  onClick={handlePrintQr}
+                >
+                  Print QR Code
+                </button>
+              </>
             ) : (
               <p>QR Code not available (no id_qr_code found for your profile).</p>
             )}

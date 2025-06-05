@@ -1,16 +1,19 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../styles/Login.css";
 import Cookies from "js-cookie";
+import { API_BASE_URL } from "../api";
+import MustChangePasswordModal from "../components/MustChangePasswordModal";
+import "../styles/Login.css";
 import Logo from "../assets/3D_App_Icon_Mockup_[Qorecraft]w[1](1).png";
 import "@fontsource/montserrat"; // Defaults to weight 400
-import { API_BASE_URL } from "../api";
+import { useNavigate, Link } from "react-router-dom";
 
 const OutlookAuth = () => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -44,11 +47,42 @@ const OutlookAuth = () => {
           secure: false,
           sameSite: "Lax",
         });
-        navigate("/home");
+        // After successful login, check must_change_password from change_password endpoint
+        const token = Cookies.get("token");
+        const mustChangeRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/prompt_change/`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
+        // Log the full response for debugging
+        console.log("Change password response:", mustChangeRes.data);
+
+        // Accept all possible true-ish values for must_change_password
+        const mustChange =
+          mustChangeRes.data.must_change_password === true ||
+          mustChangeRes.data.mustchangepassword === true ||
+          mustChangeRes.data.must_change_password === "true" ||
+          mustChangeRes.data.mustchangepassword === "true" ||
+          mustChangeRes.data.must_change_password === 1 ||
+          mustChangeRes.data.mustchangepassword === 1 ||
+          mustChangeRes.data.must_change_password === "1" ||
+          mustChangeRes.data.mustchangepassword === "1";
+
+        if (mustChange) {
+          setMustChangePassword(true);
+          setShowModal(true);
+        } else {
+          setMustChangePassword(false);
+          setShowModal(false);
+          navigate("/home");
+        }
       } else {
         setError("Login failed: No access token received.");
       }
     } catch (err) {
+      // Log the error for debugging
+      console.error("Login error:", err);
       if (err.response && err.response.data && err.response.data.detail) {
         setError(err.response.data.detail);
       } else {
@@ -115,12 +149,20 @@ const OutlookAuth = () => {
             <label className="login-remember">
               <input type="checkbox" /> Remember me
             </label>
-            <a className="login-forgot" href="#">
+            <Link className="login-forgot" to="/forgot-password">
               Forget Password
-            </a>
+            </Link>
           </div>
         </form>
       </div>
+      <MustChangePasswordModal
+        open={mustChangePassword && showModal}
+        onSuccess={() => {
+          setMustChangePassword(false);
+          setShowModal(false);
+          navigate("/home");
+        }}
+      />
     </div>
   );
 };
