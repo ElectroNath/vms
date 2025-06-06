@@ -115,10 +115,45 @@ function Navbar({ activeIndex, onMenuClick }) {
                 </div>
               ))
             )}
-            <Logout
-              className="home-menu-item"
-              style={{ color: "#c00", marginTop: 30 }}
-            />
+            <div className="navbar-logout-btn-wrapper">
+              <Logout
+                className="navbar-logout-btn"
+                style={{
+                  color: "#fff",
+                  marginTop: 36,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  fontWeight: 600,
+                  fontSize: 17,
+                  background: "linear-gradient(90deg, #e53935 0%, #c62828 100%)",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "10px 22px",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 8px #c6282833",
+                  transition: "background 0.18s, box-shadow 0.18s"
+                }}
+                // ...pass through any other props if needed
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ marginRight: 6 }}
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+              </Logout>
+            </div>
           </>
         )}
       </div>

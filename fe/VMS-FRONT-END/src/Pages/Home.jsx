@@ -23,6 +23,7 @@ function Home() {
   const [attendanceLogs, setAttendanceLogs] = useState([]);
   const [activeMenu, setActiveMenu] = useState(0);
   const [role, setRole] = useState("");
+  const [notificationCount, setNotificationCount] = useState(1); // Example: set to 5. Replace with your logic.
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -147,6 +148,58 @@ function Home() {
       )}
       {/* Main Content */}
       <div className={`home-main${loading ? " blurred" : ""}`}>
+        {/* Notification Bell Icon at top right */}
+        <div className="notification-bell-container">
+          <div className="notification-bell-wrapper">
+            {/* Modern Bell SVG icon with gradient and shadow */}
+            <svg
+              className="notification-bell-icon"
+              width="54" height="59" viewBox="0 0 44 44" fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <radialGradient id="bellGlow" cx="50%" cy="50%" r="70%">
+                  <stop offset="0%" stopColor="#1abc9c" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#247150" stopOpacity="0.1" />
+                </radialGradient>
+                <linearGradient id="bellBody" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#2ecc71" />
+                  <stop offset="100%" stopColor="#247150" />
+                </linearGradient>
+              </defs>
+              <ellipse cx="22" cy="22" rx="20" ry="20" fill="url(#bellGlow)" />
+              <g filter="url(#bellShadow)">
+                <path
+                  d="M32 30v-7a10 10 0 1 0-20 0v7c0 1.2-.9 2.1-1.5 3h23c-.6-.9-1.5-1.8-1.5-3"
+                  fill="url(#bellBody)"
+                  stroke="#247150"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M25.5 36a3.5 3.5 0 0 1-7 0"
+                  stroke="#247150"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </g>
+              <filter id="bellShadow" x="0" y="0" width="44" height="44">
+                <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#247150" floodOpacity="0.18"/>
+              </filter>
+            </svg>
+            {/* Notification count circle (red) */}
+            {notificationCount > 0 && (
+              <span className="notification-bell-count">
+                {notificationCount}
+              </span>
+            )}
+            {/* Animated ping effect */}
+            {notificationCount > 0 && (
+              <span className="notification-bell-ping"></span>
+            )}
+          </div>
+        </div>
         <div className="home-main-title"></div>
         {loading ? (
           <div className="dashboard-loader">
