@@ -18,6 +18,8 @@ function Navbar({ activeIndex, onMenuClick }) {
   const [profileId, setProfileId] = useState(null);
   const [role, setRole] = useState(null); // default to null for first render
   const [error, setError] = useState("");
+  const [profilePicUrl, setProfilePicUrl] = useState(null);
+  const [uploadingPic, setUploadingPic] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,7 +55,7 @@ function Navbar({ activeIndex, onMenuClick }) {
         if (profileRes.data.id) {
           setProfileId(profileRes.data.id);
         }
-        // Use null check to avoid empty string bug
+        setProfilePicUrl(profileRes.data.profile_picture_url || null);
         setRole(profileRes.data.role || null);
         setError("");
       } catch (err) {
@@ -78,14 +80,93 @@ function Navbar({ activeIndex, onMenuClick }) {
             : item.roles.includes(role))
           .map(item => item.label);
 
+  // Handle profile picture upload
+  const handleProfilePicChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingPic(true);
+    try {
+      const token = Cookies.get("token");
+      const formData = new FormData();
+      formData.append("profile_picture", file);
+      const res = await axios.post(
+        `${API_BASE_URL}/api/employee-profiles/me/`,
+        formData,
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : undefined,
+            "Content-Type": "multipart/form-data"
+          },
+          withCredentials: true,
+        }
+      );
+      setProfilePicUrl(res.data.profile_picture_url);
+      setError("");
+    } catch (err) {
+      setError("Failed to upload profile picture.");
+    } finally {
+      setUploadingPic(false);
+    }
+  };
+
   return (
     <div className="home-sidebar" style={{ position: "relative", minHeight: "100vh" }}>
       <div className="home-sidebar-header">
-        <img
-          src="https://randomuser.me/api/portraits/men/1.jpg"
-          alt="avatar"
-          className="home-avatar"
-        />
+        <label htmlFor="profile-pic-upload" style={{ cursor: "pointer", marginBottom: 0, position: "relative", display: "inline-block" }}>
+          <img
+            src={
+              profilePicUrl
+                ? profilePicUrl.startsWith("http")
+                  ? profilePicUrl
+                  : `${API_BASE_URL}${profilePicUrl.startsWith("/") ? "" : "/"}${profilePicUrl}`
+                : "https://randomuser.me/api/portraits/men/1.jpg"
+            }
+            alt="avatar"
+            className="home-avatar"
+            style={{
+              width: 70,
+              height: 70,
+              borderRadius: "50%",
+              border: uploadingPic ? "2px solid #1bb76e" : undefined,
+              opacity: uploadingPic ? 0.6 : 1,
+              objectFit: "cover",
+              transition: "box-shadow 0.2s"
+            }}
+            onError={e => {
+              e.target.onerror = null;
+              e.target.src = "https://randomuser.me/api/portraits/men/1.jpg";
+            }}
+          />
+          {/* Pen icon overlay */}
+          <span
+            style={{
+              position: "absolute",
+              bottom: 4,
+              right: 4,
+              background: "#fff",
+              borderRadius: "50%",
+              padding: 3,
+              boxShadow: "0 1px 4px #0002",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 2
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <rect width="20" height="20" fill="none"/>
+              <path d="M14.7 3.29a1 1 0 0 1 1.41 0l.6.6a1 1 0 0 1 0 1.41l-8.48 8.48-2.12.71.71-2.12 8.48-8.48zM3 17h14" stroke="#247150" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </span>
+          <input
+            id="profile-pic-upload"
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleProfilePicChange}
+            disabled={uploadingPic}
+          />
+        </label>
         <div className="home-welcome">
           HI {username && <span>{username.toUpperCase()}</span>}
           {error && <p className="home-error">{error}</p>}
@@ -93,7 +174,9 @@ function Navbar({ activeIndex, onMenuClick }) {
       </div>
       {profileId && (
         <div style={{ margin: "20px auto", textAlign: "center" }}>
-          <div style={{ fontSize: 12, color: "#fff" }}>My QR Code</div>
+          <div style={{ fontSize: 12, color: "#fff" }}>
+            {uploadingPic ? "Uploading..." : ""}
+          </div>
         </div>
       )}
       <div className="home-menu">
