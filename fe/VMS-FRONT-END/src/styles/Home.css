@@ -1,3 +1,6 @@
+body {
+  font-family: "Montserrat", "Segoe UI", Arial, Helvetica, sans-serif;
+}
 .home-root {
   display: flex;
   height: 100vh;
@@ -78,20 +81,29 @@
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  padding: 32px 32px 32px 32px;
+  gap: 37px;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .dashboard-profile {
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 30px;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
+  
 }
 
 .dashboard-profile p {
   margin: 5px 0;
-  font-size: 1em;
+  font-size: 1.2em;
+}
+
+.dashboard-profile #username {
+  margin: 5px 0;
+  font-size: 1.7em;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-weight: 600;
 }
 
 .dashboard-metrics {
@@ -105,11 +117,14 @@
   flex: 1 1 220px;
   min-width: 220px;
   max-width: 320px;
+  width: 1500px;
+  height: 16vh;
   background: white;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  align-content: center;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-card h3 {
@@ -117,10 +132,19 @@
   color: #2c3e50;
 }
 
-.dashboard-card p {
-  font-size: 1.5em;
-  color: #1abc9c;
-  margin: 0;
+.dashboard-card #num {
+  font-size: 2.9em;
+  color: black;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.dashboard-card #descrip {
+  font-size: 1.3em;
+  color: black;
+  margin-right: 10px;
+  width: 5px;
+  
 }
 
 .dashboard-devices {
@@ -288,7 +312,7 @@
   background: white;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
 }
 
@@ -312,6 +336,7 @@
 .dashboard-attendance th {
   font-weight: bold;
   font-size: 1.1rem;
+  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
 .notification-bell-container {
@@ -414,4 +439,29 @@
 .navbar-logout-btn:hover {
   background: linear-gradient(90deg, #c62828 0%, #e53935 100%) !important;
   box-shadow: 0 4px 16px #c6282855 !important;
+}
+
+.dashboard-qr-btn {
+  background: #247150;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 1;
+  margin-left: 24px;
+  transition: background 0.18s, opacity 0.18s;
+  display: flex;
+  align-items: center;
+  height: 55px;
+  width: 210px;
+}
+.dashboard-qr-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.dashboard-qr-btn:hover:not(:disabled) {
+  background: #1a4e38;
 }

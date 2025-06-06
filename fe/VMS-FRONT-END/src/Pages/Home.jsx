@@ -16,7 +16,7 @@ function Home() {
   const [devices, setDevices] = useState([]);
   const [profileId, setProfileId] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Only spin on login, not on Home nav
   const [error, setError] = useState("");
   const [showQrModal, setShowQrModal] = useState(false);
   const [modalQrUrl, setModalQrUrl] = useState(""); // For modal QR
@@ -25,8 +25,13 @@ function Home() {
   const [role, setRole] = useState("");
   const [notificationCount, setNotificationCount] = useState(1); // Example: set to 5. Replace with your logic.
   const navigate = useNavigate();
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
+    let ignore = false;
+    // Only show spinner if this is the first load after login/refresh
+    if (!initialLoad) return;
+    setLoading(true);
     const fetchDashboard = async () => {
       const token = Cookies.get("token");
       if (!token) {
@@ -85,11 +90,15 @@ function Home() {
           setError("Unable to fetch dashboard. Please log in again.");
         }
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
+        setInitialLoad(false);
       }
     };
 
     fetchDashboard();
+    return () => { ignore = true; };
+    // Only run on mount (not on every navigation to Home)
+    // eslint-disable-next-line
   }, [navigate]);
 
   // Handler to open modal and fetch QR code using staffId dynamically in the path
@@ -140,12 +149,7 @@ function Home() {
   return (
     <div className="home-root">
       {/* Overlay for loading */}
-      {loading && (
-        <div className="dashboard-overlay dashboard-overlay-fade">
-          <div className="dashboard-spinner"></div>
-          <div className="dashboard-loading-text">Loading Dashboard...</div>
-        </div>
-      )}
+      {/* Spinner removed as requested */}
       {/* Main Content */}
       <div className={`home-main${loading ? " blurred" : ""}`}>
         {/* Notification Bell Icon at top right */}
@@ -207,39 +211,48 @@ function Home() {
           </div>
         ) : (
           <div className="dashboard-container">
-            <div className="dashboard-profile">
-              <p>
-                <strong>{fullName}</strong>
-              </p>
-              <p>
-                <strong>{staffId}</strong>
-              </p>
+            <div className="dashboard-profile" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p id="username">
+                  <strong>{fullName}</strong>
+                </p>
+                <p>
+                  <strong>{staffId}</strong>
+                </p>
+              </div>
+              <button
+                className="dashboard-qr-btn"
+                onClick={handleShowQrModal}
+                disabled={!staffId}
+                title={staffId ? "Click to view QR Code" : "No QR Code Available"}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ marginRight: 8, verticalAlign: "middle" }}
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="2"/>
+                  <rect x="14" y="3" width="7" height="7" rx="2"/>
+                  <rect x="14" y="14" width="7" height="7" rx="2"/>
+                  <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01"/>
+                </svg>
+                Staff QR Code
+              </button>
             </div>
             <div className="dashboard-metrics">
               <div className="dashboard-card">
-                <h3>Devices</h3>
-                <p>{deviceCount}</p>
+                <span id="num">{deviceCount}</span>
+                <span id="descrip">Registered Devices</span>
               </div>
               <div className="dashboard-card">
-                <h3>Guests</h3>
-                <p>{guestCount}</p>
-              </div>
-
-              {/* QR Code Card */}
-              <div
-                className="dashboard-card dashboard-qr-card"
-                onClick={handleShowQrModal}
-                style={{ cursor: staffId ? "pointer" : "default" }}
-                title={staffId ? "Click to view QR Code" : ""}
-              >
-                <h3>Staff QR Code</h3>
-                {staffId ? (
-                  <span style={{ fontSize: 12, color: "#888" }}>
-                    Click to view
-                  </span>
-                ) : (
-                  <p>No QR Code Available</p>
-                )}
+                <span id="num">{guestCount}</span>
+                <span id="descrip">Registered Guests</span>
               </div>
             </div>
 
