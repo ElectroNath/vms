@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import "../styles/Home.css";
 import { API_BASE_URL } from "../api";
 import Logout from "./Logout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const allMenuItems = [
   { label: "Home", roles: ["admin", "employee", "security"] },
@@ -19,6 +19,24 @@ function Navbar({ activeIndex, onMenuClick }) {
   const [role, setRole] = useState(null); // default to null for first render
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Always determine active menu index from current path
+  const menuRoutes = [
+    "/home",
+    "/register-staff",
+    "/invite-guest",
+    "/register-devices"
+  ];
+  const getMenuIndexFromPath = (pathname) => {
+    // Use exact match for home, and startsWith for others
+    if (pathname === "/home") return 0;
+    if (pathname.startsWith("/register-staff")) return 1;
+    if (pathname.startsWith("/invite-guest")) return 2;
+    if (pathname.startsWith("/register-devices")) return 3;
+    return 0;
+  };
+  const [currentIndex, setCurrentIndex] = useState(getMenuIndexFromPath(location.pathname));
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -45,6 +63,11 @@ function Navbar({ activeIndex, onMenuClick }) {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    setCurrentIndex(getMenuIndexFromPath(location.pathname));
+    // eslint-disable-next-line
+  }, [location.pathname]);
+
   // Filter menu items based on user role (don't render until role is loaded)
   const menuItems =
     role === null
@@ -54,14 +77,6 @@ function Navbar({ activeIndex, onMenuClick }) {
             ? item.roles.includes("employee")
             : item.roles.includes(role))
           .map(item => item.label);
-
-  // Map menu index to route paths (must match your AppRouter/App.jsx)
-  const menuRoutes = [
-    "/home",
-    "/register-staff",
-    "/invite-guest",
-    "/register-devices"
-  ];
 
   return (
     <div className="home-sidebar" style={{ position: "relative", minHeight: "100vh" }}>
@@ -96,24 +111,25 @@ function Navbar({ activeIndex, onMenuClick }) {
                 No menu available for your role.
               </div>
             ) : (
-              menuItems.map((item, idx) => (
-                <div
-                  key={item}
-                  className={
-                    "home-menu-item" +
-                    (activeIndex === idx ? " home-menu-item-active" : "")
-                  }
-                  onClick={() => {
-                    onMenuClick && onMenuClick(idx);
-                    // Navigate to the correct route for the menu
-                    navigate(menuRoutes[
-                      allMenuItems.findIndex(m => m.label === item)
-                    ]);
-                  }}
-                >
-                  {item}
-                </div>
-              ))
+              menuItems.map((item, idx) => {
+                // Find the route for this menu item
+                const routeIdx = allMenuItems.findIndex(m => m.label === item);
+                const route = menuRoutes[routeIdx];
+                return (
+                  <div
+                    key={item}
+                    className={
+                      "home-menu-item" +
+                      (getMenuIndexFromPath(location.pathname) === routeIdx ? " home-menu-item-active" : "")
+                    }
+                    onClick={() => {
+                      navigate(route);
+                    }}
+                  >
+                    {item}
+                  </div>
+                );
+              })
             )}
           </>
         )}

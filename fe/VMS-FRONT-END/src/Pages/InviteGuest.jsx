@@ -26,29 +26,31 @@ function InviteGuest() {
           setError("You are not authenticated. Please log in.");
           return;
         }
-        const res = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/me/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
-          }
-        );
-        // Try to get user.id from nested user object, fallback to id
-        let userId = null;
-        if (res.data) {
-          if (res.data.user && res.data.user.id) {
-            userId = res.data.user.id;
-          } else if (res.data.id) {
-            userId = res.data.id;
-          }
+        // Get the correct user PK for invited_by: must match the PK of the User model in your backend
+        // Most likely, your backend expects the employee profile PK, not the user PK!
+        // So use the employee profile id (res.data.id)
+        let profileId = null;
+        let res = null;
+        try {
+          res = await axios.get(
+            `${API_BASE_URL}/api/employee-profiles/me/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+            }
+          );
+        } catch (e) {
+          // ignore
         }
-        if (userId !== undefined && userId !== null && userId !== "") {
-          setForm(f => ({ ...f, id: String(userId) }));
+        if (res && res.data && res.data.id) {
+          // Use the employee profile primary key (id) for invited_by
+          setForm(f => ({ ...f, invited_by: String(res.data.id) }));
+          setError(""); // clear error if profile id is found
         } else {
-          setError("Could not determine your user ID. Please re-login.");
+          setError("Could not determine your employee profile ID. Please contact admin.");
         }
       } catch (e) {
-        setError("Could not determine your user ID. Please re-login.");
+        setError("Could not determine your employee profile ID. Please contact admin.");
       }
     };
     fetchUserId();
@@ -87,16 +89,22 @@ function InviteGuest() {
 
     try {
       const token = Cookies.get("token");
+      // Ensure all fields are present and correct type
+      const payload = {
+        full_name: form.fullName?.trim(),
+        email: form.email?.trim(),
+        phone: form.phone?.trim(),
+        purpose: form.purpose?.trim(),
+        visit_date: form.visitDate,
+        invited_by: form.invited_by ? Number(form.invited_by) : undefined,
+      };
+      // Remove undefined fields (for safety)
+      Object.keys(payload).forEach(
+        key => (payload[key] === undefined || payload[key] === "") && delete payload[key]
+      );
       await axios.post(
         `${API_BASE_URL}/api/guests/`,
-        {
-          id: form.id, // send user id as 'id'
-          full_name: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          purpose: form.purpose,
-          visit_date: form.visitDate,
-        },
+        payload,
         {
           headers: {
             Authorization: token ? `Bearer ${token}` : undefined,
@@ -111,14 +119,23 @@ function InviteGuest() {
         phone: "",
         purpose: "",
         visitDate: "",
-        id: form.id, // keep id for next submission
+        invited_by: form.invited_by,
       });
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.detail) {
-        setError(err.response.data.detail);
-      } else if (err.response && err.response.data) {
-        const firstError = Object.values(err.response.data)[0];
-        setError(Array.isArray(firstError) ? firstError[0] : firstError);
+      // Show all validation errors from backend
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        if (typeof data === "object" && !Array.isArray(data)) {
+          // Collect all error messages
+          const messages = Object.entries(data)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`)
+            .join(" | ");
+          setError(messages);
+        } else if (data.detail) {
+          setError(data.detail);
+        } else {
+          setError("Failed to submit invitation. Please try again.");
+        }
       } else {
         setError("Failed to submit invitation. Please try again.");
       }
@@ -130,7 +147,7 @@ function InviteGuest() {
   return (
     <div className="form-root">
       <div className="form-container" style={{ minWidth: 700, maxWidth: 1100 }}>
-        <div className="login-form-title" style={{ marginBottom: 32, textAlign: "left" }}>
+        <div className="login-form-title" style={{ marginBottom: 30, textAlign: "left" }}>
           Invite Guest
         </div>
         <form className="login-form" onSubmit={handleSubmit}>
@@ -206,7 +223,8 @@ function InviteGuest() {
             />
             <span className="login-input-label">Visit Date</span>
           </div>
-          <input type="hidden" name="id" value={form.id || ""} />
+          {/* Remove id hidden input */}
+          <input type="hidden" name="invited_by" value={form.invited_by || ""} />
           <button className="login-btn" type="submit" disabled={loading}>
             {loading ? "Submitting..." : "Submit"}
           </button>

@@ -223,11 +223,11 @@ body {
   text-shadow: 0 2px 8px #000;
 }
 
-.blurred {
+/* .blurred {
   filter: blur(3px);
   pointer-events: none;
   user-select: none;
-}
+} */
 
 
 /* QR Code card */
