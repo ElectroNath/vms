@@ -26,6 +26,10 @@ function Home() {
   const [notificationCount, setNotificationCount] = useState(1); // Example: set to 5. Replace with your logic.
   const navigate = useNavigate();
   const [initialLoad, setInitialLoad] = useState(true);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [showDeviceModal, setShowDeviceModal] = useState(false);
+  const [guestList, setGuestList] = useState([]);
+  const [deviceList, setDeviceList] = useState([]);
 
   useEffect(() => {
     let ignore = false;
@@ -146,6 +150,41 @@ function Home() {
     };
   };
 
+  // Fetch guest and device records when modals are opened
+  const handleShowGuestModal = async () => {
+    setShowGuestModal(true);
+    try {
+      const token = Cookies.get("token");
+      const res = await axios.get(
+        `${API_BASE_URL}/api/guests/`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          withCredentials: true,
+        }
+      );
+      setGuestList(res.data || []);
+    } catch (e) {
+      setGuestList([]);
+    }
+  };
+
+  const handleShowDeviceModal = async () => {
+    setShowDeviceModal(true);
+    try {
+      const token = Cookies.get("token");
+      const res = await axios.get(
+        `${API_BASE_URL}/api/devices/`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          withCredentials: true,
+        }
+      );
+      setDeviceList(res.data || []);
+    } catch (e) {
+      setDeviceList([]);
+    }
+  };
+
   return (
     <div className="home-root">
       {/* Overlay for loading */}
@@ -246,11 +285,21 @@ function Home() {
               </button>
             </div>
             <div className="dashboard-metrics">
-              <div className="dashboard-card">
+              <div
+                className="dashboard-card"
+                style={{ cursor: "pointer" }}
+                onClick={handleShowDeviceModal}
+                title="Click to view your registered devices"
+              >
                 <span id="num">{deviceCount}</span>
                 <span id="descrip">Registered Devices</span>
               </div>
-              <div className="dashboard-card">
+              <div
+                className="dashboard-card"
+                style={{ cursor: "pointer" }}
+                onClick={handleShowGuestModal}
+                title="Click to view your registered guests"
+              >
                 <span id="num">{guestCount}</span>
                 <span id="descrip">Registered Guests</span>
               </div>
@@ -287,6 +336,70 @@ function Home() {
           </div>
         )}
       </div>
+
+      {/* Guest Modal */}
+      {showGuestModal && (
+        <div className="qr-modal-overlay" onClick={() => setShowGuestModal(false)}>
+          <div className="qr-modal-content" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+            <h3>Guests Registered</h3>
+            {guestList.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Name</th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Token</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {guestList.map((guest, idx) => (
+                    <tr key={guest.id || idx}>
+                      <td style={{ padding: 8 }}>{guest.full_name}</td>
+                      <td style={{ padding: 8 }}>{guest.token}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No guests found.</p>
+            )}
+            <button className="qr-modal-close-btn" onClick={() => setShowGuestModal(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Device Modal */}
+      {showDeviceModal && (
+        <div className="qr-modal-overlay" onClick={() => setShowDeviceModal(false)}>
+          <div className="qr-modal-content" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+            <h3>Devices Registered</h3>
+            {deviceList.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Device Name</th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Serial Number</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deviceList.map((device, idx) => (
+                    <tr key={device.id || idx}>
+                      <td style={{ padding: 8 }}>{device.name || device.device_name}</td>
+                      <td style={{ padding: 8 }}>{device.serial_number}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No devices found.</p>
+            )}
+            <button className="qr-modal-close-btn" onClick={() => setShowDeviceModal(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* QR Code Modal */}
       {showQrModal && (
