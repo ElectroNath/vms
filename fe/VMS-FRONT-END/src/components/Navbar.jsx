@@ -44,6 +44,19 @@ function Navbar({ activeIndex, onMenuClick }) {
     const fetchProfile = async () => {
       try {
         const token = Cookies.get("token");
+        // Get user info from cookie first
+        let user = null;
+        try {
+          const userCookie = Cookies.get("user");
+          if (userCookie) user = JSON.parse(userCookie);
+        } catch {
+          user = null;
+        }
+        // If admin, do not show this navbar (return early)
+        if (user && user.role === "admin") {
+          return;
+        }
+        // Employee or other roles
         const profileRes = await axios.get(
           `${API_BASE_URL}/api/employee-profiles/me/`,
           {
@@ -87,6 +100,18 @@ function Navbar({ activeIndex, onMenuClick }) {
     setUploadingPic(true);
     try {
       const token = Cookies.get("token");
+      let user = null;
+      try {
+        const userCookie = Cookies.get("user");
+        if (userCookie) user = JSON.parse(userCookie);
+      } catch {
+        user = null;
+      }
+      // Do nothing if admin (shouldn't even show this navbar)
+      if (user && user.role === "admin") {
+        setUploadingPic(false);
+        return;
+      }
       const formData = new FormData();
       formData.append("profile_picture", file);
       const res = await axios.post(
@@ -108,6 +133,16 @@ function Navbar({ activeIndex, onMenuClick }) {
       setUploadingPic(false);
     }
   };
+
+  // If user is admin, do not render the navbar at all
+  let user = null;
+  try {
+    const userCookie = Cookies.get("user");
+    if (userCookie) user = JSON.parse(userCookie);
+  } catch {
+    user = null;
+  }
+  if (user && user.role === "admin") return null;
 
   return (
     <div className="home-sidebar" style={{ position: "relative", minHeight: "100vh" }}>

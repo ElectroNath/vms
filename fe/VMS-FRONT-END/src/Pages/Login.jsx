@@ -80,23 +80,29 @@ const OutlookAuth = () => {
                 sameSite: "Lax",
               });
             } catch (userErr) {
-              // If not found, try employee-profiles/me/ for employees
-              try {
-                const meRes = await axios.get(
-                  `${API_BASE_URL}/api/employee-profiles/me/`,
-                  {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                  }
-                );
-                userRole = meRes.data.role;
-                userInfo = meRes.data;
-                Cookies.set("user", JSON.stringify(meRes.data), {
-                  path: "/",
-                  secure: false,
-                  sameSite: "Lax",
-                });
-              } catch {
-                userRole = "";
+              // If not found, only try employee-profiles/me/ if NOT admin login
+              if (form.username.toLowerCase().startsWith("admin")) {
+                // Do not fetch employee-profiles/me/ for admin
+                userRole = "admin";
+                userInfo = userRes && userRes.data ? userRes.data : { role: "admin", username: form.username };
+              } else {
+                try {
+                  const meRes = await axios.get(
+                    `${API_BASE_URL}/api/employee-profiles/me/`,
+                    {
+                      headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    }
+                  );
+                  userRole = meRes.data.role;
+                  userInfo = meRes.data;
+                  Cookies.set("user", JSON.stringify(meRes.data), {
+                    path: "/",
+                    secure: false,
+                    sameSite: "Lax",
+                  });
+                } catch {
+                  userRole = "";
+                }
               }
             }
           }
@@ -143,7 +149,7 @@ const OutlookAuth = () => {
         } else if (userRole === "admin") {
           setMustChangePassword(false);
           setShowModal(false);
-          navigate("/");
+          navigate("/admin");
         } else {
           setMustChangePassword(false);
           setShowModal(false);

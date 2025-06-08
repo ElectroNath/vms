@@ -28,6 +28,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/messages" element={<Messages />} />
+        {/* Mount all /admin/* routes to the Admin component */}
         <Route
           path="/admin/*"
           element={
@@ -38,17 +39,8 @@ function App() {
             )
           }
         />
-        {/* Only redirect root "/" to /admin if admin, otherwise let AppRouter handle all other routes */}
-        <Route
-          path="/"
-          element={
-            user && user.role === "admin"
-              ? <Navigate to="/admin" replace />
-              : <Navigate to="/home" replace />
-          }
-        />
         {/* All other routes handled by AppRouter (for employees and others) */}
-        <Route path="*" element={<AppRouter />} />
+        <Route path="/*" element={<AppRouter />} />
       </Routes>
     </Router>
   );
