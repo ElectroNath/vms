@@ -63,34 +63,34 @@ const OutlookAuth = () => {
               sameSite: "Lax",
             });
           } else {
-            // Try employee-profiles/me/ first
-            let meRes;
+            // Try /api/users/me/ first (for admin), fallback to employee-profiles/me/ for employees
+            let userRes;
             try {
-              meRes = await axios.get(
-                `${API_BASE_URL}/api/employee-profiles/me/`,
+              userRes = await axios.get(
+                `${API_BASE_URL}/api/users/me/`,
                 {
                   headers: token ? { Authorization: `Bearer ${token}` } : {},
                 }
               );
-              userRole = meRes.data.role;
-              userInfo = meRes.data;
-              Cookies.set("user", JSON.stringify(meRes.data), {
+              userRole = userRes.data.role;
+              userInfo = userRes.data;
+              Cookies.set("user", JSON.stringify(userRes.data), {
                 path: "/",
                 secure: false,
                 sameSite: "Lax",
               });
-            } catch (empErr) {
-              // If not found, try /api/users/me/ for admin
+            } catch (userErr) {
+              // If not found, try employee-profiles/me/ for employees
               try {
-                const userRes = await axios.get(
-                  `${API_BASE_URL}/api/users/me/`,
+                const meRes = await axios.get(
+                  `${API_BASE_URL}/api/employee-profiles/me/`,
                   {
                     headers: token ? { Authorization: `Bearer ${token}` } : {},
                   }
                 );
-                userRole = userRes.data.role;
-                userInfo = userRes.data;
-                Cookies.set("user", JSON.stringify(userRes.data), {
+                userRole = meRes.data.role;
+                userInfo = meRes.data;
+                Cookies.set("user", JSON.stringify(meRes.data), {
                   path: "/",
                   secure: false,
                   sameSite: "Lax",
