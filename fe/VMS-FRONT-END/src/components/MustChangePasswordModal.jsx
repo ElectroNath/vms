@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { API_BASE_URL } from "../api";
@@ -10,8 +10,24 @@ function MustChangePasswordModal({ open, onSuccess }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [skip, setSkip] = useState(false);
 
-  if (!open) return null;
+  useEffect(() => {
+    // Check user role from cookie and skip modal if admin
+    try {
+      const userCookie = Cookies.get("user");
+      if (userCookie) {
+        const user = JSON.parse(userCookie);
+        if (user.role === "admin") {
+          setSkip(true);
+        }
+      }
+    } catch {
+      setSkip(false);
+    }
+  }, []);
+
+  if (!open || skip) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

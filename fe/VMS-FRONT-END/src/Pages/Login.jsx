@@ -47,31 +47,103 @@ const OutlookAuth = () => {
           secure: false,
           sameSite: "Lax",
         });
-        // After successful login, check must_change_password from change_password endpoint
-        const token = Cookies.get("token");
-        const mustChangeRes = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/prompt_change/`,
-          {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
+
+        // Get user role: for admin, use response or fetch from /users/me/ (not employee-profiles)
+        let userRole = "";
+        let userInfo = null;
+        try {
+          const token = Cookies.get("token");
+          // Try to get user info from response or from /users/me/ for admin
+          if (response.data.user && response.data.user.role) {
+            userRole = response.data.user.role;
+            userInfo = response.data.user;
+            Cookies.set("user", JSON.stringify(response.data.user), {
+              path: "/",
+              secure: false,
+              sameSite: "Lax",
+            });
+          } else {
+            // Try employee-profiles/me/ first
+            let meRes;
+            try {
+              meRes = await axios.get(
+                `${API_BASE_URL}/api/employee-profiles/me/`,
+                {
+                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                }
+              );
+              userRole = meRes.data.role;
+              userInfo = meRes.data;
+              Cookies.set("user", JSON.stringify(meRes.data), {
+                path: "/",
+                secure: false,
+                sameSite: "Lax",
+              });
+            } catch (empErr) {
+              // If not found, try /api/users/me/ for admin
+              try {
+                const userRes = await axios.get(
+                  `${API_BASE_URL}/api/users/me/`,
+                  {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                  }
+                );
+                userRole = userRes.data.role;
+                userInfo = userRes.data;
+                Cookies.set("user", JSON.stringify(userRes.data), {
+                  path: "/",
+                  secure: false,
+                  sameSite: "Lax",
+                });
+              } catch {
+                userRole = "";
+              }
+            }
           }
-        );
-        // Log the full response for debugging
-        console.log("Change password response:", mustChangeRes.data);
+        } catch {
+          userRole = "";
+        }
 
-        // Accept all possible true-ish values for must_change_password
-        const mustChange =
-          mustChangeRes.data.must_change_password === true ||
-          mustChangeRes.data.mustchangepassword === true ||
-          mustChangeRes.data.must_change_password === "true" ||
-          mustChangeRes.data.mustchangepassword === "true" ||
-          mustChangeRes.data.must_change_password === 1 ||
-          mustChangeRes.data.mustchangepassword === 1 ||
-          mustChangeRes.data.must_change_password === "1" ||
-          mustChangeRes.data.mustchangepassword === "1";
+        if (userRole === "employee") {
+          try {
+            const token = Cookies.get("token");
+            const mustChangeRes = await axios.get(
+              `${API_BASE_URL}/api/employee-profiles/prompt_change/`,
+              {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              }
+            );
+            // Log the full response for debugging
+            console.log("Change password response:", mustChangeRes.data);
 
-        if (mustChange) {
-          setMustChangePassword(true);
-          setShowModal(true);
+            // Accept all possible true-ish values for must_change_password
+            const mustChange =
+              mustChangeRes.data.must_change_password === true ||
+              mustChangeRes.data.mustchangepassword === true ||
+              mustChangeRes.data.must_change_password === "true" ||
+              mustChangeRes.data.mustchangepassword === "true" ||
+              mustChangeRes.data.must_change_password === 1 ||
+              mustChangeRes.data.mustchangepassword === 1 ||
+              mustChangeRes.data.must_change_password === "1" ||
+              mustChangeRes.data.mustchangepassword === "1";
+
+            if (mustChange) {
+              setMustChangePassword(true);
+              setShowModal(true);
+            } else {
+              setMustChangePassword(false);
+              setShowModal(false);
+              navigate("/home");
+            }
+          } catch (err) {
+            setMustChangePassword(false);
+            setShowModal(false);
+            navigate("/home");
+          }
+        } else if (userRole === "admin") {
+          setMustChangePassword(false);
+          setShowModal(false);
+          navigate("/");
         } else {
           setMustChangePassword(false);
           setShowModal(false);

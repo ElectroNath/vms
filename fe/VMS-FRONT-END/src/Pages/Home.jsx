@@ -23,87 +23,121 @@ function Home() {
   const [attendanceLogs, setAttendanceLogs] = useState([]);
   const [activeMenu, setActiveMenu] = useState(0);
   const [role, setRole] = useState("");
-  const [notificationCount, setNotificationCount] = useState(1); // Example: set to 5. Replace with your logic.
+  const [notificationCount, setNotificationCount] = useState(0); // notificationCount now tracks unread messages
   const navigate = useNavigate();
   const [initialLoad, setInitialLoad] = useState(true);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showDeviceModal, setShowDeviceModal] = useState(false);
   const [guestList, setGuestList] = useState([]);
   const [deviceList, setDeviceList] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Get unique key for viewed messages per user
+  const viewedMsgsKey = `viewed_admin_msgs_${profileId || "nouser"}`;
 
   useEffect(() => {
-    let ignore = false;
-    // Only show spinner if this is the first load after login/refresh
-    if (!initialLoad) return;
-    setLoading(true);
-    const fetchDashboard = async () => {
-      const token = Cookies.get("token");
-      if (!token) {
-        navigate("/login", { replace: true });
-        return;
-      }
-      try {
-        // Fetch employee profile for username, id, and role
-        const profileRes = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/me/`,
-          {
-            withCredentials: true,
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
-        );
-        setUsername(profileRes.data.username);
-        if (profileRes.data.id) {
-          setProfileId(profileRes.data.id);
-        }
-        if (profileRes.data.role) {
-          setRole(profileRes.data.role);
-        }
+    // Ensure code runs after DOM is fully loaded
+    if (document.readyState === "complete") {
+      runDashboardEffect();
+    } else {
+      const onReady = () => {
+        runDashboardEffect();
+        document.removeEventListener("DOMContentLoaded", onReady);
+      };
+      document.addEventListener("DOMContentLoaded", onReady);
+    }
 
-        // Fetch dashboard data
-        const res = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/dashboard/`,
-          {
-            withCredentials: true,
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
-        );
-        setFullName(res.data.full_name);
-        setStaffId(res.data.staff_id);
-        setDeviceCount(res.data.device_count);
-        setGuestCount(res.data.guest_count);
-        setAttendanceIn(res.data.attendance_in);
-        setAttendanceOut(res.data.attendance_out);
-        setDevices(res.data.devices);
-
-        // Fetch attendance logs
-        const attendanceRes = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/attendance/`,
-          {
-            withCredentials: true,
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
-        );
-        setAttendanceLogs(attendanceRes.data);
-
-        setError("");
-      } catch (err) {
-        // If unauthorized, redirect to login
-        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+    function runDashboardEffect() {
+      let ignore = false;
+      // Only show spinner if this is the first load after login/refresh
+      if (!initialLoad) return;
+      setLoading(true);
+      const fetchDashboard = async () => {
+        const token = Cookies.get("token");
+        if (!token) {
           navigate("/login", { replace: true });
-        } else {
-          setError("Unable to fetch dashboard. Please log in again.");
+          return;
         }
-      } finally {
-        if (!ignore) setLoading(false);
-        setInitialLoad(false);
-      }
-    };
+        try {
+          // Fetch employee profile for username, id, and role
+          const profileRes = await axios.get(
+            `${API_BASE_URL}/api/employee-profiles/me/`,
+            {
+              withCredentials: true,
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }
+          );
+          setUsername(profileRes.data.username);
+          if (profileRes.data.id) {
+            setProfileId(profileRes.data.id);
+          }
+          if (profileRes.data.role) {
+            setRole(profileRes.data.role);
+          }
 
-    fetchDashboard();
-    return () => { ignore = true; };
+          // Fetch dashboard data
+          const res = await axios.get(
+            `${API_BASE_URL}/api/employee-profiles/dashboard/`,
+            {
+              withCredentials: true,
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }
+          );
+          setFullName(res.data.full_name);
+          setStaffId(res.data.staff_id);
+          setDeviceCount(res.data.device_count);
+          setGuestCount(res.data.guest_count);
+          setAttendanceIn(res.data.attendance_in);
+          setAttendanceOut(res.data.attendance_out);
+          setDevices(res.data.devices);
+
+          // Fetch attendance logs
+          const attendanceRes = await axios.get(
+            `${API_BASE_URL}/api/employee-profiles/attendance/`,
+            {
+              withCredentials: true,
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }
+          );
+          setAttendanceLogs(attendanceRes.data);
+
+          // Fetch messages for employees
+          const msgRes = await axios.get(
+            `${API_BASE_URL}/api/messages/`,
+            {
+              withCredentials: true,
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }
+          );
+          setMessages(msgRes.data || []);
+          // Track unread messages using localStorage (by message id) per user
+          const viewed = JSON.parse(localStorage.getItem(viewedMsgsKey) || "[]");
+          const unread = (msgRes.data || []).filter(msg => !viewed.includes(msg.id));
+          setUnreadCount(unread.length);
+          setNotificationCount(unread.length); // notificationCount always reflects unread messages
+
+          setError("");
+        } catch (err) {
+          // If unauthorized, redirect to login
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            navigate("/login", { replace: true });
+          } else {
+            setError("Unable to fetch dashboard. Please log in again.");
+          }
+        } finally {
+          if (!ignore) setLoading(false);
+          setInitialLoad(false);
+        }
+      };
+
+      fetchDashboard();
+      return () => { ignore = true; };
+    }
+
     // Only run on mount (not on every navigation to Home)
     // eslint-disable-next-line
-  }, [navigate]);
+  }, [navigate, profileId]);
 
   // Handler to open modal and fetch QR code using staffId dynamically in the path
   const handleShowQrModal = async () => {
@@ -185,6 +219,20 @@ function Home() {
     }
   };
 
+  // Handler for notification bell click
+  const handleNotificationClick = () => {
+    // Mark all messages as viewed for this user
+    if (messages.length > 0 && profileId) {
+      localStorage.setItem(
+        viewedMsgsKey,
+        JSON.stringify(messages.map(msg => msg.id))
+      );
+      setUnreadCount(0);
+      setNotificationCount(0); // reset notification count after viewing
+    }
+    navigate("/messages");
+  };
+
   return (
     <div className="home-root">
       {/* Overlay for loading */}
@@ -193,7 +241,7 @@ function Home() {
       <div className={`home-main${loading ? " blurred" : ""}`}>
         {/* Notification Bell Icon at top right */}
         <div className="notification-bell-container">
-          <div className="notification-bell-wrapper">
+          <div className="notification-bell-wrapper" style={{ cursor: "pointer" }} onClick={handleNotificationClick}>
             {/* Modern Bell SVG icon with gradient and shadow */}
             <svg
               className="notification-bell-icon"
@@ -333,6 +381,8 @@ function Home() {
                 <p>No attendance records found.</p>
               )}
             </div>
+
+            {/* Remove messages section from homepage */}
           </div>
         )}
       </div>

@@ -1,0 +1,114 @@
+.admin-root {
+  display: flex;
+  min-height: 100vh;
+  background: #f7f9fa;
+}
+
+.admin-navbar {
+  width: 220px;
+  background: #247150;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 40px 0;
+  min-height: 100vh;
+}
+
+.admin-navbar-title {
+  font-size: 1.5em;
+  font-weight: 700;
+  padding: 32px 24px 24px 24px;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #1bb76e33;
+}
+
+.admin-navbar-menu {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+.admin-navbar-link {
+  color: #fff;
+  text-decoration: none;
+  padding: 16px 24px;
+  font-size: 1.1em;
+  border-left: 4px solid transparent;
+  transition: background 0.18s, border-color 0.18s;
+}
+
+.admin-navbar-link-active,
+.admin-navbar-link:hover {
+  background: #1bb76e;
+  border-left: 4px solid #fff;
+  color: #fff;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 40px 32px;
+}
+
+.admin-dashboard {
+  margin-bottom: 40px;
+}
+
+.admin-dashboard-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.admin-dashboard-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #24715018;
+  padding: 32px 24px;
+  min-width: 180px;
+  flex: 1;
+  text-align: center;
+}
+
+.admin-dashboard-card-title {
+  font-size: 1.1em;
+  color: #247150;
+  margin-bottom: 10px;
+}
+
+.admin-dashboard-card-value {
+  font-size: 2.2em;
+  font-weight: 700;
+  color: #222;
+}
+
+.admin-table-page {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #24715018;
+  padding: 32px 24px;
+  margin-bottom: 40px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #f5f5f5;
+  color: #247150;
+  font-weight: 600;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
