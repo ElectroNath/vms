@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import "../styles/Admin.css";
 
 const menu = [
@@ -13,8 +13,6 @@ const menu = [
 ];
 
 function AdminNavbar() {
-  const location = useLocation();
-  // Remove the "." for Dashboard, use "" so it matches the index route
   return (
     <nav className="admin-navbar">
       <div className="admin-navbar-title">Admin Panel</div>
@@ -22,7 +20,7 @@ function AdminNavbar() {
         {menu.map(item => (
           <NavLink
             key={item.path}
-            to={item.path}
+            to={`/admin/${item.path}`}
             end={item.path === ""}
             className={({ isActive }) =>
               "admin-navbar-link" + (isActive ? " admin-navbar-link-active" : "")

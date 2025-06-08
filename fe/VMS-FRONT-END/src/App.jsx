@@ -28,18 +28,19 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/messages" element={<Messages />} />
-        {/* Mount all /admin/* routes to the Admin component */}
         <Route
           path="/admin/*"
           element={
             user && user.role === "admin" ? (
               <Admin />
             ) : (
-              <Navigate to="/login" replace />
+              <>
+                {console.error("App.jsx: Unauthorized admin route access. User:", user)}
+                <Navigate to="/login" replace />
+              </>
             )
           }
         />
-        {/* All other routes handled by AppRouter (for employees and others) */}
         <Route path="/*" element={<AppRouter />} />
       </Routes>
     </Router>

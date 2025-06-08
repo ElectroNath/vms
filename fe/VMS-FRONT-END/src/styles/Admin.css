@@ -35,12 +35,10 @@
   font-size: 1.1em;
   border-left: 4px solid transparent;
   transition: background 0.18s, border-color 0.18s;
-  display: block; /* Ensure NavLink fills the menu item area */
+  display: block;
 }
 
-/* Fix specificity for active link */
-.admin-navbar-link.admin-navbar-link-active,
-.admin-navbar-link:active {
+.admin-navbar-link-active {
   background: #1bb76e;
   border-left: 4px solid #fff;
   color: #fff !important;

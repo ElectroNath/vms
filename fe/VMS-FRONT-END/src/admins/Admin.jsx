@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import AdminNavbar from "./AdminNavbar";
 import AdminDashboard from "./Dashboard";
 import AdminUsers from "./Users";
@@ -18,14 +18,15 @@ function Admin() {
       <AdminNavbar />
       <div className="admin-main">
         <Routes>
-          <Route path="/" element={<AdminDashboard />} />
-          <Route path="/users" element={<AdminUsers />} />
-          <Route path="/employees" element={<AdminEmployees />} />
-          <Route path="/devices" element={<AdminDevices />} />
-          <Route path="/guests" element={<AdminGuests />} />
-          <Route path="/messages" element={<AdminMessages />} />
-          <Route path="/access-logs" element={<AdminAccessLogs />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route index element={<AdminDashboard />} />
+          <Route path="" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="employees" element={<AdminEmployees />} />
+          <Route path="devices" element={<AdminDevices />} />
+          <Route path="guests" element={<AdminGuests />} />
+          <Route path="messages" element={<AdminMessages />} />
+          <Route path="access-logs" element={<AdminAccessLogs />} />
+          {/* Remove the catch-all route to prevent infinite redirects and 404s */}
         </Routes>
       </div>
     </div>
