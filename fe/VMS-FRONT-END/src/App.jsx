@@ -7,7 +7,7 @@ import AppRouter from "./components/AppRouter";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Messages from "./Pages/Messages";
 import Admin from "./admins/Admin";
-import SecurityRoutes from "./security";
+import SecurityRoutes from "./security/index.jsx";
 import Cookies from "js-cookie";
 import "@fontsource/montserrat";
 import "./styles/Home.css";

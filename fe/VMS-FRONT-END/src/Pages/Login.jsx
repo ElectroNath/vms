@@ -150,6 +150,10 @@ const OutlookAuth = () => {
           setMustChangePassword(false);
           setShowModal(false);
           navigate("/admin");
+        } else if (userRole === "security") {
+          setMustChangePassword(false);
+          setShowModal(false);
+          navigate("/security");
         } else {
           setMustChangePassword(false);
           setShowModal(false);
