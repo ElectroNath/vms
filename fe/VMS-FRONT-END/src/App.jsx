@@ -7,6 +7,7 @@ import AppRouter from "./components/AppRouter";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Messages from "./Pages/Messages";
 import Admin from "./admins/Admin";
+import SecurityRoutes from "./security";
 import Cookies from "js-cookie";
 import "@fontsource/montserrat";
 import "./styles/Home.css";
@@ -36,6 +37,19 @@ function App() {
             ) : (
               <>
                 {console.error("App.jsx: Unauthorized admin route access. User:", user)}
+                <Navigate to="/login" replace />
+              </>
+            )
+          }
+        />
+        <Route
+          path="/security/*"
+          element={
+            user && user.role === "security" ? (
+              <SecurityRoutes />
+            ) : (
+              <>
+                {console.error("App.jsx: Unauthorized security route access. User:", user)}
                 <Navigate to="/login" replace />
               </>
             )
