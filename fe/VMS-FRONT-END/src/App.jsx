@@ -1,8 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Pages/Login";
-import Home from "./Pages/Home";
-import InviteGuest from "./Pages/InviteGuest";
 import AppRouter from "./components/AppRouter";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Messages from "./Pages/Messages";
@@ -23,6 +21,14 @@ function App() {
     user = {};
   }
 
+  // Role-based root navigation
+  function getRootRedirect() {
+    if (user && user.role === "admin") return <Navigate to="/admin" replace />;
+    if (user && user.role === "security") return <Navigate to="/security" replace />;
+    if (user && user.role === "employee") return <Navigate to="/home" replace />;
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <Router>
       <Routes>
@@ -34,6 +40,10 @@ function App() {
           element={
             user && user.role === "admin" ? (
               <Admin />
+            ) : user && user.role === "employee" ? (
+              <Navigate to="/home" replace />
+            ) : user && user.role === "security" ? (
+              <Navigate to="/security" replace />
             ) : (
               <>
                 {console.error("App.jsx: Unauthorized admin route access. User:", user)}
@@ -47,6 +57,10 @@ function App() {
           element={
             user && user.role === "security" ? (
               <SecurityRoutes />
+            ) : user && user.role === "admin" ? (
+              <Navigate to="/admin" replace />
+            ) : user && user.role === "employee" ? (
+              <Navigate to="/home" replace />
             ) : (
               <>
                 {console.error("App.jsx: Unauthorized security route access. User:", user)}
@@ -55,6 +69,7 @@ function App() {
             )
           }
         />
+        <Route path="/" element={getRootRedirect()} />
         <Route path="/*" element={<AppRouter />} />
       </Routes>
     </Router>

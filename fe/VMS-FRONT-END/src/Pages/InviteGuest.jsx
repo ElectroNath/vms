@@ -146,6 +146,7 @@ function InviteGuest() {
 
   return (
     <div className="form-root">
+      {/* Navbar removed: now handled globally for employee pages */}
       <div className="form-container" style={{ minWidth: 700, maxWidth: 1100 }}>
         <div className="login-form-title" style={{ marginBottom: 30, textAlign: "left" }}>
           Invite Guest

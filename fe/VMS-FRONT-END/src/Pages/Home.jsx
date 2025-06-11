@@ -233,8 +233,13 @@ function Home() {
     navigate("/messages");
   };
 
+  // Determine if user is employee
+  const isEmployee = role === "employee";
+  const isEmployeeRoute = window.location.pathname === "/home" || window.location.pathname === "/invite-guest";
+
   return (
     <div className="home-root">
+      {/* Navbar removed: now handled globally in AppLayout/AppRouter for employee pages */}
       {/* Overlay for loading */}
       {/* Spinner removed as requested */}
       {/* Main Content */}

@@ -139,12 +139,30 @@ const OutlookAuth = () => {
             } else {
               setMustChangePassword(false);
               setShowModal(false);
-              navigate("/home");
+              // Use role-based navigation logic from App.jsx
+              if (userRole === "admin") {
+                navigate("/admin");
+              } else if (userRole === "security") {
+                navigate("/security");
+              } else if (userRole === "employee") {
+                navigate("/home");
+              } else {
+                navigate("/login");
+              }
             }
           } catch (err) {
             setMustChangePassword(false);
             setShowModal(false);
-            navigate("/home");
+            // Use role-based navigation logic from App.jsx
+            if (userRole === "admin") {
+              navigate("/admin");
+            } else if (userRole === "security") {
+              navigate("/security");
+            } else if (userRole === "employee") {
+              navigate("/home");
+            } else {
+              navigate("/login");
+            }
           }
         } else if (userRole === "admin") {
           setMustChangePassword(false);
@@ -157,7 +175,7 @@ const OutlookAuth = () => {
         } else {
           setMustChangePassword(false);
           setShowModal(false);
-          navigate("/home");
+          navigate("/login");
         }
       } else {
         setError("Login failed: No access token received.");
