@@ -1,10 +1,13 @@
 import React from "react";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 function Logout({ className = "", style = {}, children = "Logout" }) {
+  const navigate = useNavigate();
   const handleLogout = () => {
     Cookies.remove("token");
-    window.location.href = "/"; // Redirect to login page after logout
+    Cookies.remove("user");
+    window.location.href = "/login"; // Force full reload to update app state
   };
 
   return (

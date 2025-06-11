@@ -5,7 +5,7 @@ import { API_BASE_URL } from "../api";
 import MustChangePasswordModal from "../components/MustChangePasswordModal";
 import "../styles/Login.css";
 import Logo from "../assets/3D_App_Icon_Mockup_[Qorecraft]w[1](1).png";
-import "@fontsource/montserrat"; // Defaults to weight 400
+import "@fontsource/montserrat";
 import { useNavigate, Link } from "react-router-dom";
 
 const OutlookAuth = () => {
@@ -24,14 +24,11 @@ const OutlookAuth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!form.username || !form.password) {
       setError("Please enter both username and password.");
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await axios.post(
         `${API_BASE_URL}/api/token/`,
@@ -40,20 +37,17 @@ const OutlookAuth = () => {
           password: form.password,
         }
       );
-
       if (response.data && response.data.access) {
         Cookies.set("token", response.data.access, {
           path: "/",
           secure: false,
           sameSite: "Lax",
         });
-
         // Get user role: for admin, use response or fetch from /users/me/ (not employee-profiles)
         let userRole = "";
         let userInfo = null;
         try {
           const token = Cookies.get("token");
-          // Try to get user info from response or from /users/me/ for admin
           if (response.data.user && response.data.user.role) {
             userRole = response.data.user.role;
             userInfo = response.data.user;
@@ -63,7 +57,6 @@ const OutlookAuth = () => {
               sameSite: "Lax",
             });
           } else {
-            // Try /api/users/me/ first (for admin), fallback to employee-profiles/me/ for employees
             let userRes;
             try {
               userRes = await axios.get(
@@ -80,9 +73,7 @@ const OutlookAuth = () => {
                 sameSite: "Lax",
               });
             } catch (userErr) {
-              // If not found, only try employee-profiles/me/ if NOT admin login
               if (form.username.toLowerCase().startsWith("admin")) {
-                // Do not fetch employee-profiles/me/ for admin
                 userRole = "admin";
                 userInfo = userRes && userRes.data ? userRes.data : { role: "admin", username: form.username };
               } else {
@@ -109,7 +100,6 @@ const OutlookAuth = () => {
         } catch {
           userRole = "";
         }
-
         if (userRole === "employee") {
           try {
             const token = Cookies.get("token");
@@ -119,10 +109,6 @@ const OutlookAuth = () => {
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
               }
             );
-            // Log the full response for debugging
-            console.log("Change password response:", mustChangeRes.data);
-
-            // Accept all possible true-ish values for must_change_password
             const mustChange =
               mustChangeRes.data.must_change_password === true ||
               mustChangeRes.data.mustchangepassword === true ||
@@ -132,14 +118,12 @@ const OutlookAuth = () => {
               mustChangeRes.data.mustchangepassword === 1 ||
               mustChangeRes.data.must_change_password === "1" ||
               mustChangeRes.data.mustchangepassword === "1";
-
             if (mustChange) {
               setMustChangePassword(true);
               setShowModal(true);
             } else {
               setMustChangePassword(false);
               setShowModal(false);
-              // Use role-based navigation logic from App.jsx
               if (userRole === "admin") {
                 navigate("/admin");
               } else if (userRole === "security") {
@@ -153,7 +137,6 @@ const OutlookAuth = () => {
           } catch (err) {
             setMustChangePassword(false);
             setShowModal(false);
-            // Use role-based navigation logic from App.jsx
             if (userRole === "admin") {
               navigate("/admin");
             } else if (userRole === "security") {
@@ -181,8 +164,6 @@ const OutlookAuth = () => {
         setError("Login failed: No access token received.");
       }
     } catch (err) {
-      // Log the error for debugging
-      console.error("Login error:", err);
       if (err.response && err.response.data && err.response.data.detail) {
         setError(err.response.data.detail);
       } else {
