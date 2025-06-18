@@ -102,6 +102,9 @@ function InviteGuest() {
       Object.keys(payload).forEach(
         key => (payload[key] === undefined || payload[key] === "") && delete payload[key]
       );
+      // The backend should be responsible for transactional integrity:
+      // If any error occurs (including email sending), the guest should NOT be created in the database.
+      // This is best enforced in the backend using atomic transactions.
       await axios.post(
         `${API_BASE_URL}/api/guests/`,
         payload,
@@ -122,6 +125,8 @@ function InviteGuest() {
         invited_by: form.invited_by,
       });
     } catch (err) {
+      // If any error occurs (including backend errors like email sending),
+      // the guest will NOT be created in the database if the backend is correct.
       // Show all validation errors from backend
       if (err.response && err.response.data) {
         const data = err.response.data;

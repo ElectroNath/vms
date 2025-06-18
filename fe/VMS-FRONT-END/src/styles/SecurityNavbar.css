@@ -1,0 +1,103 @@
+/* SecurityNavbar responsive and hamburger menu styles */
+.security-navbar-root {
+  background: #fff;
+  padding: 12px 0;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px #0001;
+}
+.security-navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.security-navbar-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.security-navbar-link {
+  color: #1a7bb7;
+  font-weight: 600;
+  font-size: 18px;
+  text-decoration: none;
+  transition: color 0.18s;
+}
+.security-navbar-link-active {
+  color: #fff;
+  background: #1a7bb7;
+  border-radius: 6px;
+  padding: 6px 14px;
+}
+.security-navbar-logout {
+  min-width: 90px;
+  font-size: 16px;
+  padding: 8px 18px;
+  margin-left: 16px;
+  background: linear-gradient(90deg, #0a7c3a 0%, #1bb76e 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.security-navbar-logout:hover {
+  background: linear-gradient(90deg, #1bb76e 0%, #0a7c3a 100%);
+}
+.security-navbar-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #1a7bb7;
+  cursor: pointer;
+  margin-left: 8px;
+}
+@media (max-width: 800px) {
+  .security-navbar-container {
+    flex-direction: row;
+    gap: 0;
+  }
+  .security-navbar-links {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    flex-direction: column;
+    gap: 0;
+    box-shadow: 0 4px 16px #0002;
+    z-index: 1000;
+  }
+  .security-navbar-links.open {
+    display: flex;
+  }
+  .security-navbar-link,
+  .security-navbar-link-active {
+    display: block;
+    padding: 16px 24px;
+    border-radius: 0;
+    color: #1a7bb7;
+    background: none;
+    font-size: 18px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .security-navbar-link-active {
+    background: #1a7bb7;
+    color: #fff;
+    border-radius: 0;
+  }
+  .security-navbar-hamburger {
+    display: block;
+  }
+  .security-navbar-logout {
+    width: 100%;
+    margin: 16px 0 0 0;
+  }
+}
