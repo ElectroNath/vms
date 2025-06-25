@@ -67,7 +67,7 @@ function AdminUsers() {
     try {
       const token = Cookies.get("token");
       await axios.patch(
-        `${API_BASE_URL}/api/employees/${id}/`,
+        `${API_BASE_URL}/api/users/${id}/`,
         editUser,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -89,7 +89,7 @@ function AdminUsers() {
   const confirmDelete = async () => {
     try {
       const token = Cookies.get("token");
-      await axios.delete(`${API_BASE_URL}/api/employees/${deleteId}/`, {
+      await axios.delete(`${API_BASE_URL}/api/users/${deleteId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setShowDeleteModal(false);
@@ -113,7 +113,7 @@ function AdminUsers() {
     try {
       const token = Cookies.get("token");
       await axios.post(
-        `${API_BASE_URL}/api/employees/`,
+        `${API_BASE_URL}/api/users/`,
         newUser,
         { headers: { Authorization: `Bearer ${token}` } }
       );

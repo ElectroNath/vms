@@ -85,7 +85,7 @@ function AdminEmployees() {
     try {
       const token = Cookies.get("token");
       await axios.patch(
-        `${API_BASE_URL}/api/employees/${id}/`,
+        `${API_BASE_URL}/api/employee-profiles/${id}/`,
         editEmployee,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -107,7 +107,7 @@ function AdminEmployees() {
   const confirmDelete = async () => {
     try {
       const token = Cookies.get("token");
-      await axios.delete(`${API_BASE_URL}/api/employees/${deleteId}/`, {
+      await axios.delete(`${API_BASE_URL}/api/employee-profiles/${deleteId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setShowDeleteModal(false);
@@ -126,23 +126,57 @@ function AdminEmployees() {
     setDeleteId(null);
   };
 
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    try {
-      const token = Cookies.get("token");
-      await axios.post(
-        `${API_BASE_URL}/api/employees/`,
-        newEmployee,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setNewEmployee({ user: "", full_name: "", department: "", position: "", staff_id: "" });
-      setShowModal(false);
-      fetchEmployees();
-    } catch (err) {
-      setError("Failed to create employee.");
-      console.error("Create employee error:", err);
+ const handleCreate = async (e) => {
+  e.preventDefault();
+  try {
+    const token = Cookies.get("token");
+
+    // Ensure user is submitted as an integer, not string
+    const payload = {
+      ...newEmployee,
+      user: parseInt(newEmployee.user) // ✅ Convert user ID to integer
+    };
+
+    console.log("Submitting new employee data:", newEmployee);
+    console.log("📦 Payload being sent to backend:", payload);
+
+    await axios.post(
+      `${API_BASE_URL}/api/employee-profiles/`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    // Reset form
+    setNewEmployee({
+      user: "",
+      full_name: "",
+      department: "",
+      position: "",
+      staff_id: ""
+    });
+    setShowModal(false);
+    fetchEmployees();
+  } catch (err) {
+    setError("Failed to create employee.");
+
+    if (err.response) {
+      console.error("🚫 Validation errors from backend:", err.response.data);
+      console.error("📦 Status Code:", err.response.status);
+    } else if (err.request) {
+      console.error("❌ No response from server. Request:", err.request);
+    } else {
+      console.error("⚠️ Error setting up request:", err.message);
     }
-  };
+  }
+};
+
+
+
 
   // Filtered employees
   const filteredEmployees = employees.filter(e =>

@@ -10,12 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babel/runtime": "^7.27.6",
+    "@blackbox-vision/react-qr-reader": "^5.0.0",
     "@fontsource/montserrat": "^5.2.5",
     "axios": "^1.9.0",
     "cookies": "^0.9.1",
+    "html5-qrcode": "^2.3.8",
     "js-cookie": "^3.0.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-qr-reader": "^3.0.0-beta-1",
     "react-router-dom": "^7.6.1"
   },
   "devDependencies": {

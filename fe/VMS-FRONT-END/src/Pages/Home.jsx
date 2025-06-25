@@ -32,8 +32,6 @@ function Home() {
   const [deviceList, setDeviceList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [verifiedDeviceCount, setVerifiedDeviceCount] = useState(0);
-  const [expectedGuestsToday, setExpectedGuestsToday] = useState(0);
 
   // Get unique key for viewed messages per user
   const viewedMsgsKey = `viewed_admin_msgs_${profileId || "nouser"}`;
@@ -93,8 +91,6 @@ function Home() {
           setAttendanceIn(res.data.attendance_in);
           setAttendanceOut(res.data.attendance_out);
           setDevices(res.data.devices);
-          setVerifiedDeviceCount(res.data.verified_device_count || 0);
-          setExpectedGuestsToday(res.data.expected_guests_today || 0);
 
           // Fetch attendance logs
           const attendanceRes = await axios.get(
@@ -242,12 +238,12 @@ function Home() {
   const isEmployeeRoute = window.location.pathname === "/home" || window.location.pathname === "/invite-guest";
 
   return (
-    <div className="home-root" >
+    <div className="home-root">
       {/* Navbar removed: now handled globally in AppLayout/AppRouter for employee pages */}
       {/* Overlay for loading */}
       {/* Spinner removed as requested */}
       {/* Main Content */}
-      <div className={`home-main${loading ? " blurred" : ""}`} style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px' }}>
+      <div className={`home-main${loading ? " blurred" : ""}`}>
         {/* Notification Bell Icon at top right */}
         <div className="notification-bell-container">
           <div className="notification-bell-wrapper" style={{ cursor: "pointer" }} onClick={handleNotificationClick}>
@@ -307,7 +303,7 @@ function Home() {
           </div>
         ) : (
           <div className="dashboard-container">
-            <div className="dashboard-profile" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+            <div className="dashboard-profile" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <p id="username">
                   <strong>{fullName}</strong>
@@ -341,8 +337,7 @@ function Home() {
                 Staff QR Code
               </button>
             </div>
-            {/* 2x2 grid for dashboard cards */}
-            <div className="dashboard-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, marginBottom: 32 }}>
+            <div className="dashboard-metrics">
               <div
                 className="dashboard-card"
                 style={{ cursor: "pointer" }}
@@ -360,22 +355,6 @@ function Home() {
               >
                 <span id="num">{guestCount}</span>
                 <span id="descrip">Registered Guests</span>
-              </div>
-              <div
-                className="dashboard-card"
-                style={{ background: '#e8f5e9', color: '#247150', border: '1.5px solid #1bb76e' }}
-                title="Number of your devices that have been signed in (verified) in the system"
-              >
-                <span id="num">{verifiedDeviceCount}</span>
-                <span id="descrip">Verified Devices</span>
-              </div>
-              <div
-                className="dashboard-card"
-                style={{ background: '#fffde7', color: '#bfa100', border: '1.5px solid #ffe082' }}
-                title="Number of guests you registered that are expected today (not expired)"
-              >
-                <span id="num">{expectedGuestsToday}</span>
-                <span id="descrip">Expected Guests Today</span>
               </div>
             </div>
 

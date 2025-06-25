@@ -142,12 +142,6 @@ class Guest(models.Model):
             self.token_qr_code.save(f"{self.full_name}_token_qr.png", File(buffer), save=False)
         super().save(*args, **kwargs)
 
-    def is_token_expired(self):
-        # Token expires 24 hours after visit_date (midnight to midnight)
-        from django.utils import timezone
-        now = timezone.now().date()
-        return now > self.visit_date
-
     def get_full_info(self):
         return {
             "id": self.id,
@@ -166,7 +160,6 @@ class Guest(models.Model):
             "is_verified": self.is_verified,
             "visit_date": self.visit_date,
             "created_at": self.created_at,
-            "token_expired": self.is_token_expired(),
         }
 
 

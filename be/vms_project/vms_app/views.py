@@ -12,6 +12,7 @@ import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
 from rest_framework.decorators import action, api_view, permission_classes # type: ignore
+from rest_framework.views import APIView # type: ignore
 from datetime import timedelta, datetime, timezone
 from rest_framework.exceptions import PermissionDenied # type: ignore
 from rest_framework_simplejwt.views import TokenObtainPairView # type: ignore
@@ -30,8 +31,6 @@ from django.utils.crypto import get_random_string
 from rest_framework.decorators import api_view, permission_classes # type: ignore
 from rest_framework.permissions import IsAuthenticated # type: ignore
 from django.db import transaction
-from django.utils import timezone
-from django.db.models import Count
 
 
 
@@ -266,7 +265,7 @@ class EmployeeProfileViewSet(viewsets.ModelViewSet):
     def dashboard(self, request):
         """
         Returns detailed info for the logged-in employee, including device count,
-        guest count, attendance (in/out) count, verified devices, and expected guests for today.
+        guest count, and attendance (in/out) count.
         """
         try:
             profile = EmployeeProfile.objects.get(user=request.user)
@@ -276,13 +275,9 @@ class EmployeeProfileViewSet(viewsets.ModelViewSet):
         # Devices
         devices = Device.objects.filter(owner_employee=profile)
         device_count = devices.count()
-        verified_device_count = devices.filter(is_verified=True).count()
 
         # Guests invited
-        from django.utils import timezone
-        today = timezone.now().date()
-        guests_today = Guest.objects.filter(invited_by=profile, visit_date=today)
-        expected_guests_today = guests_today.exclude(id__in=[g.id for g in guests_today if g.is_token_expired()]).count()
+        guest_count = Guest.objects.filter(invited_by=profile).count()
 
         # Attendance logs (in/out)
         from django.contrib.contenttypes.models import ContentType
@@ -297,11 +292,9 @@ class EmployeeProfileViewSet(viewsets.ModelViewSet):
         data = profile.get_full_info()
         data["device_count"] = device_count
         data["devices"] = [device.get_full_info() for device in devices]
-        data["guest_count"] = Guest.objects.filter(invited_by=profile).count()
+        data["guest_count"] = guest_count
         data["attendance_in"] = attendance_in
         data["attendance_out"] = attendance_out
-        data["verified_device_count"] = verified_device_count
-        data["expected_guests_today"] = expected_guests_today
 
         return Response(data)
 
@@ -754,85 +747,96 @@ class SecurityAccessLogViewSet(viewsets.ModelViewSet):
         except Guest.DoesNotExist:
             return Response({"detail": "Guest not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class IsSecurityUser(BasePermission):
-    def has_permission(self, request, view):
-        return hasattr(request.user, 'role') and request.user.role == 'security'
+class SecurityDashboardAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSecurity]
 
-class SecurityDashboardView(APIView):
-    permission_classes = [IsAuthenticated, IsSecurityUser]
     def get(self, request):
-        today = timezone.localdate()
-        guests_today = Guest.objects.filter(visit_date=today).count()
-        devices = Device.objects.count()
-        logs_today = AccessLog.objects.filter(time_in__date=today).count()
-        verified_guests_today = Guest.objects.filter(visit_date=today, is_verified=True).count()
+        """
+        Returns dashboard metrics for security users: device counts, guest counts, verified devices, expected guests, etc.
+        """
+        device_count = Device.objects.count()
+        verified_device_count = Device.objects.filter(is_verified=True).count()
+        guest_count = Guest.objects.count()
+        guests_today = Guest.objects.filter(visit_date=datetime.now().date()).count()
+        expected_guests_today = Guest.objects.filter(visit_date=datetime.now().date(), token_expiry__gte=datetime.now()).count()
+        access_logs_today = AccessLog.objects.filter(time_in__date=datetime.now().date()).count()
         return Response({
-            'guests_today': guests_today,
-            'devices': devices,
-            'logs_today': logs_today,
-            'verified_guests_today': verified_guests_today,
+            "device_count": device_count,
+            "verified_device_count": verified_device_count,
+            "guest_count": guest_count,
+            "guests_today": guests_today,
+            "expected_guests_today": expected_guests_today,
+            "access_logs_today": access_logs_today,
         })
 
-class SecurityGuestsView(APIView):
-    permission_classes = [IsAuthenticated, IsSecurityUser]
-    def get(self, request):
-        date = request.query_params.get('date')
-        if not date:
-            date = timezone.localdate()
-        guests = Guest.objects.filter(visit_date=date)
-        return Response([{
-            'id': g.id,
-            'full_name': g.full_name,
-            'phone': g.phone,
-            'purpose': g.purpose,
-            'visit_date': g.visit_date,
-            'is_verified': g.is_verified,
-        } for g in guests])
+class SecurityScanAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSecurity]
 
-class SecurityScanQRView(APIView):
-    permission_classes = [IsAuthenticated, IsSecurityUser]
     def post(self, request):
-        token = request.data.get('token')
-        if not token:
-            return Response({'detail': 'Token required.'}, status=400)
-        # Try guest
-        guest = Guest.objects.filter(token=token).first()
-        if guest:
-            return Response({'type': 'guest', **guest.get_full_info()})
-        # Try employee by QR (assume staff_id or similar)
-        emp = EmployeeProfile.objects.filter(id_qr_code__isnull=False).filter(staff_id=token).first()
-        if emp:
-            return Response({'type': 'employee', **emp.get_full_info()})
-        # Try device
-        device = Device.objects.filter(qr_code=token).first()
-        if device:
-            return Response({'type': 'device', 'device_name': device.device_name, 'serial_number': device.serial_number})
-        return Response({'detail': 'Not found.'}, status=404)
+        """
+        Accepts a QR/token and returns the type (employee, guest, device) and info.
+        If both person and device are provided, logs attendance (in/out).
+        """
+        qr_value = request.data.get("qr_value")
+        device_serial = request.data.get("device_serial")
+        action = request.data.get("action")  # 'in' or 'out'
+        if not qr_value:
+            return Response({"detail": "qr_value is required."}, status=400)
 
-class SecurityDeviceView(APIView):
-    permission_classes = [IsAuthenticated, IsSecurityUser]
-    def get(self, request):
-        devices = Device.objects.all()
-        return Response([{
-            'id': d.id,
-            'device_name': d.device_name,
-            'serial_number': d.serial_number,
-            'owner': str(d.owner_employee) if d.owner_employee else None,
-        } for d in devices])
-    def post(self, request):
-        # Register a new device for guest or employee
-        data = request.data
-        device_name = data.get('device_name')
-        serial_number = data.get('serial_number')
-        owner_id = data.get('owner_id')
-        owner_type = data.get('owner_type')  # 'guest' or 'employee'
-        if not device_name or not serial_number or not owner_id or not owner_type:
-            return Response({'detail': 'All fields required.'}, status=400)
-        if owner_type == 'guest':
-            owner = Guest.objects.filter(id=owner_id).first()
-        else:
-            owner = EmployeeProfile.objects.filter(id=owner_id).first()
-        if not owner:
-            return Response({'detail': 'Owner not found.'}, status=404)
-        device = Device.objects.create(device_name=device_name, serial_number=serial_number, owner_employee=owner if owner_type=='employee' else None, owner_guest=owner if owner_type=='guest' else None)
-        return Response({'detail': 'Device registered.', 'id': device.id})
+        # Try to match employee by staff_id
+        try:
+            profile = EmployeeProfile.objects.get(staff_id=qr_value)
+            person_type = 'employee'
+            person_id = profile.id
+            person_info = profile.get_full_info()
+        except EmployeeProfile.DoesNotExist:
+            profile = None
+            # Try guest by token
+            try:
+                guest = Guest.objects.get(token=qr_value)
+                person_type = 'guest'
+                person_id = guest.id
+                person_info = guest.get_full_info()
+            except Guest.DoesNotExist:
+                guest = None
+                # Try device by serial_number
+                try:
+                    device = Device.objects.get(serial_number=qr_value)
+                    return Response({
+                        "type": "device",
+                        "device": device.get_full_info()
+                    })
+                except Device.DoesNotExist:
+                    return Response({"detail": "Not found."}, status=404)
+
+        # If only person scanned, return info and expect device next
+        if not device_serial:
+            return Response({
+                "type": person_type,
+                "person": person_info
+            })
+
+        # If both person and device, log attendance
+        try:
+            device = Device.objects.get(serial_number=device_serial)
+        except Device.DoesNotExist:
+            return Response({"detail": "Device not found."}, status=404)
+
+        # Log attendance
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(profile or guest)
+        log = AccessLog.objects.create(
+            person_type=person_type,
+            person_id=person_id,
+            content_type=content_type,
+            device_serial=device.serial_number,
+            scanned_by=request.user,
+            status=action or 'in',
+        )
+        return Response({
+            "type": person_type,
+            "person": person_info,
+            "device": device.get_full_info(),
+            "log": "Attendance logged.",
+            "status": action or 'in',
+        })

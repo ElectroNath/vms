@@ -1,126 +1,193 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { QrReader } from "@blackbox-vision/react-qr-reader";
 import { API_BASE_URL } from "../api";
-import SecurityDashboardCards from "./SecurityDashboardCards";
-import SecurityDashboardTable from "./SecurityDashboardTable";
 import "../styles/SecurityDashboard.css";
-import { useNavigate } from "react-router-dom";
 
-function SecurityDashboard() {
-  const [stats, setStats] = useState({ guests_today: 0, devices: 0, logs_today: 0, verified_guests_today: 0 });
-  const [recentGuests, setRecentGuests] = useState([]);
-  const [recentLogs, setRecentLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+const SecurityDashboard = () => {
+  const [metrics, setMetrics] = useState({
+    registeredDevices: 0,
+    verifiedDevices: 0,
+    guestsToday: 0,
+    expectedGuests: 0,
+    accessLogsToday: 0,
+  });
 
-  const handleLogout = () => {
-    Cookies.remove("token");
-    Cookies.remove("user");
-    navigate("/login");
-  };
+  const [scanStep, setScanStep] = useState(1);
+  const [personInfo, setPersonInfo] = useState(null);
+  const [deviceInfo, setDeviceInfo] = useState(null);
+  const [scanError, setScanError] = useState("");
+  const [scanResult, setScanResult] = useState(null);
+  const [manualValue, setManualValue] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError("");
+    const fetchMetrics = async () => {
       try {
         const token = Cookies.get("token");
-        const today = new Date().toISOString().slice(0, 10);
-        const [dashboardRes, guestsRes, logsRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/security/dashboard/`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${API_BASE_URL}/api/security/guests/?date=${today}`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${API_BASE_URL}/api/security/access-logs/?date=${today}`, { headers: { Authorization: `Bearer ${token}` } })
-        ]);
-        setStats(dashboardRes.data);
-        setRecentGuests(guestsRes.data.slice(0, 5));
-        setRecentLogs((logsRes.data || []).slice(0, 5));
-      } catch (e) {
-        if (e.response && e.response.status === 404) {
-          setError("No data found for today. Please check if the backend security endpoints are set up correctly.");
-        } else {
-          setError("Failed to load dashboard data.");
-        }
-      } finally {
-        setLoading(false);
+        const res = await axios.get(`${API_BASE_URL}/api/security/dashboard/`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        setMetrics({
+          registeredDevices: res.data.device_count || 0,
+          verifiedDevices: res.data.verified_device_count || 0,
+          guestsToday: res.data.guests_today || 0,
+          expectedGuests: res.data.expected_guests_today || 0,
+          accessLogsToday: res.data.access_logs_today || 0,
+        });
+      } catch {
+        setMetrics({
+          registeredDevices: 0,
+          verifiedDevices: 0,
+          guestsToday: 0,
+          expectedGuests: 0,
+          accessLogsToday: 0,
+        });
       }
     };
-    fetchData();
+
+    fetchMetrics();
   }, []);
 
+  const handleScan = async (data) => {
+    if (!data) return;
+    setScanError("");
+
+    try {
+      const token = Cookies.get("token");
+
+      if (scanStep === 1) {
+        const res = await axios.post(
+          `${API_BASE_URL}/api/security/scan/`,
+          { qr_value: data },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.data.type === "device") {
+          setScanError("⚠️ Scan the person (employee/guest) first.");
+        } else {
+          setPersonInfo(res.data.person);
+          setScanStep(2);
+        }
+      } else if (scanStep === 2 && personInfo) {
+        const res = await axios.post(
+          `${API_BASE_URL}/api/security/scan/`,
+          {
+            qr_value: personInfo.staff_id || personInfo.token,
+            device_serial: data,
+            action: "in",
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setDeviceInfo(res.data.device);
+        setScanResult(res.data);
+        setScanStep(1);
+        setPersonInfo(null);
+      }
+    } catch (err) {
+      setScanError("❌ Invalid QR code or network error.");
+    }
+  };
+
+  const handleManualSubmit = async (e) => {
+    e.preventDefault();
+    setScanError("");
+
+    try {
+      const token = Cookies.get("token");
+
+      if (scanStep === 1) {
+        const res = await axios.post(
+          `${API_BASE_URL}/api/security/scan/`,
+          { qr_value: manualValue },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.data.type === "device") {
+          setScanError("⚠️ Enter the person token first.");
+        } else {
+          setPersonInfo(res.data.person);
+          setScanStep(2);
+        }
+      } else if (scanStep === 2 && personInfo) {
+        const res = await axios.post(
+          `${API_BASE_URL}/api/security/scan/`,
+          {
+            qr_value: personInfo.staff_id || personInfo.token,
+            device_serial: manualValue,
+            action: "in",
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setDeviceInfo(res.data.device);
+        setScanResult(res.data);
+        setScanStep(1);
+        setPersonInfo(null);
+      }
+
+      setManualValue("");
+    } catch {
+      setScanError("❌ Invalid or not found.");
+    }
+  };
+
   return (
-    <div className="admin-table-page security-dashboard-root">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", marginBottom: 16 }}>
-        <h2 style={{ marginBottom: 12, fontSize: 24 }}>Security Dashboard</h2>
+    <div className="security-dashboard-root">
+      <h2 className="security-dashboard-title">Security Dashboard</h2>
+
+      <div className="security-dashboard-cards">
+        <div className="security-dashboard-card card-num"> Registered Devices: {metrics.registeredDevices}</div>
+        <div className="security-dashboard-card card-num">Verified Devices: {metrics.verifiedDevices}</div>
+        <div className="security-dashboard-card card-num">Guests Today: {metrics.guestsToday}</div>
+        <div className="security-dashboard-card card-num">Expected Guests: {metrics.expectedGuests}</div>
+        <div className="security-dashboard-card card-num">Access Logs Today: {metrics.accessLogsToday}</div>
       </div>
-      {loading ? (
-        <div style={{ textAlign: "center", margin: 40 }}>Loading...</div>
-      ) : error ? (
-        <div style={{ color: "red", margin: 20 }}>{error}</div>
-      ) : (
-        <>
-          <SecurityDashboardCards stats={stats} />
-          <div className="security-dashboard-flex" style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
-            <div style={{ flex: 1, minWidth: 280, maxWidth: 600 }}>
-              <SecurityDashboardTable
-                title="Today's Guests"
-                columns={[
-                  { key: "full_name", label: "Full Name" },
-                  { key: "phone", label: "Phone" },
-                  { key: "purpose", label: "Purpose" },
-                  { key: "visit_date", label: "Visit Date" },
-                  { key: "is_verified", label: "Verified" },
-                ]}
-                data={recentGuests.map(g => ({
-                  ...g,
-                  is_verified: g.is_verified ? "Yes" : "No"
-                }))}
-              />
-            </div>
-            <div style={{ flex: 1, minWidth: 280, maxWidth: 600 }}>
-              <SecurityDashboardTable
-                title="Today's Access Logs"
-                columns={[
-                  { key: "person_type", label: "Person Type" },
-                  { key: "person_id", label: "Person ID" },
-                  { key: "device_serial", label: "Device Serial" },
-                  { key: "scanned_by", label: "Scanned By" },
-                  { key: "time_in", label: "Time In" },
-                  { key: "status", label: "Status" },
-                ]}
-                data={recentLogs}
-              />
-            </div>
+
+      <div className="security-dashboard-scan-section">
+        <h3 className="security-dashboard-scan-title">
+          Step {scanStep}: {scanStep === 1 ? "Scan Person Token" : "Scan Device QR"}
+        </h3>
+
+        <div className="security-dashboard-scan-camera ">
+  <QrReader
+    constraints={{ facingMode: 'environment' }}
+    onResult={(result, error) => {
+      if (!!result) {
+        handleScan({ text: result?.text });
+      }
+      if (!!error && error.name !== 'NotFoundError') {
+        handleScanError(error);
+      }
+    }}
+    containerStyle={{ width: '100%', maxWidth: 400 }}
+    videoStyle={{ width: '100%', height: 'auto' }}
+  />
+</div>
+
+
+        <form className="manual-input-form" onSubmit={handleManualSubmit}>
+          <input
+            className="manual-input"
+            type="text"
+            value={manualValue}
+            onChange={(e) => setManualValue(e.target.value)}
+            placeholder="Enter manually if needed"
+          />
+          <button type="submit" className="submit-btn">Submit</button>
+        </form>
+
+        {scanError && <p className="security-dashboard-scan-error">{scanError}</p>}
+        {scanResult && (
+          <div className="security-dashboard-scan-result">
+            ✅ Access logged for: {scanResult.device?.device_name || "Device"}
           </div>
-        </>
-      )}
-      <style>{`
-        @media (max-width: 900px) {
-          .security-dashboard-flex {
-            flex-direction: column !important;
-            gap: 18px !important;
-          }
-        }
-        @media (max-width: 600px) {
-          .security-dashboard-root {
-            padding: 8px !important;
-          }
-          .dashboard-card {
-            min-width: 120px !important;
-            padding: 12px 8px !important;
-          }
-          .admin-table-page h2 {
-            font-size: 1.2rem !important;
-          }
-          .login-btn {
-            font-size: 15px !important;
-            padding: 7px 10px !important;
-          }
-        }
-      `}</style>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default SecurityDashboard;
