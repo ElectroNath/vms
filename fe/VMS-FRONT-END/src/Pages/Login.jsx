@@ -22,157 +22,58 @@ const OutlookAuth = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!form.username || !form.password) {
-      setError("Please enter both username and password.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/token/`,
-        {
-          username: form.username,
-          password: form.password,
-        }
-      );
-      if (response.data && response.data.access) {
-        Cookies.set("token", response.data.access, {
-          path: "/",
-          secure: false,
-          sameSite: "Lax",
-        });
-        // Get user role: for admin, use response or fetch from /users/me/ (not employee-profiles)
-        let userRole = "";
-        let userInfo = null;
-        try {
-          const token = Cookies.get("token");
-          if (response.data.user && response.data.user.role) {
-            userRole = response.data.user.role;
-            userInfo = response.data.user;
-            Cookies.set("user", JSON.stringify(response.data.user), {
-              path: "/",
-              secure: false,
-              sameSite: "Lax",
-            });
-          } else {
-            let userRes;
-            try {
-              userRes = await axios.get(
-                `${API_BASE_URL}/api/users/me/`,
-                {
-                  headers: token ? { Authorization: `Bearer ${token}` } : {},
-                }
-              );
-              userRole = userRes.data.role;
-              userInfo = userRes.data;
-              Cookies.set("user", JSON.stringify(userRes.data), {
-                path: "/",
-                secure: false,
-                sameSite: "Lax",
-              });
-            } catch (userErr) {
-              if (form.username.toLowerCase().startsWith("admin")) {
-                userRole = "admin";
-                userInfo = userRes && userRes.data ? userRes.data : { role: "admin", username: form.username };
-              } else {
-                try {
-                  const meRes = await axios.get(
-                    `${API_BASE_URL}/api/employee-profiles/me/`,
-                    {
-                      headers: token ? { Authorization: `Bearer ${token}` } : {},
-                    }
-                  );
-                  userRole = meRes.data.role;
-                  userInfo = meRes.data;
-                  Cookies.set("user", JSON.stringify(meRes.data), {
-                    path: "/",
-                    secure: false,
-                    sameSite: "Lax",
-                  });
-                } catch {
-                  userRole = "";
-                }
-              }
-            }
-          }
-        } catch {
-          userRole = "";
-        }
-        if (userRole === "employee") {
-          try {
-            const token = Cookies.get("token");
-            const mustChangeRes = await axios.get(
-              `${API_BASE_URL}/api/employee-profiles/prompt_change/`,
-              {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-              }
-            );
-            const mustChange =
-              mustChangeRes.data.must_change_password === true ||
-              mustChangeRes.data.mustchangepassword === true ||
-              mustChangeRes.data.must_change_password === "true" ||
-              mustChangeRes.data.mustchangepassword === "true" ||
-              mustChangeRes.data.must_change_password === 1 ||
-              mustChangeRes.data.mustchangepassword === 1 ||
-              mustChangeRes.data.must_change_password === "1" ||
-              mustChangeRes.data.mustchangepassword === "1";
-            if (mustChange) {
-              setMustChangePassword(true);
-              setShowModal(true);
-            } else {
-              setMustChangePassword(false);
-              setShowModal(false);
-              if (userRole === "admin") {
-                navigate("/admin");
-              } else if (userRole === "security") {
-                navigate("/security");
-              } else if (userRole === "employee") {
-                navigate("/home");
-              } else {
-                navigate("/login");
-              }
-            }
-          } catch (err) {
-            setMustChangePassword(false);
-            setShowModal(false);
-            if (userRole === "admin") {
-              navigate("/admin");
-            } else if (userRole === "security") {
-              navigate("/security");
-            } else if (userRole === "employee") {
-              navigate("/home");
-            } else {
-              navigate("/login");
-            }
-          }
-        } else if (userRole === "admin") {
-          setMustChangePassword(false);
-          setShowModal(false);
-          navigate("/admin");
-        } else if (userRole === "security") {
-          setMustChangePassword(false);
-          setShowModal(false);
-          navigate("/security");
-        } else {
-          setMustChangePassword(false);
-          setShowModal(false);
-          navigate("/login");
-        }
-      } else {
-        setError("Login failed: No access token received.");
+  e.preventDefault();
+  setError("");
+  if (!form.username || !form.password) {
+    setError("Please enter both username and password.");
+    return;
+  }
+  setLoading(true);
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/token/`, {
+      username: form.username,
+      password: form.password,
+    });
+
+    const { access, user } = response.data;
+    if (!access || !user) throw new Error("Invalid login response.");
+
+    const { role } = user;
+
+    Cookies.set("token", access, { path: "/", secure: false, sameSite: "Lax" });
+    Cookies.set("user", JSON.stringify(user), {
+      path: "/",
+      secure: false,
+      sameSite: "Lax",
+    });
+
+    if (role === "employee") {
+      const token = Cookies.get("token");
+      const mustChangeRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/prompt_change/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const mustChange = ["true", true, 1, "1"].includes(mustChangeRes.data.must_change_password);
+      if (mustChange) {
+        setMustChangePassword(true);
+        setShowModal(true);
+        return;
       }
-    } catch (err) {
-      if (err.response && err.response.data && err.response.data.detail) {
-        setError(err.response.data.detail);
-      } else {
-        setError("An error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
+      navigate("/home");
+    } else if (role === "admin") {
+      navigate("/admin");
+    } else if (role === "security") {
+      navigate("/security");
+    } else {
+      navigate("/login");
     }
-  };
+
+  } catch (err) {
+    setError(err.response?.data?.detail || "Login failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="login-root">
