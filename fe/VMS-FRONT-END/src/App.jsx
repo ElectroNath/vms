@@ -5,10 +5,10 @@ import AppRouter from "./components/AppRouter";
 import ForgotPassword from "./Pages/ForgotPassword";
 import Messages from "./Pages/Messages";
 import Admin from "./admins/Admin";
-import SecurityRoutes from "./security/index.jsx";
 import Cookies from "js-cookie";
 import "@fontsource/montserrat";
 import "./styles/Home.css";
+import Security from "./securities/Security";
 
 // Error boundary for catching runtime errors
 class ErrorBoundary extends React.Component {
@@ -93,7 +93,7 @@ function App() {
                 path="/security/*"
                 element={
                   user.role === "security" ? (
-                    <SecurityRoutes />
+                    <Security />
                   ) : user.role === "admin" ? (
                     <Navigate to="/admin" replace />
                   ) : user.role === "employee" ? (
