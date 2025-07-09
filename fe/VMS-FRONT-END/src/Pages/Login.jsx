@@ -24,12 +24,20 @@ const OutlookAuth = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
+
   if (!form.username || !form.password) {
     setError("Please enter both username and password.");
     return;
   }
+
   setLoading(true);
+
   try {
+    // 🔁 Clear any previous session
+    Cookies.remove("token", { path: "/" });
+    Cookies.remove("user", { path: "/" });
+
+    // 🔐 Authenticate
     const response = await axios.post(`${API_BASE_URL}/api/token/`, {
       username: form.username,
       password: form.password,
@@ -40,6 +48,7 @@ const OutlookAuth = () => {
 
     const { role } = user;
 
+    // ✅ Save session cookies
     Cookies.set("token", access, { path: "/", secure: false, sameSite: "Lax" });
     Cookies.set("user", JSON.stringify(user), {
       path: "/",
@@ -47,25 +56,22 @@ const OutlookAuth = () => {
       sameSite: "Lax",
     });
 
+    // 👤 Handle employee change password prompt
     if (role === "employee") {
-      const token = Cookies.get("token");
       const mustChangeRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/prompt_change/`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${access}` },
       });
+
       const mustChange = ["true", true, 1, "1"].includes(mustChangeRes.data.must_change_password);
       if (mustChange) {
         setMustChangePassword(true);
         setShowModal(true);
         return;
       }
-      navigate("/home");
-    } else if (role === "admin") {
-      navigate("/admin");
-    } else if (role === "security") {
-      navigate("/security");
-    } else {
-      navigate("/login");
     }
+
+    // 🚀 Force reload to target dashboard (avoid stale state)
+    window.location.href = `/${role}`;
 
   } catch (err) {
     setError(err.response?.data?.detail || "Login failed.");
@@ -73,7 +79,6 @@ const OutlookAuth = () => {
     setLoading(false);
   }
 };
-
 
   return (
     <div className="login-root">
@@ -84,20 +89,24 @@ const OutlookAuth = () => {
         >
           VISITORS MANAGEMENT
           <br />
-          SYSTEM(NETCO)
+          SYSTEM (NETCO)
         </div>
       </div>
+
       <img className="login-3d-icon" src={Logo} alt="3D App Icon" />
+
       <div className="login-right">
         <img
           className="login-nnpc-logo"
           src="/src/assets/nnpc-logo.png"
           alt="NNPC Logo"
         />
-        <div className="login-nnpc-label"></div>
+
         <div className="login-form-title">Log-In To Your Account</div>
+
         <form className="login-form" onSubmit={handleSubmit}>
           {error && <div className="login-error">{error}</div>}
+
           <div className="login-input-group">
             <input
               className="login-input"
@@ -111,6 +120,7 @@ const OutlookAuth = () => {
             />
             <span className="login-input-label">Username</span>
           </div>
+
           <div className="login-input-group">
             <input
               className="login-input"
@@ -124,9 +134,11 @@ const OutlookAuth = () => {
             />
             <span className="login-input-label">Password</span>
           </div>
+
           <button className="login-btn" type="submit" disabled={loading}>
             {loading ? "Signing in..." : "Log In"}
           </button>
+
           <div className="login-form-row">
             <label className="login-remember">
               <input type="checkbox" /> Remember me
@@ -137,12 +149,13 @@ const OutlookAuth = () => {
           </div>
         </form>
       </div>
+
       <MustChangePasswordModal
         open={mustChangePassword && showModal}
         onSuccess={() => {
           setMustChangePassword(false);
           setShowModal(false);
-          navigate("/home");
+          navigate("/employee");
         }}
       />
     </div>

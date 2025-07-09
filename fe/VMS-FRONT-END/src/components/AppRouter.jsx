@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Navbar from "./Navbar";
-import Home from "../Pages/Home";
-import InviteGuest from "../Pages/InviteGuest";
+import Home from "../Employees/Home";
+import InviteGuest from "../Employees/InviteGuest";
 import Cookies from "js-cookie";
 import Permission from "./Permission";
-import NotFound from "../Pages/NotFound";
+import NotFound from "../Employees/NotFound";
 
 function AppLayout({ activeMenu, setActiveMenu, children }) {
   const location = useLocation();

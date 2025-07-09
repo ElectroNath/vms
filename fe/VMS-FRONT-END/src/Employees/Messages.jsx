@@ -15,51 +15,66 @@ function Messages() {
       setLoading(true);
       try {
         const token = Cookies.get("token");
-        const res = await axios.get(
-          `${API_BASE_URL}/api/messages/`,
-          {
-            withCredentials: true,
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
+
+        const res = await axios.get(`${API_BASE_URL}/api/messages/`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        const data = res.data?.results || [];
+
+        setMessages(data);
+
+        // Store message IDs in cookie
+        Cookies.set(
+          "viewed_admin_msgs",
+          JSON.stringify(data.map((msg) => msg.id)),
+          { expires: 7 }
         );
-        setMessages(res.data || []);
-        // Mark all as read
-        if (res.data && res.data.length > 0) {
-          localStorage.setItem(
-            "viewed_admin_msgs",
-            JSON.stringify(res.data.map(msg => msg.id))
-          );
-        }
       } catch (e) {
+        console.error("❌ Failed to fetch messages:", e);
         setMessages([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchMessages();
   }, []);
 
   return (
     <div className="messages-root">
       <div className="messages-header">
-        <button className="messages-back-btn" onClick={() => navigate(-1)} title="Back">
+        <button
+          className="messages-back-btn"
+          onClick={() => navigate(-1)}
+          title="Back"
+        >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <path d="M15 19l-7-7 7-7" stroke="#247150" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path
+              d="M15 19l-7-7 7-7"
+              stroke="#247150"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
         <h2 className="messages-title">Admin Messages</h2>
       </div>
+
       {loading ? (
         <div className="messages-loading">Loading...</div>
       ) : messages.length === 0 ? (
         <div className="messages-empty">No messages found.</div>
       ) : (
         <ul className="messages-list">
-          {messages.map(msg => (
+          {messages.map((msg) => (
             <li key={msg.id} className="messages-item">
               <div className="messages-content">{msg.content}</div>
               <div className="messages-meta">
-                {msg.sender_username} &middot; {new Date(msg.created_at).toLocaleString()}
+                {msg.sender_username} &middot;{" "}
+                {new Date(msg.created_at).toLocaleString()}
               </div>
             </li>
           ))}

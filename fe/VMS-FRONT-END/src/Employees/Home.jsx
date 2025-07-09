@@ -37,107 +37,71 @@ function Home() {
   const viewedMsgsKey = `viewed_admin_msgs_${profileId || "nouser"}`;
 
   useEffect(() => {
-    // Ensure code runs after DOM is fully loaded
-    if (document.readyState === "complete") {
-      runDashboardEffect();
-    } else {
-      const onReady = () => {
-        runDashboardEffect();
-        document.removeEventListener("DOMContentLoaded", onReady);
-      };
-      document.addEventListener("DOMContentLoaded", onReady);
+  let ignore = false;
+  setLoading(true); // Always trigger loading on mount
+
+  const fetchDashboard = async () => {
+    const token = Cookies.get("token");
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
     }
 
-    function runDashboardEffect() {
-      let ignore = false;
-      // Only show spinner if this is the first load after login/refresh
-      if (!initialLoad) return;
-      setLoading(true);
-      const fetchDashboard = async () => {
-        const token = Cookies.get("token");
-        if (!token) {
-          navigate("/login", { replace: true });
-          return;
-        }
-        try {
-          // Fetch employee profile for username, id, and role
-          const profileRes = await axios.get(
-            `${API_BASE_URL}/api/employee-profiles/me/`,
-            {
-              withCredentials: true,
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            }
-          );
-          setUsername(profileRes.data.username);
-          if (profileRes.data.id) {
-            setProfileId(profileRes.data.id);
-          }
-          if (profileRes.data.role) {
-            setRole(profileRes.data.role);
-          }
+    try {
+      const profileRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/me/`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
 
-          // Fetch dashboard data
-          const res = await axios.get(
-            `${API_BASE_URL}/api/employee-profiles/dashboard/`,
-            {
-              withCredentials: true,
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            }
-          );
-          setFullName(res.data.full_name);
-          setStaffId(res.data.staff_id);
-          setDeviceCount(res.data.device_count);
-          setGuestCount(res.data.guest_count);
-          setAttendanceIn(res.data.attendance_in);
-          setAttendanceOut(res.data.attendance_out);
-          setDevices(res.data.devices);
+      setUsername(profileRes.data.username);
+      setProfileId(profileRes.data.id);
+      setRole(profileRes.data.role);
 
-          // Fetch attendance logs
-          const attendanceRes = await axios.get(
-            `${API_BASE_URL}/api/employee-profiles/attendance/`,
-            {
-              withCredentials: true,
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            }
-          );
-          setAttendanceLogs(attendanceRes.data);
+      const dashboardRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/dashboard/`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
 
-          // Fetch messages for employees
-          const msgRes = await axios.get(
-            `${API_BASE_URL}/api/messages/`,
-            {
-              withCredentials: true,
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-            }
-          );
-          setMessages(msgRes.data || []);
-          // Track unread messages using localStorage (by message id) per user
-          const viewed = JSON.parse(localStorage.getItem(viewedMsgsKey) || "[]");
-          const unread = (msgRes.data || []).filter(msg => !viewed.includes(msg.id));
-          setUnreadCount(unread.length);
-          setNotificationCount(unread.length); // notificationCount always reflects unread messages
+      setFullName(dashboardRes.data.full_name);
+      setStaffId(dashboardRes.data.staff_id);
+      setDeviceCount(dashboardRes.data.device_count);
+      setGuestCount(dashboardRes.data.guest_count);
+      setAttendanceIn(dashboardRes.data.attendance_in);
+      setAttendanceOut(dashboardRes.data.attendance_out);
+      setDevices(dashboardRes.data.devices);
 
-          setError("");
-        } catch (err) {
-          // If unauthorized, redirect to login
-          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-            navigate("/login", { replace: true });
-          } else {
-            setError("Unable to fetch dashboard. Please log in again.");
-          }
-        } finally {
-          if (!ignore) setLoading(false);
-          setInitialLoad(false);
-        }
-      };
+      const attendanceRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/attendance/`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      setAttendanceLogs(attendanceRes.data);
 
-      fetchDashboard();
-      return () => { ignore = true; };
+      const msgRes = await axios.get(`${API_BASE_URL}/api/messages/`, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+
+      setMessages(msgRes.data || []);
+      const viewed = JSON.parse(localStorage.getItem(`viewed_admin_msgs_${profileRes.data.id}`) || "[]");
+      const unread = (msgRes.data || []).filter((msg) => !viewed.includes(msg.id));
+      setUnreadCount(unread.length);
+      setNotificationCount(unread.length);
+
+    } catch (err) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        navigate("/login", { replace: true });
+      } else {
+        setError("Unable to fetch dashboard. Please log in again.");
+      }
+    } finally {
+      if (!ignore) setLoading(false);
     }
+  };
 
-    // Only run on mount (not on every navigation to Home)
-    // eslint-disable-next-line
-  }, [navigate, profileId]);
+  fetchDashboard();
+  return () => { ignore = true; };
+}, [navigate]);
+
 
   // Handler to open modal and fetch QR code using staffId dynamically in the path
   const handleShowQrModal = async () => {
@@ -186,38 +150,38 @@ function Home() {
 
   // Fetch guest and device records when modals are opened
   const handleShowGuestModal = async () => {
-    setShowGuestModal(true);
-    try {
-      const token = Cookies.get("token");
-      const res = await axios.get(
-        `${API_BASE_URL}/api/guests/`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          withCredentials: true,
-        }
-      );
-      setGuestList(res.data || []);
-    } catch (e) {
-      setGuestList([]);
-    }
-  };
+  setShowGuestModal(true);
+  try {
+    const token = Cookies.get("token");
+    const res = await axios.get(`${API_BASE_URL}/api/guests/`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      withCredentials: true,
+    });
 
-  const handleShowDeviceModal = async () => {
-    setShowDeviceModal(true);
-    try {
-      const token = Cookies.get("token");
-      const res = await axios.get(
-        `${API_BASE_URL}/api/devices/`,
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          withCredentials: true,
-        }
-      );
-      setDeviceList(res.data || []);
-    } catch (e) {
-      setDeviceList([]);
-    }
-  };
+    setGuestList(res.data?.results || []);  // 👈 correct this line
+  } catch (e) {
+    console.error("Failed to fetch guests:", e);
+    setGuestList([]);
+  }
+};
+
+
+ const handleShowDeviceModal = async () => {
+  setShowDeviceModal(true);
+  try {
+    const token = Cookies.get("token");
+    const res = await axios.get(`${API_BASE_URL}/api/devices/`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      withCredentials: true,
+    });
+
+    setDeviceList(res.data?.results || []); // ✅ use paginated `results` array
+  } catch (e) {
+    console.error("Failed to fetch devices:", e);
+    setDeviceList([]);
+  }
+};
+
 
   // Handler for notification bell click
   const handleNotificationClick = () => {

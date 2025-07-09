@@ -6,45 +6,24 @@ import { API_BASE_URL } from "../api";
 import Logout from "./Logout";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const allMenuItems = [
-  { label: "Home", roles: ["admin", "employee", "security"] },
-  { label: "Register Staff", roles: ["admin"] },
-  { label: "Invite Guest", roles: ["employee"] },
-  { label: "Register Devices", roles: ["security"] },
+const menu = [
+  { label: "Dashboard", path: "/employee", roles: ["employee"] },
+  { label: "Invite Guest", path: "/employee/inviteguest", roles: ["employee"] },
 ];
 
-function Navbar({ activeIndex, onMenuClick }) {
+function Navbar() {
   const [username, setUsername] = useState("");
   const [profileId, setProfileId] = useState(null);
-  const [role, setRole] = useState(null); // default to null for first render
   const [error, setError] = useState("");
   const [profilePicUrl, setProfilePicUrl] = useState(null);
   const [uploadingPic, setUploadingPic] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Always determine active menu index from current path
-  const menuRoutes = [
-    "/home",
-    "/register-staff",
-    "/invite-guest",
-    "/register-devices"
-  ];
-  const getMenuIndexFromPath = (pathname) => {
-    // Use exact match for home, and startsWith for others
-    if (pathname === "/home") return 0;
-    if (pathname.startsWith("/register-staff")) return 1;
-    if (pathname.startsWith("/invite-guest")) return 2;
-    if (pathname.startsWith("/register-devices")) return 3;
-    return 0;
-  };
-  const [currentIndex, setCurrentIndex] = useState(getMenuIndexFromPath(location.pathname));
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const token = Cookies.get("token");
-        // Get user info from cookie first
         let user = null;
         try {
           const userCookie = Cookies.get("user");
@@ -52,24 +31,18 @@ function Navbar({ activeIndex, onMenuClick }) {
         } catch {
           user = null;
         }
-        // If admin, do not show this navbar (return early)
-        if (user && user.role === "admin") {
-          return;
-        }
-        // Employee or other roles
-        const profileRes = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/me/`,
-          {
-            withCredentials: true,
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          }
-        );
-        setUsername(profileRes.data.username);
-        if (profileRes.data.id) {
-          setProfileId(profileRes.data.id);
-        }
-        setProfilePicUrl(profileRes.data.profile_picture_url || null);
-        setRole(profileRes.data.role || null);
+
+        // If admin, don't show navbar
+        if (user && user.role === "admin") return;
+
+        const res = await axios.get(`${API_BASE_URL}/api/employee-profiles/me/`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        setUsername(res.data.username || "");
+        setProfileId(res.data.id || null);
+        setProfilePicUrl(res.data.profile_picture_url || null);
         setError("");
       } catch (err) {
         setError("Unable to fetch profile.");
@@ -78,42 +51,15 @@ function Navbar({ activeIndex, onMenuClick }) {
     fetchProfile();
   }, []);
 
-  useEffect(() => {
-    setCurrentIndex(getMenuIndexFromPath(location.pathname));
-    // eslint-disable-next-line
-  }, [location.pathname]);
-
-  // Filter menu items based on user role (don't render until role is loaded)
-  const menuItems =
-    role === null
-      ? []
-      : allMenuItems
-          .filter(item => String(role).toLowerCase() === "employee"
-            ? item.roles.includes("employee")
-            : item.roles.includes(role))
-          .map(item => item.label);
-
-  // Handle profile picture upload
   const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploadingPic(true);
     try {
       const token = Cookies.get("token");
-      let user = null;
-      try {
-        const userCookie = Cookies.get("user");
-        if (userCookie) user = JSON.parse(userCookie);
-      } catch {
-        user = null;
-      }
-      // Do nothing if admin (shouldn't even show this navbar)
-      if (user && user.role === "admin") {
-        setUploadingPic(false);
-        return;
-      }
       const formData = new FormData();
       formData.append("profile_picture", file);
+
       const res = await axios.post(
         `${API_BASE_URL}/api/employee-profiles/me/`,
         formData,
@@ -134,7 +80,7 @@ function Navbar({ activeIndex, onMenuClick }) {
     }
   };
 
-  // If user is admin, do not render the navbar at all
+  // Do not render for admin
   let user = null;
   try {
     const userCookie = Cookies.get("user");
@@ -172,7 +118,6 @@ function Navbar({ activeIndex, onMenuClick }) {
               e.target.src = "https://randomuser.me/api/portraits/men/1.jpg";
             }}
           />
-          {/* Pen icon overlay */}
           <span
             style={{
               position: "absolute",
@@ -189,8 +134,8 @@ function Navbar({ activeIndex, onMenuClick }) {
             }}
           >
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <rect width="20" height="20" fill="none"/>
-              <path d="M14.7 3.29a1 1 0 0 1 1.41 0l.6.6a1 1 0 0 1 0 1.41l-8.48 8.48-2.12.71.71-2.12 8.48-8.48zM3 17h14" stroke="#247150" strokeWidth="1.5" strokeLinecap="round"/>
+              <rect width="20" height="20" fill="none" />
+              <path d="M14.7 3.29a1 1 0 0 1 1.41 0l.6.6a1 1 0 0 1 0 1.41l-8.48 8.48-2.12.71.71-2.12 8.48-8.48zM3 17h14" stroke="#247150" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </span>
           <input
@@ -207,6 +152,7 @@ function Navbar({ activeIndex, onMenuClick }) {
           {error && <p className="home-error">{error}</p>}
         </div>
       </div>
+
       {profileId && (
         <div style={{ margin: "20px auto", textAlign: "center" }}>
           <div style={{ fontSize: 12, color: "#fff" }}>
@@ -214,49 +160,35 @@ function Navbar({ activeIndex, onMenuClick }) {
           </div>
         </div>
       )}
+
       <div className="home-menu">
-        {/* Only render menu when role is loaded */}
-        {role === null && !error ? (
-          <div style={{ color: "#fff", padding: "16px" }}>Loading menu...</div>
-        ) : error ? (
+        {error ? (
           <div style={{ color: "#ff4d4f", padding: "16px" }}>
             Error loading menu. {error}
           </div>
         ) : (
           <>
-            {menuItems.length === 0 ? (
-              <div style={{ color: "#ff9800", padding: "16px" }}>
-                No menu available for your role.
+            {menu.map((item, idx) => (
+              <div
+                key={item.label}
+                className={
+                  "home-menu-item" +
+                  (location.pathname === item.path ? " home-menu-item-active" : "")
+                }
+                onClick={() => navigate(item.path)}
+              >
+                {item.label}
               </div>
-            ) : (
-              menuItems.map((item, idx) => {
-                // Find the route for this menu item
-                const routeIdx = allMenuItems.findIndex(m => m.label === item);
-                const route = menuRoutes[routeIdx];
-                return (
-                  <div
-                    key={item}
-                    className={
-                      "home-menu-item" +
-                      (getMenuIndexFromPath(location.pathname) === routeIdx ? " home-menu-item-active" : "")
-                    }
-                    onClick={() => {
-                      navigate(route);
-                    }}
-                  >
-                    {item}
-                  </div>
-                );
-              })
-            )}
+            ))}
           </>
         )}
       </div>
+
       <div
         className="navbar-logout-btn-wrapper"
         style={{
           position: "absolute",
-          bottom: 80, // push up from the bottom
+          bottom: 80,
           left: 0,
           width: "100%",
           display: "flex",
@@ -293,9 +225,9 @@ function Navbar({ activeIndex, onMenuClick }) {
             strokeLinejoin="round"
             style={{ marginRight: 6 }}
           >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
           Logout
         </Logout>
