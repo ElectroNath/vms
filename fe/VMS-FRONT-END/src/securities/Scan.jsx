@@ -1,56 +1,74 @@
+// src/security/SecurityScan.jsx
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { API_BASE_URL } from "../api";
 import { QrReader } from "@blackbox-vision/react-qr-reader";
+import { API_BASE_URL } from "../api";
 import "./security.css";
 
 function SecurityScan() {
-  const [token, setToken] = useState("");
+  const [qrValue, setQrValue] = useState("");
+  const [deviceSerial, setDeviceSerial] = useState("");
+  const [action, setAction] = useState("in");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const scanToken = async (scannedToken) => {
+  const scanToken = async (value) => {
     setError("");
     setResult(null);
+    setLoading(true);
+
     try {
       const tokenVal = Cookies.get("token");
+      const payload = {
+        qr_value: value,
+        device_serial: deviceSerial || null,
+        action,
+      };
       const res = await axios.post(
         `${API_BASE_URL}/api/security/access-logs/scan-qr/`,
-        { token: scannedToken },
-        { headers: { Authorization: `Bearer ${tokenVal}` } }
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${tokenVal}`,
+          },
+        }
       );
       setResult(res.data);
     } catch (err) {
-      setError("Guest not found or invalid token.");
+      setError(err?.response?.data?.detail || "Scan failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleManualSubmit = async (e) => {
     e.preventDefault();
-    if (token) {
-      await scanToken(token);
+    if (qrValue) {
+      await scanToken(qrValue);
     }
   };
 
   useEffect(() => {
-  navigator.mediaDevices?.getUserMedia({ video: true }).catch(() => {
-    alert("Camera access denied. Please allow camera permissions.");
-  });
-}, []);
+    navigator.mediaDevices
+      ?.getUserMedia({ video: true })
+      .catch(() => alert("Camera access denied. Please allow camera permissions."));
+  }, []);
 
   return (
     <div className="security-scan-page">
-      <h2>Scan Guest QR/Token</h2>
+      <h2>Security QR Scan</h2>
 
       {/* QR Scanner */}
       <div className="security-qr-reader">
         <QrReader
           constraints={{ facingMode: "environment" }}
           scanDelay={500}
-          onResult={(res, err) => {
-            if (res?.text && res.text !== token) {
-              setToken(res.text);
+          onResult={(res) => {
+            if (res?.text && res.text !== qrValue) {
+              setQrValue(res.text);
               scanToken(res.text);
             }
           }}
@@ -66,26 +84,50 @@ function SecurityScan() {
         />
         <div className="scanner-line"></div>
       </div>
-      <br></br>
+
       {/* Manual Input */}
       <form onSubmit={handleManualSubmit} className="security-scan-form">
         <input
-          className="security-scan-input"
-          placeholder="Or enter token manually"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
+          type="text"
+          placeholder="QR/Token manually"
+          value={qrValue}
+          onChange={(e) => setQrValue(e.target.value)}
         />
-        <button type="submit" className="security-scan-btn">
-          Submit
+        <input
+          type="text"
+          placeholder="Device Serial (optional)"
+          value={deviceSerial}
+          onChange={(e) => setDeviceSerial(e.target.value)}
+        />
+        <select value={action} onChange={(e) => setAction(e.target.value)}>
+          <option value="in">Check-In</option>
+          <option value="out">Check-Out</option>
+        </select>
+        <button type="submit" disabled={loading}>
+          {loading ? "Submitting..." : "Submit"}
         </button>
       </form>
 
-      {/* Result / Error */}
+      {/* Error / Success */}
       {error && <div className="security-scan-error">{error}</div>}
       {result && (
         <div className="security-scan-result">
-          <h4>Guest Info</h4>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
+          <h4>{result.type === "device" ? "Device Info" : "Person Info"}</h4>
+          <p><strong>Type:</strong> {result.type}</p>
+          {result.person && (
+            <>
+              <p><strong>Name:</strong> {result.person.full_name || "N/A"}</p>
+              <p><strong>Email:</strong> {result.person.email || "N/A"}</p>
+            </>
+          )}
+          {result.device && (
+            <>
+              <p><strong>Device:</strong> {result.device.name}</p>
+              <p><strong>Serial:</strong> {result.device.serial_number}</p>
+            </>
+          )}
+          {result.status && <p><strong>Status:</strong> {result.status}</p>}
+          {result.log && <p><strong>Log:</strong> {result.log}</p>}
         </div>
       )}
     </div>
