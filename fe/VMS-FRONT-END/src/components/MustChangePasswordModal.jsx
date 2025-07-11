@@ -3,13 +3,14 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { API_BASE_URL } from "../api";
 import "../styles/change_pass.css"; // Ensure you have the correct styles
+import Modal from "./Modals";
 
 function MustChangePasswordModal({ open, onSuccess }) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState("");
   const [skip, setSkip] = useState(false);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ function MustChangePasswordModal({ open, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess(false);
+    setSuccess("");
     if (!newPassword || !confirmPassword) {
       setError("Both fields are required.");
       return;
@@ -53,9 +54,9 @@ function MustChangePasswordModal({ open, onSuccess }) {
       setError("");
       setNewPassword("");
       setConfirmPassword("");
-      setSuccess(true);
+      setSuccess("Password changed successfully!");
       setTimeout(() => {
-        setSuccess(false);
+        setSuccess("");
         if (onSuccess) onSuccess();
       }, 1200);
     } catch (err) {
@@ -95,8 +96,16 @@ function MustChangePasswordModal({ open, onSuccess }) {
           />
            <span className="login-input-label">Confirm Password</span>
         </div>
-          {error && <div style={{ color: "#c00", marginBottom: 10 }}>{error}</div>}
-          {success && <div style={{ color: "#247150", marginBottom: 10 }}>Password changed successfully!</div>}
+           {(error || success) && (
+                      <Modal
+                        message={error || success}
+                        isSuccess={!!success}
+                        onClose={() => {
+                          setError("");
+                          setSuccess("");
+                        }}
+                      />
+                    )}
           <button
             type="submit"
             className="qr-modal-close-btn"

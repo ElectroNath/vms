@@ -3,6 +3,7 @@ import axios from "axios";
 import "../styles/Form.css";
 import { API_BASE_URL } from "../api";
 import Cookies from "js-cookie";
+import Modal from "../components/Modals";
 
 function InviteGuest() {
   const [form, setForm] = useState({
@@ -157,8 +158,16 @@ function InviteGuest() {
           Invite Guest
         </div>
         <form className="login-form" onSubmit={handleSubmit}>
-          {error && <div className="login-error">{error}</div>}
-          {success && <div className="login-success">{success}</div>}
+          {(error || success) && (
+            <Modal
+              message={error || success}
+              isSuccess={!!success}
+              onClose={() => {
+                setError("");
+                setSuccess("");
+              }}
+            />
+          )}
           <div className="login-input-group">
             <input
               className="login-input"
