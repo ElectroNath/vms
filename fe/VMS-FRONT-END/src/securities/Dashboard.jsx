@@ -42,11 +42,11 @@ function SecurityDashboard() {
         <div className="admin-dashboard-cards">
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Total Devices</div>
-            <div className="admin-dashboard-card-value">{stats.devices_count}</div>
+            <div className="admin-dashboard-card-value">{stats.device_count}</div>
           </div>
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Verified Devices</div>
-            <div className="admin-dashboard-card-value">{stats.verified_devices_count}</div>
+            <div className="admin-dashboard-card-value">{stats.verified_device_count}</div>
           </div>
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Guests Today</div>
