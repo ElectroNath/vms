@@ -42,11 +42,11 @@ function SecurityDashboard() {
         <div className="admin-dashboard-cards">
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Total Devices</div>
-            <div className="admin-dashboard-card-value">{stats.devices}</div>
+            <div className="admin-dashboard-card-value">{stats.device_count}</div>
           </div>
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Verified Devices</div>
-            <div className="admin-dashboard-card-value">{stats.verified_devices}</div>
+            <div className="admin-dashboard-card-value">{stats.verified_device_count}</div>
           </div>
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Guests Today</div>
@@ -54,11 +54,11 @@ function SecurityDashboard() {
           </div>
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Expected Guests</div>
-            <div className="admin-dashboard-card-value">{stats.expected_guests}</div>
+            <div className="admin-dashboard-card-value">{stats.expected_guests_today}</div>
           </div>
           <div className="admin-dashboard-card">
             <div className="admin-dashboard-card-title">Access Logs</div>
-            <div className="admin-dashboard-card-value">{stats.access_logs}</div>
+            <div className="admin-dashboard-card-value">{stats.access_logs_today}</div>
           </div>
         </div>
       )}

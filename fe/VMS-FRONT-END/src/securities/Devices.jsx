@@ -32,8 +32,9 @@ function SecurityDevices() {
       const res = await axios.get(`${API_BASE_URL}/api/security/devices/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setDevices(res.data);
-    } catch {
+      setDevices(Array.isArray(res.data) ? res.data : res.data.results || []);
+    } catch (err) {
+      console.error("Device fetch error:", err);
       setDevices([]);
     }
   };
@@ -41,22 +42,23 @@ function SecurityDevices() {
   const fetchEmployeeList = async () => {
     try {
       const token = Cookies.get("token");
-      const res = await axios.get(`${API_BASE_URL}/api/admin/employees/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/security/employees/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setEmployeeList(res.data);
-    } catch {
-      setEmployeeList([]);
+      setEmployeeList(Array.isArray(res.data) ? res.data : res.data.results || []);
+    } catch (err) {
+      console.warn("Cannot fetch employee list: forbidden for this role.");
+      setEmployeeList([]); // fallback to empty list
     }
   };
 
   const fetchGuestList = async () => {
     try {
       const token = Cookies.get("token");
-      const res = await axios.get(`${API_BASE_URL}/api/admin/guests/`, {
+      const res = await axios.get(`${API_BASE_URL}/api/security/guests/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setGuestList(res.data);
+      setGuestList(Array.isArray(res.data) ? res.data : res.data.results || []);
     } catch {
       setGuestList([]);
     }
@@ -91,6 +93,7 @@ function SecurityDevices() {
       <button onClick={() => setShowModal(true)} className="adminuser-add-btn">
         Register Device
       </button>
+
       {showModal && (
         <div className="qr-modal-overlay adminuser-modal-overlay">
           <div className="qr-modal-content adminuser-modal-content">
@@ -173,6 +176,7 @@ function SecurityDevices() {
           </div>
         </div>
       )}
+
       <table className="admin-table">
         <thead>
           <tr>
@@ -184,7 +188,7 @@ function SecurityDevices() {
           </tr>
         </thead>
         <tbody>
-          {devices.map(d => (
+          {Array.isArray(devices) && devices.map(d => (
             <tr key={d.id}>
               <td>{d.device_name}</td>
               <td>{d.serial_number}</td>

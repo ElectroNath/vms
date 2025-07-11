@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { API_BASE_URL } from "../api";
-import { QrReader } from "react-qr-reader";
+import { QrReader } from "@blackbox-vision/react-qr-reader";
 import "./security.css";
 
 function SecurityScan() {
@@ -33,6 +33,12 @@ function SecurityScan() {
     }
   };
 
+  useEffect(() => {
+  navigator.mediaDevices?.getUserMedia({ video: true }).catch(() => {
+    alert("Camera access denied. Please allow camera permissions.");
+  });
+}, []);
+
   return (
     <div className="security-scan-page">
       <h2>Scan Guest QR/Token</h2>
@@ -41,16 +47,26 @@ function SecurityScan() {
       <div className="security-qr-reader">
         <QrReader
           constraints={{ facingMode: "environment" }}
-          onResult={(result, error) => {
-            if (result?.text && result.text !== token) {
-              setToken(result.text);
-              scanToken(result.text);
+          scanDelay={500}
+          onResult={(res, err) => {
+            if (res?.text && res.text !== token) {
+              setToken(res.text);
+              scanToken(res.text);
             }
           }}
-          style={{ width: "100%", maxWidth: 400, height: "300px" }}
+          videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
+          containerStyle={{
+            width: "100%",
+            maxWidth: "600px",
+            height: "400px",
+            border: "2px solid #1abc9c",
+            borderRadius: "10px",
+            overflow: "hidden",
+          }}
         />
+        <div className="scanner-line"></div>
       </div>
-
+      <br></br>
       {/* Manual Input */}
       <form onSubmit={handleManualSubmit} className="security-scan-form">
         <input
