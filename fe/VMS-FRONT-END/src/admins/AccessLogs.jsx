@@ -17,19 +17,26 @@ function AdminAccessLogs() {
   });
 
   useEffect(() => {
-    async function fetchLogs() {
-      try {
-        const token = Cookies.get("token");
-        const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setLogs(res.data);
-      } catch {
-        setLogs([]);
-      }
+  async function fetchLogs() {
+    try {
+      const token = Cookies.get("token");
+      const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const logsData = Array.isArray(res.data)
+        ? res.data
+        : res.data.logs || [];
+
+      setLogs(logsData);
+    } catch (err) {
+      console.error("Failed to fetch logs:", err);
+      setLogs([]);
     }
-    fetchLogs();
-  }, []);
+  }
+
+  fetchLogs();
+}, []);
 
   // Filtered logs
   const filteredLogs = logs.filter(l =>
