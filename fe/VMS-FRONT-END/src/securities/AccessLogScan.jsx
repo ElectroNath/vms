@@ -24,7 +24,10 @@ function SecurityAccessLog() {
         setLogs(Array.isArray(res.data) ? res.data : []);
         setLoading(false);
       } catch (err) {
-        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+        if (
+          err.response &&
+          (err.response.status === 401 || err.response.status === 403)
+        ) {
           setError("Authentication failed. Please log in again.");
         } else {
           setError("Failed to fetch logs");
@@ -38,39 +41,30 @@ function SecurityAccessLog() {
   }, []);
 
   return (
-    <div className="attendance-log-page">
-      <h2>Recent Access Logs</h2>
-      {loading && <p>Loading logs...</p>}
-      {error && <p className="security-scan-error">{error}</p>}
-      {!loading && !error && logs.length === 0 && <p>No logs found.</p>}
-      {/* Debug: Show raw logs data */}
-      {!loading && !error && logs.length > 0 && (
-        <pre style={{ background: "#f8f8f8", padding: "10px", borderRadius: "5px", fontSize: "0.95em" }}>
-          {JSON.stringify(logs, null, 2)}
-        </pre>
+    <div className="admin-table-page">
+      <h2>Scan Guest QR/Token</h2>
+      <form onSubmit={handleScan} style={{ marginBottom: 20 }}>
+        <input
+          className="login-input"
+          style={{ width: 220 }}
+          placeholder="Enter guest token"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          required
+        />
+        <button type="submit" className="login-btn" style={{ marginLeft: 10 }}>
+          Scan
+        </button>
+      </form>
+      {error && <div style={{ color: "red" }}>{error}</div>}
+      {result && (
+        <div style={{ marginTop: 20 }}>
+          <h4>Guest Info</h4>
+          <pre style={{ background: "#f7f7f7", padding: 10 }}>
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        </div>
       )}
-      <table className="log-table">
-        <thead>
-          <tr>
-            <th>Person</th>
-            <th>Type</th>
-            <th>Device</th>
-            <th>Action</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log, idx) => (
-            <tr key={idx}>
-              <td>{log.person_name || "N/A"}</td>
-              <td>{log.person_type}</td>
-              <td>{log.device_serial}</td>
-              <td>{log.status}</td>
-              <td>{new Date(log.timestamp).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }

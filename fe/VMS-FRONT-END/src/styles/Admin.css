@@ -9,7 +9,6 @@
   flex-direction: row;
   overflow-x: auto; /* ✅ allow scroll if needed */
   overflow-y: auto;
-
 }
 
 .admin-navbar {
@@ -134,7 +133,6 @@
   box-sizing: border-box;
 }
 
-
 .admin-dashboard {
   margin-bottom: 40px;
 }
@@ -199,109 +197,4 @@
 
 .admin-table tr:last-child td {
   border-bottom: none;
-}
-
-
-
-
-/* 🔽 Responsive Design Breakpoints */
-
-@media (min-width: 1440px) {
-  .admin-main {
-    padding-left: 6%;
-    padding-right: 6%;
-    max-width: 1400px;
-  }
-
-  .admin-dashboard-card {
-    flex: 1 1 20%;
-    max-width: 300px;
-  }
-
-  .admin-dashboard-card-value {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 1024px) {
-  .admin-navbar {
-    width: 180px;
-  }
-
-  .admin-main {
-    padding: 30px 4%;
-  }
-
-  .admin-dashboard-card {
-    flex: 1 1 45%;
-  }
-}
-
-@media (max-width: 768px) {
-  .admin-root {
-    flex-direction: column;
-  }
-
-  .admin-navbar {
-    width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 10px 16px;
-    height: auto;
-    min-height: unset;
-  }
-
-  .admin-navbar-title {
-    display: none;
-  }
-
-  .admin-navbar-menu {
-    flex-direction: row;
-    gap: 16px;
-    margin-top: 0;
-  }
-
-  .admin-navbar-link {
-    padding: 12px 16px;
-    font-size: 1rem;
-    border-left: none;
-    border-bottom: 2px solid transparent;
-  }
-
-  .admin-navbar-link-active {
-    border-left: none;
-    border-bottom: 2px solid #fff;
-  }
-
-  .admin-main {
-    padding: 24px 5%;
-  }
-
-  .admin-dashboard-card {
-    flex: 1 1 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .admin-main {
-    padding: 16px 3%;
-  }
-
-  .admin-dashboard-card {
-    padding: 24px 16px;
-  }
-
-  .admin-dashboard-card-title {
-    font-size: 1rem;
-  }
-
-  .admin-dashboard-card-value {
-    font-size: 1.8rem;
-  }
-
-  .admin-table th,
-  .admin-table td {
-    padding: 8px 10px;
-    font-size: 0.85rem;
-  }
 }
