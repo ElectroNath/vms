@@ -28,7 +28,7 @@ function SecurityScan() {
         action,
       };
       const res = await axios.post(
-        `${API_BASE_URL}/api/security/access-logs/scan-qr/`,
+        `${API_BASE_URL}/api/security/scan/`,
         payload,
         {
           headers: {
@@ -75,7 +75,7 @@ function SecurityScan() {
           videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
           containerStyle={{
             width: "100%",
-            maxWidth: "600px",
+            maxWidth: "750px",
             height: "400px",
             border: "2px solid #1abc9c",
             borderRadius: "10px",

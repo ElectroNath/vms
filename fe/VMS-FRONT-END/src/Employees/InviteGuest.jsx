@@ -145,7 +145,6 @@ function InviteGuest() {
       justifyContent: "center", 
       alignItems: "center", 
       position: "relative", 
-      overflowY: "auto",
       margin:  "auto",
       padding: 0,}}>
       <div className="form-container" style={{ minWidth: 700, maxWidth: 1100, height: "100vh" }}>

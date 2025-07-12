@@ -20,10 +20,13 @@ function SecurityAccessLog() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setLogs(res.data);
+        // Ensure logs is always an array
+        setLogs(Array.isArray(res.data) ? res.data : []);
+        setLoading(false);
       } catch (err) {
-        setError("Failed to fetch logs.");
-      } finally {
+        console.error("Error fetching logs:", err);
+        setLogs([]);
+        setError("Failed to fetch logs");
         setLoading(false);
       }
     };
