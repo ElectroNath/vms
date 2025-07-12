@@ -20,7 +20,7 @@ function AdminAccessLogs() {
     async function fetchLogs() {
       try {
         const token = Cookies.get("token");
-        const res = await axios.get(`${API_BASE_URL}/api/admin/access-logs/`, {
+        const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLogs(res.data);
