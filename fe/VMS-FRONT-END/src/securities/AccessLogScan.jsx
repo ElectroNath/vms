@@ -15,7 +15,7 @@ function SecurityAccessLog() {
     const fetchLogs = async () => {
       try {
         const token = Cookies.get("token");
-        const res = await axios.get(`${API_BASE_URL}/api/security/access-logs/`, {
+        const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -24,9 +24,12 @@ function SecurityAccessLog() {
         setLogs(Array.isArray(res.data) ? res.data : []);
         setLoading(false);
       } catch (err) {
-        console.error("Error fetching logs:", err);
+        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+          setError("Authentication failed. Please log in again.");
+        } else {
+          setError("Failed to fetch logs");
+        }
         setLogs([]);
-        setError("Failed to fetch logs");
         setLoading(false);
       }
     };
@@ -40,6 +43,12 @@ function SecurityAccessLog() {
       {loading && <p>Loading logs...</p>}
       {error && <p className="security-scan-error">{error}</p>}
       {!loading && !error && logs.length === 0 && <p>No logs found.</p>}
+      {/* Debug: Show raw logs data */}
+      {!loading && !error && logs.length > 0 && (
+        <pre style={{ background: "#f8f8f8", padding: "10px", borderRadius: "5px", fontSize: "0.95em" }}>
+          {JSON.stringify(logs, null, 2)}
+        </pre>
+      )}
       <table className="log-table">
         <thead>
           <tr>

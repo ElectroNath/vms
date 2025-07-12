@@ -6,16 +6,33 @@ import Cookies from "js-cookie";
 import { QrReader } from "@blackbox-vision/react-qr-reader";
 import { API_BASE_URL } from "../api";
 import "./security.css";
+import Modal from "../components/Modals";
+
 
 function SecurityScan() {
+  const [phase, setPhase] = useState(1); // 1: scan person, 2: scan device
   const [qrValue, setQrValue] = useState("");
   const [deviceSerial, setDeviceSerial] = useState("");
   const [action, setAction] = useState("in");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modalMsg, setModalMsg] = useState("");
+  const [modalSuccess, setModalSuccess] = useState(false);
 
-  const scanToken = async (value) => {
+  // Handles scan for both phases
+  const handleScan = (value) => {
+    if (phase === 1) {
+      setQrValue(value);
+      setPhase(2);
+    } else if (phase === 2) {
+      setDeviceSerial(value);
+    }
+  };
+
+  // Submit after both scans (or skip device)
+  const handleSubmit = async (e) => {
+    e && e.preventDefault();
     setError("");
     setResult(null);
     setLoading(true);
@@ -23,7 +40,7 @@ function SecurityScan() {
     try {
       const tokenVal = Cookies.get("token");
       const payload = {
-        qr_value: value,
+        qr_value: qrValue,
         device_serial: deviceSerial || null,
         action,
       };
@@ -37,19 +54,29 @@ function SecurityScan() {
         }
       );
       setResult(res.data);
+      setModalMsg(res.data.log || "Scan successful!");
+      setModalSuccess(true);
+      setPhase(1);
+      setQrValue("");
+      setDeviceSerial("");
     } catch (err) {
       setError(err?.response?.data?.detail || "Scan failed.");
+      setModalMsg(err?.response?.data?.detail || "Scan failed.");
+      setModalSuccess(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleManualSubmit = async (e) => {
-    e.preventDefault();
-    if (qrValue) {
-      await scanToken(qrValue);
+  // Ensure modalMsg is set after submit
+  useEffect(() => {
+    if (result && result.log) {
+      setModalMsg(result.log);
     }
-  };
+    if (error) {
+      setModalMsg(error);
+    }
+  }, [result, error]);
 
   useEffect(() => {
     navigator.mediaDevices
@@ -60,52 +87,113 @@ function SecurityScan() {
   return (
     <div className="security-scan-page">
       <h2>Security QR Scan</h2>
-
-      {/* QR Scanner */}
-      <div className="security-qr-reader">
-        <QrReader
-          constraints={{ facingMode: "environment" }}
-          scanDelay={500}
-          onResult={(res) => {
-            if (res?.text && res.text !== qrValue) {
-              setQrValue(res.text);
-              scanToken(res.text);
-            }
-          }}
-          videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
-          containerStyle={{
-            width: "100%",
-            maxWidth: "750px",
-            height: "400px",
-            border: "2px solid #1abc9c",
-            borderRadius: "10px",
-            overflow: "hidden",
-          }}
+      {/* Modal for success/error */}
+      {modalMsg && (
+        <Modal
+          message={modalMsg}
+          onClose={() => setModalMsg("")}
+          isSuccess={modalSuccess}
         />
-        <div className="scanner-line"></div>
+      )}
+
+      {/* QR Scanner Phases */}
+      <div className="security-qr-reader">
+        {phase === 1 ? (
+          <>
+            <p>Step 1: Scan Person QR/Token</p>
+            <QrReader
+              constraints={{ facingMode: "environment" }}
+              scanDelay={500}
+              onResult={(res) => {
+                if (res?.text && res.text !== qrValue) {
+                  handleScan(res.text);
+                }
+              }}
+              videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
+              containerStyle={{
+                width: "100%",
+                maxWidth: "750px",
+                height: "400px",
+                border: "2px solid #1abc9c",
+                borderRadius: "10px",
+                overflow: "hidden",
+              }}
+            />
+            <div className="scanner-line"></div>
+          </>
+        ) : (
+          <>
+            <p>Step 2: Scan Device QR (optional)</p>
+            <QrReader
+              constraints={{ facingMode: "environment" }}
+              scanDelay={500}
+              onResult={(res) => {
+                if (res?.text && res.text !== deviceSerial) {
+                  handleScan(res.text);
+                }
+              }}
+              videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
+              containerStyle={{
+                width: "100%",
+                maxWidth: "750px",
+                height: "400px",
+                border: "2px solid #1abc9c",
+                borderRadius: "10px",
+                overflow: "hidden",
+              }}
+            />
+            <div className="scanner-line"></div>
+            <button
+              style={{ marginTop: "20px" }}
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </button>
+            <button
+              style={{ marginLeft: "10px" }}
+              onClick={() => handleSubmit()}
+              disabled={loading}
+            >
+              Skip Device & Submit
+            </button>
+          </>
+        )}
       </div>
 
       {/* Manual Input */}
-      <form onSubmit={handleManualSubmit} className="security-scan-form">
+      <form onSubmit={handleSubmit} className="security-scan-form">
         <input
           type="text"
           placeholder="QR/Token manually"
           value={qrValue}
           onChange={(e) => setQrValue(e.target.value)}
+          disabled={phase !== 1}
         />
         <input
           type="text"
           placeholder="Device Serial (optional)"
           value={deviceSerial}
           onChange={(e) => setDeviceSerial(e.target.value)}
+          disabled={phase !== 2}
         />
         <select value={action} onChange={(e) => setAction(e.target.value)}>
           <option value="in">Check-In</option>
           <option value="out">Check-Out</option>
         </select>
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading || phase !== 2}>
           {loading ? "Submitting..." : "Submit"}
         </button>
+        {phase === 2 && (
+          <button
+            type="button"
+            style={{ marginLeft: "10px" }}
+            onClick={() => handleSubmit()}
+            disabled={loading}
+          >
+            Skip Device & Submit
+          </button>
+        )}
       </form>
 
       {/* Error / Success */}
@@ -113,7 +201,9 @@ function SecurityScan() {
       {result && (
         <div className="security-scan-result">
           <h4>{result.type === "device" ? "Device Info" : "Person Info"}</h4>
-          <p><strong>Type:</strong> {result.type}</p>
+          <pre style={{ background: "#f8f8f8", padding: "10px", borderRadius: "5px", fontSize: "0.95em" }}>
+            {JSON.stringify(result, null, 2)}
+          </pre>
           {result.person && (
             <>
               <p><strong>Name:</strong> {result.person.full_name || "N/A"}</p>
@@ -133,5 +223,6 @@ function SecurityScan() {
     </div>
   );
 }
+
 
 export default SecurityScan;
