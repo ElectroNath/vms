@@ -1,43 +1,55 @@
-import React, { useState } from "react";
+// src/security/AttendanceLog.jsx
+
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { API_BASE_URL } from "../api";
-import "../styles/Admin.css";
-import "../styles/Login.css";
+import "./security.css";
 
-function SecurityAccessLogScan() {
-  const [token, setToken] = useState("");
-  const [result, setResult] = useState(null);
+function SecurityAccessLog() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const handleScan = async (e) => {
-    e.preventDefault();
-    setError("");
-    setResult(null);
-    try {
-      const tokenVal = Cookies.get("token");
-      const res = await axios.post(
-        `${API_BASE_URL}/api/security/access-logs/scan-qr/`,
-        { token },
-        { headers: { Authorization: `Bearer ${tokenVal}` } }
-      );
-      setResult(res.data);
-    } catch (err) {
-      setError("Guest not found or invalid token.");
-    }
-  };
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const token = Cookies.get("token");
+        const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // Ensure logs is always an array
+        setLogs(Array.isArray(res.data) ? res.data : []);
+        setLoading(false);
+      } catch (err) {
+        if (
+          err.response &&
+          (err.response.status === 401 || err.response.status === 403)
+        ) {
+          setError("Authentication failed. Please log in again.");
+        } else {
+          setError("Failed to fetch logs");
+        }
+        setLogs([]);
+        setLoading(false);
+      }
+    };
+
+    fetchLogs();
+  }, []);
 
   return (
-    <div className="admin-main">
-      <div className="admin-table-page">
-        <h2>Scan Guest QR/Token</h2>
-        <form onSubmit={handleScan} style={{ marginBottom: 20 }}>
+    <div className="admin-table-page">
+      <h2>Scan Guest QR/Token</h2>
+      <form onSubmit={handleScan} style={{ marginBottom: 20 }}>
         <input
           className="login-input"
           style={{ width: 220 }}
           placeholder="Enter guest token"
           value={token}
-          onChange={e => setToken(e.target.value)}
+          onChange={(e) => setToken(e.target.value)}
           required
         />
         <button type="submit" className="login-btn" style={{ marginLeft: 10 }}>
@@ -48,12 +60,13 @@ function SecurityAccessLogScan() {
       {result && (
         <div style={{ marginTop: 20 }}>
           <h4>Guest Info</h4>
-          <pre style={{ background: "#f7f7f7", padding: 10 }}>{JSON.stringify(result, null, 2)}</pre>
+          <pre style={{ background: "#f7f7f7", padding: 10 }}>
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </div>
       )}
-      </div>
     </div>
   );
 }
 
-export default SecurityAccessLogScan;
+export default SecurityAccessLog;

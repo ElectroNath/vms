@@ -42,23 +42,7 @@ function AdminNavbar() {
         }}
       >
         <Logout
-          className="navbar-logout-btn"
-          style={{
-            color: "#fff",
-            marginTop: 30,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontWeight: 600,
-            fontSize: 17,
-            background: "linear-gradient(90deg, #e53935 0%, #c62828 100%)",
-            border: "none",
-            borderRadius: "8px",
-            padding: "10px 22px",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px #c6282833",
-            transition: "background 0.18s, box-shadow 0.18s"
-          }}
+          className="navbar-logout-btn"    
         >
           <svg
             width="22"

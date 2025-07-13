@@ -110,14 +110,21 @@ function AdminUsers() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(newUser.email)) {
+    setError("Please enter a valid email address.");
+    setShowModal(true);
+    return;
+  }
     try {
       const token = Cookies.get("token");
       await axios.post(
-        `${API_BASE_URL}/api/employees/`,
+        `${API_BASE_URL}/api/users/`,
         newUser,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setNewUser({ username: "", email: "", role: "employee", is_active: true, password: "" });
+    
       setShowModal(false);
       fetchUsers();
     } catch (err) {
