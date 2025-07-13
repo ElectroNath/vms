@@ -28,9 +28,10 @@ function SecurityAccessLogScan() {
   };
 
   return (
-    <div className="admin-table-page">
-      <h2>Scan Guest QR/Token</h2>
-      <form onSubmit={handleScan} style={{ marginBottom: 20 }}>
+    <div className="admin-main">
+      <div className="admin-table-page">
+        <h2>Scan Guest QR/Token</h2>
+        <form onSubmit={handleScan} style={{ marginBottom: 20 }}>
         <input
           className="login-input"
           style={{ width: 220 }}
@@ -50,6 +51,7 @@ function SecurityAccessLogScan() {
           <pre style={{ background: "#f7f7f7", padding: 10 }}>{JSON.stringify(result, null, 2)}</pre>
         </div>
       )}
+      </div>
     </div>
   );
 }
