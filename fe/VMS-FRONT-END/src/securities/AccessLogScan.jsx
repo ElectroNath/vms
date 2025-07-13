@@ -24,7 +24,10 @@ function SecurityAccessLog() {
         setLogs(Array.isArray(res.data) ? res.data : []);
         setLoading(false);
       } catch (err) {
-        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+        if (
+          err.response &&
+          (err.response.status === 401 || err.response.status === 403)
+        ) {
           setError("Authentication failed. Please log in again.");
         } else {
           setError("Failed to fetch logs");
@@ -45,7 +48,14 @@ function SecurityAccessLog() {
       {!loading && !error && logs.length === 0 && <p>No logs found.</p>}
       {/* Debug: Show raw logs data */}
       {!loading && !error && logs.length > 0 && (
-        <pre style={{ background: "#f8f8f8", padding: "10px", borderRadius: "5px", fontSize: "0.95em" }}>
+        <pre
+          style={{
+            background: "#f8f8f8",
+            padding: "10px",
+            borderRadius: "5px",
+            fontSize: "0.95em",
+          }}
+        >
           {JSON.stringify(logs, null, 2)}
         </pre>
       )}

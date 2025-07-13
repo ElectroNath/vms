@@ -8,7 +8,6 @@ import { API_BASE_URL } from "../api";
 import "./security.css";
 import Modal from "../components/Modals";
 
-
 function SecurityScan() {
   const [phase, setPhase] = useState(1); // 1: scan person, 2: scan device
   const [qrValue, setQrValue] = useState("");
@@ -81,7 +80,9 @@ function SecurityScan() {
   useEffect(() => {
     navigator.mediaDevices
       ?.getUserMedia({ video: true })
-      .catch(() => alert("Camera access denied. Please allow camera permissions."));
+      .catch(() =>
+        alert("Camera access denied. Please allow camera permissions.")
+      );
   }, []);
 
   return (
@@ -201,28 +202,50 @@ function SecurityScan() {
       {result && (
         <div className="security-scan-result">
           <h4>{result.type === "device" ? "Device Info" : "Person Info"}</h4>
-          <pre style={{ background: "#f8f8f8", padding: "10px", borderRadius: "5px", fontSize: "0.95em" }}>
+          <pre
+            style={{
+              background: "#f8f8f8",
+              padding: "10px",
+              borderRadius: "5px",
+              fontSize: "0.95em",
+            }}
+          >
             {JSON.stringify(result, null, 2)}
           </pre>
           {result.person && (
             <>
-              <p><strong>Name:</strong> {result.person.full_name || "N/A"}</p>
-              <p><strong>Email:</strong> {result.person.email || "N/A"}</p>
+              <p>
+                <strong>Name:</strong> {result.person.full_name || "N/A"}
+              </p>
+              <p>
+                <strong>Email:</strong> {result.person.email || "N/A"}
+              </p>
             </>
           )}
           {result.device && (
             <>
-              <p><strong>Device:</strong> {result.device.name}</p>
-              <p><strong>Serial:</strong> {result.device.serial_number}</p>
+              <p>
+                <strong>Device:</strong> {result.device.name}
+              </p>
+              <p>
+                <strong>Serial:</strong> {result.device.serial_number}
+              </p>
             </>
           )}
-          {result.status && <p><strong>Status:</strong> {result.status}</p>}
-          {result.log && <p><strong>Log:</strong> {result.log}</p>}
+          {result.status && (
+            <p>
+              <strong>Status:</strong> {result.status}
+            </p>
+          )}
+          {result.log && (
+            <p>
+              <strong>Log:</strong> {result.log}
+            </p>
+          )}
         </div>
       )}
     </div>
   );
 }
-
 
 export default SecurityScan;

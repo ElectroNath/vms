@@ -12,16 +12,20 @@ const menu = [
 
 function SecurityNavbar() {
   return (
-    <nav className="admin-navbar" style={{ position: "relative", minHeight: "100vh" }}>
+    <nav
+      className="admin-navbar"
+      style={{ position: "relative", minHeight: "100vh" }}
+    >
       <div className="admin-navbar-title">Security Panel</div>
       <div className="admin-navbar-menu">
-        {menu.map(item => (
+        {menu.map((item) => (
           <NavLink
             key={item.path}
             to={`/security/${item.path}`}
             end={item.path === ""}
             className={({ isActive }) =>
-              "admin-navbar-link" + (isActive ? " admin-navbar-link-active" : "")
+              "admin-navbar-link" +
+              (isActive ? " admin-navbar-link-active" : "")
             }
           >
             {item.label}
@@ -35,7 +39,7 @@ function SecurityNavbar() {
           left: 0,
           width: "100%",
           display: "flex",
-          justifyContent: "center"
+          justifyContent: "center",
         }}
       >
         <Logout
@@ -54,7 +58,7 @@ function SecurityNavbar() {
             padding: "10px 22px",
             cursor: "pointer",
             boxShadow: "0 2px 8px #c6282833",
-            transition: "background 0.18s, box-shadow 0.18s"
+            transition: "background 0.18s, box-shadow 0.18s",
           }}
         >
           <svg
@@ -68,9 +72,9 @@ function SecurityNavbar() {
             strokeLinejoin="round"
             style={{ marginRight: 6 }}
           >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
           Logout
         </Logout>
