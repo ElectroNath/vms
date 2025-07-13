@@ -87,51 +87,161 @@ function SecurityScan() {
 
   return (
     <div className="security-scan-page">
-      <h2>Scan Guest QR/Token</h2>
+      <h2>Security QR Scan</h2>
+      {/* Modal for success/error */}
+      {modalMsg && (
+        <Modal
+          message={modalMsg}
+          onClose={() => setModalMsg("")}
+          isSuccess={modalSuccess}
+        />
+      )}
 
-      {/* QR Scanner */}
+      {/* QR Scanner Phases */}
       <div className="security-qr-reader">
-        <QrReader
-          constraints={{ facingMode: "environment" }}
-          scanDelay={500}
-          onResult={(res, err) => {
-            if (res?.text && res.text !== token) {
-              setToken(res.text);
-              scanToken(res.text);
-            }
-          }}
-          videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
-          containerStyle={{
-            width: "100%",
-            maxWidth: "600px",
-            height: "400px",
-            border: "2px solid #1abc9c",
-            borderRadius: "10px",
-            overflow: "hidden",
-          }}
-        />
-        <div className="scanner-line"></div>
+        {phase === 1 ? (
+          <>
+            <p>Step 1: Scan Person QR/Token</p>
+            <QrReader
+              constraints={{ facingMode: "environment" }}
+              scanDelay={500}
+              onResult={(res) => {
+                if (res?.text && res.text !== qrValue) {
+                  handleScan(res.text);
+                }
+              }}
+              videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
+              containerStyle={{
+                width: "100%",
+                maxWidth: "750px",
+                height: "400px",
+                border: "2px solid #1abc9c",
+                borderRadius: "10px",
+                overflow: "hidden",
+              }}
+            />
+            <div className="scanner-line"></div>
+          </>
+        ) : (
+          <>
+            <p>Step 2: Scan Device QR (optional)</p>
+            <QrReader
+              constraints={{ facingMode: "environment" }}
+              scanDelay={500}
+              onResult={(res) => {
+                if (res?.text && res.text !== deviceSerial) {
+                  handleScan(res.text);
+                }
+              }}
+              videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
+              containerStyle={{
+                width: "100%",
+                maxWidth: "750px",
+                height: "400px",
+                border: "2px solid #1abc9c",
+                borderRadius: "10px",
+                overflow: "hidden",
+              }}
+            />
+            <div className="scanner-line"></div>
+            <button
+              style={{ marginTop: "20px" }}
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Submit"}
+            </button>
+            <button
+              style={{ marginLeft: "10px" }}
+              onClick={() => handleSubmit()}
+              disabled={loading}
+            >
+              Skip Device & Submit
+            </button>
+          </>
+        )}
       </div>
-      <br></br>
+
       {/* Manual Input */}
-      <form onSubmit={handleManualSubmit} className="security-scan-form">
+      <form onSubmit={handleSubmit} className="security-scan-form">
         <input
-          className="security-scan-input"
-          placeholder="Or enter token manually"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
+          type="text"
+          placeholder="QR/Token manually"
+          value={qrValue}
+          onChange={(e) => setQrValue(e.target.value)}
+          disabled={phase !== 1}
         />
-        <button type="submit" className="security-scan-btn">
-          Submit
+        <input
+          type="text"
+          placeholder="Device Serial (optional)"
+          value={deviceSerial}
+          onChange={(e) => setDeviceSerial(e.target.value)}
+          disabled={phase !== 2}
+        />
+        <select value={action} onChange={(e) => setAction(e.target.value)}>
+          <option value="in">Check-In</option>
+          <option value="out">Check-Out</option>
+        </select>
+        <button type="submit" disabled={loading || phase !== 2}>
+          {loading ? "Submitting..." : "Submit"}
         </button>
+        {phase === 2 && (
+          <button
+            type="button"
+            style={{ marginLeft: "10px" }}
+            onClick={() => handleSubmit()}
+            disabled={loading}
+          >
+            Skip Device & Submit
+          </button>
+        )}
       </form>
 
-      {/* Result / Error */}
+      {/* Error / Success */}
       {error && <div className="security-scan-error">{error}</div>}
       {result && (
         <div className="security-scan-result">
-          <h4>Guest Info</h4>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
+          <h4>{result.type === "device" ? "Device Info" : "Person Info"}</h4>
+          <pre
+            style={{
+              background: "#f8f8f8",
+              padding: "10px",
+              borderRadius: "5px",
+              fontSize: "0.95em",
+            }}
+          >
+            {JSON.stringify(result, null, 2)}
+          </pre>
+          {result.person && (
+            <>
+              <p>
+                <strong>Name:</strong> {result.person.full_name || "N/A"}
+              </p>
+              <p>
+                <strong>Email:</strong> {result.person.email || "N/A"}
+              </p>
+            </>
+          )}
+          {result.device && (
+            <>
+              <p>
+                <strong>Device:</strong> {result.device.name}
+              </p>
+              <p>
+                <strong>Serial:</strong> {result.device.serial_number}
+              </p>
+            </>
+          )}
+          {result.status && (
+            <p>
+              <strong>Status:</strong> {result.status}
+            </p>
+          )}
+          {result.log && (
+            <p>
+              <strong>Log:</strong> {result.log}
+            </p>
+          )}
         </div>
       )}
     </div>
