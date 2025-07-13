@@ -274,144 +274,155 @@ function SecurityDevices() {
   );
 
   return (
-    <div className="admin-table-page">
-      <h2>Register Device</h2>
-      <button onClick={() => setShowModal(true)} className="adminuser-add-btn">
-        Register Device
-      </button>
+    <div className="admin-main">
+      <div className="admin-table-page">
+        <h2>Register Device</h2>
+        <button
+          onClick={() => setShowModal(true)}
+          className="adminuser-add-btn"
+        >
+          Register Device
+        </button>
 
-      {showModal && (
-        <div className="qr-modal-overlay adminuser-modal-overlay">
-          <div className="qr-modal-content adminuser-modal-content">
-            <div className="adminuser-modal-title">Register Device</div>
-            <form onSubmit={handleCreate} className="adminuser-modal-form">
-              <div className="login-input-group">
-                <input
-                  className="login-input"
-                  name="device_name"
-                  value={newDevice.device_name}
-                  onChange={(e) =>
-                    setNewDevice({ ...newDevice, device_name: e.target.value })
-                  }
-                  placeholder=" "
-                  required
-                />
-                <span className="login-input-label">Device Name</span>
-              </div>
-              <div className="login-input-group">
-                <input
-                  className="login-input"
-                  name="serial_number"
-                  value={newDevice.serial_number}
-                  onChange={(e) =>
-                    setNewDevice({
-                      ...newDevice,
-                      serial_number: e.target.value,
-                    })
-                  }
-                  placeholder=" "
-                  required
-                />
-                <span className="login-input-label">Serial Number</span>
-              </div>
-              <div className="login-input-group">
-                <select
-                  className="login-input"
-                  name="owner_employee"
-                  value={newDevice.owner_employee}
-                  onChange={(e) =>
-                    setNewDevice({
-                      ...newDevice,
-                      owner_employee: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">Select Employee</option>
-                  {employeeList.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.full_name}
-                    </option>
-                  ))}
-                </select>
-                <span className="login-input-label">Owner Employee</span>
-              </div>
-              <div className="login-input-group">
-                <select
-                  className="login-input"
-                  name="owner_guest"
-                  value={newDevice.owner_guest}
-                  onChange={(e) =>
-                    setNewDevice({ ...newDevice, owner_guest: e.target.value })
-                  }
-                >
-                  <option value="">Select Guest</option>
-                  {guestList.map((guest) => (
-                    <option key={guest.id} value={guest.id}>
-                      {guest.full_name}
-                    </option>
-                  ))}
-                </select>
-                <span className="login-input-label">Owner Guest</span>
-              </div>
-              <div className="adminuser-checkbox-row">
-                <label>
-                  Verified
+        {showModal && (
+          <div className="qr-modal-overlay adminuser-modal-overlay">
+            <div className="qr-modal-content adminuser-modal-content">
+              <div className="adminuser-modal-title">Register Device</div>
+              <form onSubmit={handleCreate} className="adminuser-modal-form">
+                <div className="login-input-group">
                   <input
-                    type="checkbox"
-                    checked={newDevice.is_verified}
+                    className="login-input"
+                    name="device_name"
+                    value={newDevice.device_name}
                     onChange={(e) =>
                       setNewDevice({
                         ...newDevice,
-                        is_verified: e.target.checked,
+                        device_name: e.target.value,
                       })
                     }
+                    placeholder=" "
+                    required
                   />
-                </label>
-              </div>
-              <div className="adminuser-modal-btn-row">
-                <button
-                  type="submit"
-                  className="login-btn adminuser-create-btn"
-                >
-                  Register
-                </button>
-                <button
-                  type="button"
-                  className="login-btn adminuser-cancel-btn"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-              {error && <div className="login-error">{error}</div>}
-            </form>
+                  <span className="login-input-label">Device Name</span>
+                </div>
+                <div className="login-input-group">
+                  <input
+                    className="login-input"
+                    name="serial_number"
+                    value={newDevice.serial_number}
+                    onChange={(e) =>
+                      setNewDevice({
+                        ...newDevice,
+                        serial_number: e.target.value,
+                      })
+                    }
+                    placeholder=" "
+                    required
+                  />
+                  <span className="login-input-label">Serial Number</span>
+                </div>
+                <div className="login-input-group">
+                  <select
+                    className="login-input"
+                    name="owner_employee"
+                    value={newDevice.owner_employee}
+                    onChange={(e) =>
+                      setNewDevice({
+                        ...newDevice,
+                        owner_employee: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Select Employee</option>
+                    {employeeList.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.full_name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="login-input-label">Owner Employee</span>
+                </div>
+                <div className="login-input-group">
+                  <select
+                    className="login-input"
+                    name="owner_guest"
+                    value={newDevice.owner_guest}
+                    onChange={(e) =>
+                      setNewDevice({
+                        ...newDevice,
+                        owner_guest: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Select Guest</option>
+                    {guestList.map((guest) => (
+                      <option key={guest.id} value={guest.id}>
+                        {guest.full_name}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="login-input-label">Owner Guest</span>
+                </div>
+                <div className="adminuser-checkbox-row">
+                  <label>
+                    Verified
+                    <input
+                      type="checkbox"
+                      checked={newDevice.is_verified}
+                      onChange={(e) =>
+                        setNewDevice({
+                          ...newDevice,
+                          is_verified: e.target.checked,
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="adminuser-modal-btn-row">
+                  <button
+                    type="submit"
+                    className="login-btn adminuser-create-btn"
+                  >
+                    Register
+                  </button>
+                  <button
+                    type="button"
+                    className="login-btn adminuser-cancel-btn"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+                {error && <div className="login-error">{error}</div>}
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>Device Name</th>
-            <th>Serial Number</th>
-            <th>Owner Employee</th>
-            <th>Owner Guest</th>
-            <th>Verified</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(devices) &&
-            devices.map((d) => (
-              <tr key={d.id}>
-                <td>{d.device_name}</td>
-                <td>{d.serial_number}</td>
-                <td>{d.owner_employee_name}</td>
-                <td>{d.owner_guest_name}</td>
-                <td>{d.is_verified ? "Yes" : "No"}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Device Name</th>
+              <th>Serial Number</th>
+              <th>Owner Employee</th>
+              <th>Owner Guest</th>
+              <th>Verified</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(devices) &&
+              devices.map((d) => (
+                <tr key={d.id}>
+                  <td>{d.device_name}</td>
+                  <td>{d.serial_number}</td>
+                  <td>{d.owner_employee_name}</td>
+                  <td>{d.owner_guest_name}</td>
+                  <td>{d.is_verified ? "Yes" : "No"}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
