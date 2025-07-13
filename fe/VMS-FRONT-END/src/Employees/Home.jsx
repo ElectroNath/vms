@@ -37,86 +37,92 @@ function Home() {
   const viewedMsgsKey = `viewed_admin_msgs_${profileId || "nouser"}`;
 
   useEffect(() => {
-  let ignore = false;
-  setLoading(true); // Always trigger loading on mount
+    let ignore = false;
+    setLoading(true); // Always trigger loading on mount
 
-  const fetchDashboard = async () => {
-    const token = Cookies.get("token");
-    if (!token) {
-      navigate("/login", { replace: true });
-      return;
-    }
-
-    try {
-      const profileRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/me/`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
-
-      setUsername(profileRes.data.username);
-      setProfileId(profileRes.data.id);
-      setRole(profileRes.data.role);
-
-      const dashboardRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/dashboard/`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
-
-      setFullName(dashboardRes.data.full_name);
-      setStaffId(dashboardRes.data.staff_id);
-      setDeviceCount(dashboardRes.data.device_count);
-      setGuestCount(dashboardRes.data.guest_count);
-      setAttendanceIn(dashboardRes.data.attendance_in);
-      setAttendanceOut(dashboardRes.data.attendance_out);
-      setDevices(dashboardRes.data.devices);
-
-      const attendanceRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/attendance/`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
-      setAttendanceLogs(attendanceRes.data);
-
-      const msgRes = await axios.get(`${API_BASE_URL}/api/messages/`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
-
-      setMessages(msgRes.data || []);
-      const viewed = JSON.parse(localStorage.getItem(`viewed_admin_msgs_${profileRes.data.id}`) || "[]");
-      const unread = (msgRes.data || []).filter((msg) => !viewed.includes(msg.id));
-      setUnreadCount(unread.length);
-      setNotificationCount(unread.length);
-
-    } catch (err) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
+    const fetchDashboard = async () => {
+      const token = Cookies.get("token");
+      if (!token) {
         navigate("/login", { replace: true });
-      } else {
-        setError("Unable to fetch dashboard. Please log in again.");
+        return;
       }
-    } finally {
-      if (!ignore) setLoading(false);
-    }
-  };
 
-  fetchDashboard();
-  return () => { ignore = true; };
-}, [navigate]);
+      try {
+        const profileRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/me/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
 
+        setUsername(profileRes.data.username);
+        setProfileId(profileRes.data.id);
+        setRole(profileRes.data.role);
+        setQrCodeUrl(profileRes.data.id_qr_code_url);
+
+        const dashboardRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/dashboard/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+
+        setFullName(dashboardRes.data.full_name);
+        setStaffId(dashboardRes.data.staff_id);
+        setDeviceCount(dashboardRes.data.device_count);
+        setGuestCount(dashboardRes.data.guest_count);
+        setAttendanceIn(dashboardRes.data.attendance_in);
+        setAttendanceOut(dashboardRes.data.attendance_out);
+        setDevices(dashboardRes.data.devices);
+
+        const attendanceRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/attendance/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+        setAttendanceLogs(attendanceRes.data);
+
+        const msgRes = await axios.get(`${API_BASE_URL}/api/messages/`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+
+        setMessages(msgRes.data || []);
+        const viewed = JSON.parse(
+          localStorage.getItem(`viewed_admin_msgs_${profileRes.data.id}`) ||
+            "[]"
+        );
+        const unread = (msgRes.data || []).filter(
+          (msg) => !viewed.includes(msg.id)
+        );
+        setUnreadCount(unread.length);
+        setNotificationCount(unread.length);
+      } catch (err) {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          navigate("/login", { replace: true });
+        } else {
+          setError("Unable to fetch dashboard. Please log in again.");
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+    return () => {
+      ignore = true;
+    };
+  }, [navigate]);
 
   // Handler to open modal and fetch QR code using staffId dynamically in the path
   const handleShowQrModal = async () => {
-    if (!staffId) {
-      setModalQrUrl("");
-      setShowQrModal(true);
-      return;
-    }
-    try {
-      // Construct the correct media path for the QR code image
-      const qrUrl = `${API_BASE_URL}/media/qr_codes/${staffId}_qr.png`;
-      const res = await axios.get(qrUrl, { responseType: "blob" });
-      const qrBlobUrl = URL.createObjectURL(res.data);
-      setModalQrUrl(qrBlobUrl);
-    } catch (err) {
+    if (qrCodeUrl) {
+      setModalQrUrl(qrCodeUrl);
+    } else {
       setModalQrUrl("");
     }
     setShowQrModal(true);
@@ -150,38 +156,36 @@ function Home() {
 
   // Fetch guest and device records when modals are opened
   const handleShowGuestModal = async () => {
-  setShowGuestModal(true);
-  try {
-    const token = Cookies.get("token");
-    const res = await axios.get(`${API_BASE_URL}/api/guests/`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      withCredentials: true,
-    });
+    setShowGuestModal(true);
+    try {
+      const token = Cookies.get("token");
+      const res = await axios.get(`${API_BASE_URL}/api/guests/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        withCredentials: true,
+      });
 
-    setGuestList(res.data?.results || []);  // 👈 correct this line
-  } catch (e) {
-    console.error("Failed to fetch guests:", e);
-    setGuestList([]);
-  }
-};
+      setGuestList(res.data?.results || []); // 👈 correct this line
+    } catch (e) {
+      console.error("Failed to fetch guests:", e);
+      setGuestList([]);
+    }
+  };
 
+  const handleShowDeviceModal = async () => {
+    setShowDeviceModal(true);
+    try {
+      const token = Cookies.get("token");
+      const res = await axios.get(`${API_BASE_URL}/api/devices/`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        withCredentials: true,
+      });
 
- const handleShowDeviceModal = async () => {
-  setShowDeviceModal(true);
-  try {
-    const token = Cookies.get("token");
-    const res = await axios.get(`${API_BASE_URL}/api/devices/`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      withCredentials: true,
-    });
-
-    setDeviceList(res.data?.results || []); // ✅ use paginated `results` array
-  } catch (e) {
-    console.error("Failed to fetch devices:", e);
-    setDeviceList([]);
-  }
-};
-
+      setDeviceList(res.data?.results || []); // ✅ use paginated `results` array
+    } catch (e) {
+      console.error("Failed to fetch devices:", e);
+      setDeviceList([]);
+    }
+  };
 
   // Handler for notification bell click
   const handleNotificationClick = () => {
@@ -189,7 +193,7 @@ function Home() {
     if (messages.length > 0 && profileId) {
       localStorage.setItem(
         viewedMsgsKey,
-        JSON.stringify(messages.map(msg => msg.id))
+        JSON.stringify(messages.map((msg) => msg.id))
       );
       setUnreadCount(0);
       setNotificationCount(0); // reset notification count after viewing
@@ -199,7 +203,9 @@ function Home() {
 
   // Determine if user is employee
   const isEmployee = role === "employee";
-  const isEmployeeRoute = window.location.pathname === "/home" || window.location.pathname === "/invite-guest";
+  const isEmployeeRoute =
+    window.location.pathname === "/home" ||
+    window.location.pathname === "/invite-guest";
 
   return (
     <div className="home-root">
@@ -210,11 +216,18 @@ function Home() {
       <div className={`home-main${loading ? " blurred" : ""}`}>
         {/* Notification Bell Icon at top right */}
         <div className="notification-bell-container">
-          <div className="notification-bell-wrapper" style={{ cursor: "pointer" }} onClick={handleNotificationClick}>
+          <div
+            className="notification-bell-wrapper"
+            style={{ cursor: "pointer" }}
+            onClick={handleNotificationClick}
+          >
             {/* Modern Bell SVG icon with gradient and shadow */}
             <svg
               className="notification-bell-icon"
-              width="54" height="59" viewBox="0 0 44 44" fill="none"
+              width="54"
+              height="59"
+              viewBox="0 0 44 44"
+              fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
@@ -245,7 +258,13 @@ function Home() {
                 />
               </g>
               <filter id="bellShadow" x="0" y="0" width="44" height="44">
-                <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#247150" floodOpacity="0.18"/>
+                <feDropShadow
+                  dx="0"
+                  dy="2"
+                  stdDeviation="2"
+                  floodColor="#247150"
+                  floodOpacity="0.18"
+                />
               </filter>
             </svg>
             {/* Notification count circle (red) */}
@@ -267,7 +286,14 @@ function Home() {
           </div>
         ) : (
           <div className="dashboard-container">
-            <div className="dashboard-profile" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div
+              className="dashboard-profile"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <div>
                 <p id="username">
                   <strong>{fullName}</strong>
@@ -279,8 +305,10 @@ function Home() {
               <button
                 className="dashboard-qr-btn"
                 onClick={handleShowQrModal}
-                disabled={!staffId}
-                title={staffId ? "Click to view QR Code" : "No QR Code Available"}
+                disabled={!qrCodeUrl}
+                title={
+                  qrCodeUrl ? "Click to view QR Code" : "QR Code not available"
+                }
               >
                 <svg
                   width="22"
@@ -293,10 +321,10 @@ function Home() {
                   strokeLinejoin="round"
                   style={{ marginRight: 8, verticalAlign: "middle" }}
                 >
-                  <rect x="3" y="3" width="7" height="7" rx="2"/>
-                  <rect x="14" y="3" width="7" height="7" rx="2"/>
-                  <rect x="14" y="14" width="7" height="7" rx="2"/>
-                  <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01"/>
+                  <rect x="3" y="3" width="7" height="7" rx="2" />
+                  <rect x="14" y="3" width="7" height="7" rx="2" />
+                  <rect x="14" y="14" width="7" height="7" rx="2" />
+                  <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
                 </svg>
                 Staff QR Code
               </button>
@@ -358,15 +386,26 @@ function Home() {
 
       {/* Guest Modal */}
       {showGuestModal && (
-        <div className="qr-modal-overlay" onClick={() => setShowGuestModal(false)}>
-          <div className="qr-modal-content" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+        <div
+          className="qr-modal-overlay"
+          onClick={() => setShowGuestModal(false)}
+        >
+          <div
+            className="qr-modal-content"
+            style={{ maxWidth: 500 }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3>Guests Registered</h3>
             {guestList.length > 0 ? (
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Name</th>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Token</th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Name
+                    </th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Token
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -381,7 +420,10 @@ function Home() {
             ) : (
               <p>No guests found.</p>
             )}
-            <button className="qr-modal-close-btn" onClick={() => setShowGuestModal(false)}>
+            <button
+              className="qr-modal-close-btn"
+              onClick={() => setShowGuestModal(false)}
+            >
               Close
             </button>
           </div>
@@ -390,21 +432,34 @@ function Home() {
 
       {/* Device Modal */}
       {showDeviceModal && (
-        <div className="qr-modal-overlay" onClick={() => setShowDeviceModal(false)}>
-          <div className="qr-modal-content" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+        <div
+          className="qr-modal-overlay"
+          onClick={() => setShowDeviceModal(false)}
+        >
+          <div
+            className="qr-modal-content"
+            style={{ maxWidth: 500 }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3>Devices Registered</h3>
             {deviceList.length > 0 ? (
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Device Name</th>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>Serial Number</th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Device Name
+                    </th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Serial Number
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {deviceList.map((device, idx) => (
                     <tr key={device.id || idx}>
-                      <td style={{ padding: 8 }}>{device.name || device.device_name}</td>
+                      <td style={{ padding: 8 }}>
+                        {device.name || device.device_name}
+                      </td>
                       <td style={{ padding: 8 }}>{device.serial_number}</td>
                     </tr>
                   ))}
@@ -413,7 +468,10 @@ function Home() {
             ) : (
               <p>No devices found.</p>
             )}
-            <button className="qr-modal-close-btn" onClick={() => setShowDeviceModal(false)}>
+            <button
+              className="qr-modal-close-btn"
+              onClick={() => setShowDeviceModal(false)}
+            >
               Close
             </button>
           </div>
@@ -422,11 +480,11 @@ function Home() {
 
       {/* QR Code Modal */}
       {showQrModal && (
-        <div
-          className="qr-modal-overlay"
-          onClick={() => setShowQrModal(false)}
-        >
-          <div className="qr-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="qr-modal-overlay" onClick={() => setShowQrModal(false)}>
+          <div
+            className="qr-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3>Your Staff ID QR Code</h3>
             {modalQrUrl ? (
               <>
@@ -453,7 +511,9 @@ function Home() {
                 </button>
               </>
             ) : (
-              <p>QR Code not available (no id_qr_code found for your profile).</p>
+              <p>
+                QR Code not available (no id_qr_code found for your profile).
+              </p>
             )}
             <button
               className="qr-modal-close-btn"
