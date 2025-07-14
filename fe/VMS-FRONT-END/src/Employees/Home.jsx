@@ -59,7 +59,7 @@ function Home() {
         setUsername(profileRes.data.username);
         setProfileId(profileRes.data.id);
         setRole(profileRes.data.role);
-        setQrCodeUrl(profileRes.data.id_qr_code_url);
+        setQrCodeUrl(profileRes.data.id_qr_code_url || "");
 
         const dashboardRes = await axios.get(
           `${API_BASE_URL}/api/employee-profiles/dashboard/`,

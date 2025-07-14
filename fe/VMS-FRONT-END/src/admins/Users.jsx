@@ -110,12 +110,12 @@ function AdminUsers() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(newUser.email)) {
-    setError("Please enter a valid email address.");
-    setShowModal(true);
-    return;
-  }
+
+    if (!/\S+@\S+\.\S+/.test(newUser.email)) {
+      setError("Please enter a valid email address.");
+      setShowModal(true);
+      return;
+    }
     try {
       const token = Cookies.get("token");
       await axios.post(
