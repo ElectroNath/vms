@@ -31,39 +31,52 @@ function InviteGuest() {
           return;
         }
 
-        const res = await axios.get(`${API_BASE_URL}/api/employee-profiles/me/`, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/me/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
 
         if (res?.data?.id) {
-          setForm(f => ({ ...f, invited_by: String(res.data.id) }));
+          setForm((f) => ({ ...f, invited_by: String(res.data.id) }));
         } else {
-          setError("Could not determine your employee profile ID. Please contact admin.");
+          setError(
+            "Could not determine your employee profile ID. Please contact admin."
+          );
           setShowModal(true);
         }
       } catch {
-        setError("Could not determine your employee profile ID. Please contact admin.");
+        setError(
+          "Could not determine your employee profile ID. Please contact admin."
+        );
         setShowModal(true);
       }
     };
     fetchUserId();
   }, []);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
     setSuccess("");
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
     setLoading(true);
     setShowModal(false);
 
-    if (!form.fullName || !form.email || !form.phone || !form.purpose || !form.visitDate) {
+    if (
+      !form.fullName ||
+      !form.email ||
+      !form.phone ||
+      !form.purpose ||
+      !form.visitDate
+    ) {
       setError("All fields are required.");
       setShowModal(true);
       setLoading(false);
@@ -96,13 +109,15 @@ function InviteGuest() {
       };
 
       Object.keys(payload).forEach(
-        key => (payload[key] === undefined || payload[key] === "") && delete payload[key]
+        (key) =>
+          (payload[key] === undefined || payload[key] === "") &&
+          delete payload[key]
       );
 
       await axios.post(`${API_BASE_URL}/api/guests/`, payload, {
         headers: {
           Authorization: token ? `Bearer ${token}` : undefined,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
       });
 
@@ -121,7 +136,10 @@ function InviteGuest() {
         const data = err.response.data;
         if (typeof data === "object" && !Array.isArray(data)) {
           const messages = Object.entries(data)
-            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`)
+            .map(
+              ([field, msgs]) =>
+                `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`
+            )
             .join(" | ");
           setError(messages);
         } else if (data.detail) {
@@ -139,16 +157,26 @@ function InviteGuest() {
   };
 
   return (
-    <div className="form-root" style={{ 
-      height: "100vh", 
-      display: "flex", 
-      justifyContent: "center", 
-      alignItems: "center", 
-      position: "relative", 
-      margin:  "auto",
-      padding: 0,}}>
-      <div className="form-container" style={{ minWidth: 700, maxWidth: 1100, height: "100vh" }}>
-        <div className="login-form-title" style={{ marginBottom: 30, textAlign: "left", fontSize: 30 }}>
+    <div
+      className="form-root"
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+        margin: "auto",
+        padding: 0,
+      }}
+    >
+      <div
+        className="form-container"
+        style={{ minWidth: 700, maxWidth: 1100, height: "100vh" }}
+      >
+        <div
+          className="login-form-title"
+          style={{ marginBottom: 30, textAlign: "left", fontSize: 30 }}
+        >
           Invite Guest
         </div>
 
@@ -224,7 +252,11 @@ function InviteGuest() {
             <span className="login-input-label">Visit Date</span>
           </div>
 
-          <input type="hidden" name="invited_by" value={form.invited_by || ""} />
+          <input
+            type="hidden"
+            name="invited_by"
+            value={form.invited_by || ""}
+          />
 
           <button className="login-btn" type="submit" disabled={loading}>
             {loading ? "Submitting..." : "Submit"}

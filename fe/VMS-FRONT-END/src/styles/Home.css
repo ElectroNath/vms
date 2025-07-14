@@ -1,3 +1,26 @@
+@media (min-width: 601px) {
+  .mobile-hamburger-wrapper,
+  .sidebar-overlay {
+    display: none !important;
+  }
+  .home-sidebar {
+    display: flex !important;
+    position: relative !important;
+    width: 20% !important;
+    min-width: 180px;
+    max-width: 320px;
+    height: 100vh;
+    left: 0 !important;
+    top: 0 !important;
+    background: #247150 !important;
+    color: #fff;
+    box-shadow: 2px 0 16px #0002;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 32px 0 0 0;
+    z-index: 10;
+  }
+}
 body {
   font-family: "Montserrat", "Segoe UI", Arial, Helvetica, sans-serif;
 }
@@ -473,8 +496,17 @@ body {
 }
 
 /* Hamburger styles */
+/* Hamburger styles */
 .hamburger-btn {
   display: none;
+  background: none;
+  border: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 10001;
 }
 .hamburger-bar {
   width: 28px;
@@ -484,9 +516,76 @@ body {
   border-radius: 2px;
   transition: 0.3s;
 }
-
 .mobile-hamburger-wrapper {
   display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10001;
+}
+
+@media (max-width: 600px) {
+  .mobile-hamburger-wrapper {
+    display: flex !important;
+  }
+  .hamburger-btn {
+    display: flex !important;
+  }
+  .home-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: -80vw;
+    width: 70vw !important;
+    max-width: 320px;
+    min-width: 180px;
+    height: 100vh;
+    z-index: 10002;
+    background: #247150 !important;
+    color: #fff;
+    box-shadow: 2px 0 16px #0002;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 32px 0 0 0;
+  }
+  .home-sidebar.open {
+    left: 0 !important;
+  }
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 10000;
+    display: block;
+  }
+  .sidebar-close-btn {
+    display: block;
+    margin: 24px 0 0 18px;
+    background: #e53935;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px #c6282833;
+    transition: background 0.18s;
+  }
+  .sidebar-close-btn:hover {
+    background: #c62828;
+  }
+  .home-main {
+    margin-top: 0 !important;
+  }
+  /* Hide sidebar on mobile unless open */
+  .home-sidebar:not(.open) {
+    display: none !important;
+  }
 }
 
 /* Dashboard Main Wrapper */
@@ -685,19 +784,142 @@ body {
 }
 
 @media (max-width: 600px) {
-  .dashboard-content-card {
-    padding: 4px 1vw;
+  .home-root {
+    flex-direction: column;
+    align-items: stretch;
+    height: 100vh;
+    min-height: 100vh;
+    background: #f5f5f5;
   }
-  .dashboard-header-bar {
-    gap: 4px;
+
+  .home-main {
+    margin-top: 60px !important; /* keep header space */
+    flex: 1;
+    width: 100vw !important;
+    min-height: 0;
+    background: #f5f5f5 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
-  .dashboard-stat-value {
-    font-size: 1.5rem;
+
+  .dashboard-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 0 24px 0 !important;
+    gap: 18px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    box-sizing: border-box;
   }
-  .dashboard-stat-label {
-    font-size: 0.9rem;
+
+  .dashboard-profile {
+    width: 94vw !important;
+    max-width: 420px;
+    margin: 18px auto 0 auto !important;
+    border-radius: 18px !important;
+    box-shadow: 0 4px 24px #0002 !important;
+    padding: 18px 12px 14px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    position: relative;
+    background: #fff !important;
   }
-  .dashboard-attendance-header {
-    font-size: 0.98rem;
+
+  .dashboard-profile p {
+    font-size: 1.1em !important;
+    margin: 2px 0 !important;
+  }
+
+  .dashboard-profile #username {
+    font-size: 1.2em !important;
+    margin-bottom: 2px !important;
+  }
+
+  .dashboard-qr-btn {
+    margin-left: 0 !important;
+    margin-top: 10px !important;
+    width: 100px !important;
+    height: 36px !important;
+    font-size: 0.98em !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    align-self: flex-end;
+  }
+
+  .dashboard-metrics {
+    flex-direction: row !important;
+    gap: 12px !important;
+    width: 94vw !important;
+    max-width: 420px;
+    margin: 0 auto !important;
+    justify-content: space-between !important;
+  }
+
+  .dashboard-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 48vw !important;
+    height: auto !important;
+    padding: 18px 0 10px 0 !important;
+    border-radius: 12px !important;
+    margin: 0 !important;
+    font-size: 1em !important;
+    box-shadow: 0 1px 6px #0001 !important;
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .dashboard-card #num {
+    font-size: 2.1em !important;
+    margin-right: 0 !important;
+  }
+
+  .dashboard-card #descrip {
+    font-size: 1em !important;
+    margin-right: 0 !important;
+    width: auto !important;
+  }
+
+  .dashboard-attendance {
+    width: 94vw !important;
+    max-width: 420px;
+    margin: 0 auto !important;
+    border-radius: 12px !important;
+    padding: 12px 4px !important;
+    box-shadow: 0 1px 6px #0001 !important;
+    background: #fff !important;
+    margin-top: 18px !important;
+  }
+
+  .attendance-table {
+    font-size: 0.98em !important;
+    margin-top: 8px !important;
+  }
+
+  .attendance-table th,
+  .attendance-table td {
+    padding: 7px 4px !important;
+    font-size: 0.97em !important;
+  }
+
+  .notification-bell-container {
+    position: absolute !important;
+    top: 10px !important;
+    right: 12px !important;
+    z-index: 10 !important;
   }
 }
+
+/* --- END MOBILE RESPONSIVENESS --- */
