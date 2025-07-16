@@ -52,6 +52,8 @@ APP_LOGO_URL = "https://73b6-102-89-32-65.ngrok-free.app/static/logo.png"
 
 # CORS_ALLOWED_ORIGINS
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
     f"http://{host}" if not host.startswith("http") else host
     for host in BASE_HOSTS
 ] + [

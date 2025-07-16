@@ -268,9 +268,9 @@ function Home() {
               </filter>
             </svg>
             {/* Notification count circle (red) */}
-            {unreadCount > 0 && (
+            {notificationCount > 0 && (
               <span className="notification-bell-count">
-                {unreadCount}
+                {notificationCount}
               </span>
             )}
             {/* Animated ping effect */}
@@ -285,101 +285,105 @@ function Home() {
             <div className="dashboard-spinner"></div>
           </div>
         ) : (
-          <div className="dashboard-container">
-            <div
-              className="dashboard-profile"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <div>
-                <p id="username">
-                  <strong>{fullName}</strong>
-                </p>
-                <p>
-                  <strong>{staffId}</strong>
-                </p>
-              </div>
-              <button
-                className="dashboard-qr-btn"
-                onClick={handleShowQrModal}
-                disabled={!qrCodeUrl}
-                title={
-                  qrCodeUrl ? "Click to view QR Code" : "QR Code not available"
-                }
+          <div className="ogin-right">
+            <div className="dashboard-container">
+              <div
+                className="dashboard-profile"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#fff"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ marginRight: 8, verticalAlign: "middle" }}
+                <div>
+                  <p id="username">
+                    <strong>{fullName}</strong>
+                  </p>
+                  <p>
+                    <strong>{staffId}</strong>
+                  </p>
+                </div>
+                <button
+                  className="dashboard-qr-btn"
+                  onClick={handleShowQrModal}
+                  disabled={!qrCodeUrl}
+                  title={
+                    qrCodeUrl
+                      ? "Click to view QR Code"
+                      : "QR Code not available"
+                  }
                 >
-                  <rect x="3" y="3" width="7" height="7" rx="2" />
-                  <rect x="14" y="3" width="7" height="7" rx="2" />
-                  <rect x="14" y="14" width="7" height="7" rx="2" />
-                  <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
-                </svg>
-                Staff QR Code
-              </button>
-            </div>
-            <div className="dashboard-metrics">
-              <div
-                className="dashboard-card"
-                style={{ cursor: "pointer" }}
-                onClick={handleShowDeviceModal}
-                title="Click to view your registered devices"
-              >
-                <span id="num">{deviceCount}</span>
-                <span id="descrip">Registered Devices</span>
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ marginRight: 8, verticalAlign: "middle" }}
+                  >
+                    <rect x="3" y="3" width="7" height="7" rx="2" />
+                    <rect x="14" y="3" width="7" height="7" rx="2" />
+                    <rect x="14" y="14" width="7" height="7" rx="2" />
+                    <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
+                  </svg>
+                  Staff QR Code
+                </button>
               </div>
-              <div
-                className="dashboard-card"
-                style={{ cursor: "pointer" }}
-                onClick={handleShowGuestModal}
-                title="Click to view your registered guests"
-              >
-                <span id="num">{guestCount}</span>
-                <span id="descrip">Registered Guests</span>
+              <div className="dashboard-metrics">
+                <div
+                  className="dashboard-card"
+                  style={{ cursor: "pointer" }}
+                  onClick={handleShowDeviceModal}
+                  title="Click to view your registered devices"
+                >
+                  <span id="num">{deviceCount}</span>
+                  <span id="descrip">Registered Devices</span>
+                </div>
+                <div
+                  className="dashboard-card"
+                  style={{ cursor: "pointer" }}
+                  onClick={handleShowGuestModal}
+                  title="Click to view your registered guests"
+                >
+                  <span id="num">{guestCount}</span>
+                  <span id="descrip">Registered Guests</span>
+                </div>
               </div>
-            </div>
 
-            {/* Attendance Table */}
-            <div className="dashboard-attendance">
-              <h3>Attendance Logs</h3>
-              {attendanceLogs.length > 0 ? (
-                <table className="attendance-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Time In</th>
-                      <th>Time Out</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attendanceLogs.map((log, idx) => (
-                      <tr key={idx}>
-                        <td>{log.date}</td>
-                        <td>{log.time_in || "-"}</td>
-                        <td>{log.time_out || "-"}</td>
-                        <td>{log.status}</td>
+              {/* Attendance Table */}
+              <div className="dashboard-attendance">
+                <h3>Attendance Logs</h3>
+                {attendanceLogs.length > 0 ? (
+                  <table className="attendance-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time In</th>
+                        <th>Time Out</th>
+                        <th>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p>No attendance records found.</p>
-              )}
-            </div>
+                    </thead>
+                    <tbody>
+                      {attendanceLogs.map((log, idx) => (
+                        <tr key={idx}>
+                          <td>{log.date}</td>
+                          <td>{log.time_in || "-"}</td>
+                          <td>{log.time_out || "-"}</td>
+                          <td>{log.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p>No attendance records found.</p>
+                )}
+              </div>
 
-            {/* Remove messages section from homepage */}
+              {/* Remove messages section from homepage */}
+            </div>
           </div>
         )}
       </div>
