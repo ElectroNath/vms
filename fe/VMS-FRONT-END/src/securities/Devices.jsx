@@ -102,12 +102,14 @@ function SecurityDevices() {
   const [employeeList, setEmployeeList] = useState([]);
   const [guestList, setGuestList] = useState([]);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [qrModal, setQrModal] = useState({ open: false, url: "" });
   const [editingId, setEditingId] = useState(null);
   const [editDevice, setEditDevice] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [isloading, setIsloading] = useState(false);
   const [filter, setFilter] = useState({
     device_name: "",
     serial_number: "",
@@ -167,6 +169,8 @@ function SecurityDevices() {
   const handleCreate = async (e) => {
     e.preventDefault();
     setError(""); // Clear previous error
+    setSuccessMessage(""); // Clear previous success message
+    setIsloading(true);
     try {
       const token = Cookies.get("token");
       const payload = {
@@ -188,6 +192,7 @@ function SecurityDevices() {
         is_verified: false,
       });
       fetchDevices();
+      setSuccessMessage("Device created successfully");
     } catch (err) {
       setError(
         err?.response?.data?.detail ||
@@ -195,6 +200,7 @@ function SecurityDevices() {
           "Failed to create device."
       );
     }
+    setIsloading(false);
   };
 
   // Edit modal handlers
@@ -212,6 +218,9 @@ function SecurityDevices() {
     setEditDevice({ ...editDevice, [e.target.name]: e.target.value });
   };
   const handleUpdate = async (id) => {
+    setError("");
+    setSuccessMessage("");
+    setIsloading(true);
     try {
       const token = Cookies.get("token");
       await axios.patch(
@@ -223,9 +232,11 @@ function SecurityDevices() {
       setEditDevice({});
       setShowEditModal(false);
       fetchDevices();
+      setSuccessMessage("Device updated successfully");
     } catch (err) {
       setError("Failed to update device.");
     }
+    setIsloading(false);
   };
 
   // Delete modal handlers
@@ -234,6 +245,9 @@ function SecurityDevices() {
     setShowDeleteModal(true);
   };
   const confirmDelete = async () => {
+    setError("");
+    setSuccessMessage("");
+    setIsloading(true);
     try {
       const token = Cookies.get("token");
       await axios.delete(`${API_BASE_URL}/api/security/devices/${deleteId}/`, {
@@ -242,11 +256,13 @@ function SecurityDevices() {
       setShowDeleteModal(false);
       setDeleteId(null);
       fetchDevices();
+      setSuccessMessage("Device deleted successfully");
     } catch (err) {
       setError("Failed to delete device.");
       setShowDeleteModal(false);
-      setDeleteId(null);
+      setDeleteId(null)
     }
+    setIsloading(false)
   };
   const cancelDelete = () => {
     setShowDeleteModal(false);
@@ -379,8 +395,9 @@ function SecurityDevices() {
                 <button
                   type="submit"
                   className="login-btn adminuser-create-btn"
+                  disabled={isloading}
                 >
-                  Create
+                  {isloading ? "Creating..." : "Create"}
                 </button>
                 <button
                   type="button"
@@ -421,8 +438,9 @@ function SecurityDevices() {
                 <button
                   type="submit"
                   className="login-btn adminuser-create-btn"
+                  disabled={isloading}
                 >
-                  Update
+                  {isloading ? "Updating..." : "Update"}
                 </button>
                 <button
                   type="button"
@@ -450,8 +468,9 @@ function SecurityDevices() {
               <button
                 className="login-btn adminuser-create-btn"
                 onClick={confirmDelete}
+                disabled={isloading}
               >
-                Yes, Delete
+                {isloading ? "Deleting..." : "Yes, Delete"}
               </button>
               <button
                 className="login-btn adminuser-cancel-btn"

@@ -268,9 +268,9 @@ function Home() {
               </filter>
             </svg>
             {/* Notification count circle (red) */}
-            {notificationCount > 0 && (
+            {unreadCount > 0 && (
               <span className="notification-bell-count">
-                {notificationCount}
+                {unreadCount}
               </span>
             )}
             {/* Animated ping effect */}

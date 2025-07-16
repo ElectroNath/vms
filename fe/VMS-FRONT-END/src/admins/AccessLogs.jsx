@@ -10,7 +10,7 @@ function AdminAccessLogs() {
     person_type: "",
     person_name: "",
     person_id: "",
-    device_serial: "",
+    device: "",
     scanned_by: "",
     time_in: "",
     time_out: "",
@@ -21,15 +21,13 @@ function AdminAccessLogs() {
     async function fetchLogs() {
       try {
         const token = Cookies.get("token");
-        const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/access-logs/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const logsData = Array.isArray(res.data)
-          ? res.data
-          : res.data.logs || [];
+        console.log("📦 Admin logs response:", res.data);  // 👈 inspect this
+        setLogs(res.data);  // ⬅️ directly use the array
 
-        setLogs(logsData);
       } catch (err) {
         console.error("Failed to fetch logs:", err);
         setLogs([]);
@@ -44,7 +42,7 @@ function AdminAccessLogs() {
     (filter.person_type === "" || (l.person_type || "").toLowerCase().includes(filter.person_type.toLowerCase())) &&
     (filter.person_name === "" || (l.person_name || "").toLowerCase().includes(filter.person_name.toLowerCase())) &&
     (filter.person_id === "" || String(l.person_id || "").toLowerCase().includes(filter.person_id.toLowerCase())) &&
-    (filter.device_serial === "" || (l.device_serial || "").toLowerCase().includes(filter.device_serial.toLowerCase())) &&
+    (filter.device === "" || (l.device || "").toLowerCase().includes(filter.device.toLowerCase())) &&
     (filter.scanned_by === "" || (l.scanned_by || "").toLowerCase().includes(filter.scanned_by.toLowerCase())) &&
     (filter.time_in === "" || (l.time_in || "").includes(filter.time_in)) &&
     (filter.time_out === "" || (l.time_out || "").includes(filter.time_out)) &&
@@ -84,8 +82,8 @@ function AdminAccessLogs() {
           className="login-input"
           style={{ width: 130 }}
           placeholder="Device Serial"
-          value={filter.device_serial}
-          onChange={e => setFilter({ ...filter, device_serial: e.target.value })}
+          value={filter.device}
+          onChange={e => setFilter({ ...filter, device: e.target.value })}
         />
         <input
           className="login-input"
@@ -122,7 +120,7 @@ function AdminAccessLogs() {
             person_type: "",
             person_name: "",
             person_id: "",
-            device_serial: "",
+            device: "",
             scanned_by: "",
             time_in: "",
             time_out: "",
@@ -155,7 +153,7 @@ function AdminAccessLogs() {
               <td>{l.person_type}</td>
               <td>{l.person_name || "N/A"}</td>
               <td>{l.person_id}</td>
-              <td>{l.device_serial}</td>
+              <td>{l.device}</td>
               <td>{l.scanned_by}</td>
               <td>{l.time_in}</td>
               <td>{l.time_out}</td>
