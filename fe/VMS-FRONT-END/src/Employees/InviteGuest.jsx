@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import Modal from "../components/Modals"; // Ensure this is a styled modal
+import Modal from "../components/Modals";
 import { API_BASE_URL } from "../api";
 
-function InviteGuest() {
+function InviteGuest({ profileImageUrl, userName }) {
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -152,182 +152,164 @@ function InviteGuest() {
   };
 
   return (
-    <div className="form-root">
+    <div className="invite-wrapper">
       <style>{`
-        .form-root {
-          height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 0;
-          background-color: #f2f4f7;
-        }
-
-        .form-container {
-          min-width: 700px;
-          max-width: 1100px;
-          height: 100vh;
-          background: white;
-          padding: 40px;
-          border-radius: 12px;
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-          display: flex;
-          flex-direction: column;
-        }
-
-        .login-form-title {
-          font-size: 30px;
-          font-weight: bold;
-          margin-bottom: 30px;
-        }
-
-        .login-form {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        .login-input-group {
-          position: relative;
-        }
-
-        .login-input {
-          width: 100%;
-          padding: 12px;
-          font-size: 18px;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-          outline: none;
-        }
-
-        .login-input-label {
-          position: absolute;
-          top: -10px;
-          left: 12px;
-          background: white;
-          padding: 0 4px;
-          font-size: 14px;
-          color: #666;
-        }
-
-        .login-btn {
-          padding: 12px;
-          background-color: #007bff;
-          color: white;
-          font-weight: bold;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .login-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
+      .form-wrapper {
+  width: 700px;
+ 
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
 
         @media (max-width: 768px) {
-          .form-root {
-            height: 75px !important;
-            padding: 20px;
-            align-items: flex-start !important;
-            background-color: green;
-            border
+          .invite-wrapper {
+            width: 100vw;
+            height: 100vh;
+            
+           
+            overflow: hidden;
           }
 
-          .form-container {
-            min-width: unset !important;
-            max-width: 100% !important;
-            width: 100% !important;
-            height: auto !important;
-            margin-top: 40px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 24px 20px;
-            border-radius: 12px;
+          .mobile-header {
+            height: 15vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+          }
+
+          .mobile-header-welcome {
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+          }
+
+          .mobile-header-profile {
+            width: 42px;
+            height: 42px;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 2px solid white;
+          }
+
+          .mobile-header-profile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .mobile-header-overflow {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 1;
+          }
+
+          .mobile-header-curve {
+            width: 100%;
+            height: 40px;
+          }
+
+          .form-wrapper {
+            position: absolute;
+            top: 9vh;
+            left: 0;
+            width: 100vw;
+            height: 88vh;
+            background-color: white;
+            border-radius: 24px 24px 0 0;
+            padding: 30px 20px;
+            z-index: 2;
+            overflow-y: auto;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
           }
 
           .login-form-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 22px !important;
-          }
-
-          .login-btn,
-          .login-input {
-            font-size: 16px;
           }
 
           .login-form {
-            gap: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+          }
+
+          .login-input-group {
+            position: relative;
+          }
+
+          .login-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+          }
+
+          .login-input-label {
+            position: absolute;
+            top: -10px;
+            left: 12px;
+            background: white;
+            padding: 0 4px;
+            font-size: 12px;
+            color: #666;
+          }
+
+          .login-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+          }
+
+          .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
           }
         }
       `}</style>
 
-      <div className="form-container">
+      <div className="form-wrapper">
         <div className="login-form-title">Invite Guest</div>
         <form className="login-form" onSubmit={handleSubmit}>
-          <div className="login-input-group">
-            <input
-              className="login-input"
-              type="text"
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
-              placeholder=" "
-              required
-            />
-            <span className="login-input-label">Full Name</span>
-          </div>
-
-          <div className="login-input-group">
-            <input
-              className="login-input"
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder=" "
-              required
-            />
-            <span className="login-input-label">Email</span>
-          </div>
-
-          <div className="login-input-group">
-            <input
-              className="login-input"
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              placeholder=" "
-              required
-            />
-            <span className="login-input-label">Phone</span>
-          </div>
-
-          <div className="login-input-group">
-            <input
-              className="login-input"
-              type="text"
-              name="purpose"
-              value={form.purpose}
-              onChange={handleChange}
-              placeholder=" "
-              required
-            />
-            <span className="login-input-label">Purpose</span>
-          </div>
-
-          <div className="login-input-group">
-            <input
-              className="login-input"
-              type="date"
-              name="visitDate"
-              value={form.visitDate}
-              onChange={handleChange}
-              placeholder=" "
-              required
-            />
-            <span className="login-input-label">Visit Date</span>
-          </div>
+          {["fullName", "email", "phone", "purpose", "visitDate"].map(
+            (field) => (
+              <div className="login-input-group" key={field}>
+                <input
+                  className="login-input"
+                  type={
+                    field === "visitDate"
+                      ? "date"
+                      : field === "email"
+                      ? "email"
+                      : "text"
+                  }
+                  name={field}
+                  value={form[field]}
+                  onChange={handleChange}
+                  placeholder=" "
+                  required
+                />
+                <span className="login-input-label">
+                  {field.charAt(0).toUpperCase() +
+                    field.slice(1).replace("Name", " Name")}
+                </span>
+              </div>
+            )
+          )}
 
           <input
             type="hidden"
