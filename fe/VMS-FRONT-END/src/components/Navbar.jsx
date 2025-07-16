@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import "../styles/Home.css";
 import { API_BASE_URL } from "../api";
 import Logout from "./Logout";
+import Modal from "./Modals";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const menu = [
@@ -14,11 +15,13 @@ const menu = [
 function Navbar() {
   const [username, setUsername] = useState("");
   const [profileId, setProfileId] = useState(null);
-  const [error, setError] = useState("");
   const [profilePicUrl, setProfilePicUrl] = useState(null);
   const [uploadingPic, setUploadingPic] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [modalMessage, setModalMessage] = useState(""); // ✅ modal text
+  const [showModal, setShowModal] = useState(false);     // ✅ modal trigger
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -26,31 +29,19 @@ function Navbar() {
     const fetchProfile = async () => {
       try {
         const token = Cookies.get("token");
-        let user = null;
-        try {
-          const userCookie = Cookies.get("user");
-          if (userCookie) user = JSON.parse(userCookie);
-        } catch {
-          user = null;
-        }
-
-        // If admin, don't show navbar
-        if (user && user.role === "admin") return;
-
         const res = await axios.get(
           `${API_BASE_URL}/api/employee-profiles/me/`,
           {
-            withCredentials: true,
             headers: token ? { Authorization: `Bearer ${token}` } : {},
+            withCredentials: true,
           }
         );
-
         setUsername(res.data.username || "");
         setProfileId(res.data.id || null);
         setProfilePicUrl(res.data.profile_picture_url || null);
-        setError("");
       } catch (err) {
-        setError("Unable to fetch profile.");
+        setModalMessage("Unable to fetch profile.");
+        setShowModal(true);
       }
     };
     fetchProfile();
@@ -59,6 +50,7 @@ function Navbar() {
   const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     setUploadingPic(true);
     try {
       const token = Cookies.get("token");
@@ -76,28 +68,28 @@ function Navbar() {
           withCredentials: true,
         }
       );
+
       setProfilePicUrl(res.data.profile_picture_url);
-      setError("");
+      setModalMessage("Profile picture uploaded successfully.");
+      setShowModal(true);
     } catch (err) {
-      setError("Failed to upload profile picture.");
+      setModalMessage("Failed to upload profile picture.");
+      setShowModal(true);
     } finally {
       setUploadingPic(false);
     }
   };
 
-  // Detect mobile view
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Close sidebar on route change (mobile only)
   useEffect(() => {
     if (isMobile) setSidebarOpen(false);
   }, [location.pathname, isMobile]);
 
-  // Do not render for admin
   let user = null;
   try {
     const userCookie = Cookies.get("user");
@@ -107,38 +99,39 @@ function Navbar() {
   }
   if (user && user.role === "admin") return null;
 
-  // Hamburger button for mobile
-  const Hamburger = (
-    isMobile && (
-      <button
-        className="hamburger-btn"
-        aria-label="Open sidebar menu"
-        onClick={() => setSidebarOpen((open) => !open)}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 40,
-          height: 40,
-          margin: 16,
-          zIndex: 1001,
-        }}
-      >
-        <span className="hamburger-bar" />
-        <span className="hamburger-bar" />
-        <span className="hamburger-bar" />
-      </button>
-    )
+  const Hamburger = isMobile && (
+    <button
+      className="hamburger-btn"
+      aria-label="Open sidebar menu"
+      onClick={() => setSidebarOpen((open) => !open)}
+      style={{
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        width: 40,
+        height: 40,
+        margin: 16,
+        zIndex: 1001,
+      }}
+    >
+      <span className="hamburger-bar" />
+      <span className="hamburger-bar" />
+      <span className="hamburger-bar" />
+    </button>
   );
 
   return (
     <>
+      {showModal && (
+        <Modal message={modalMessage} onClose={() => setShowModal(false)} />
+      )}
+
       <div className="mobile-hamburger-wrapper">{Hamburger}</div>
-      {/* Overlay for mobile sidebar */}
+
       {isMobile && sidebarOpen && (
         <div
           className="sidebar-overlay"
@@ -158,7 +151,6 @@ function Navbar() {
       <div
         className={`home-sidebar${isMobile && sidebarOpen ? " open" : ""}`}
         style={{
-          // Only apply mobile styles if isMobile
           ...(isMobile
             ? {
                 position: "fixed",
@@ -169,9 +161,7 @@ function Navbar() {
                 zIndex: 1001,
                 background: "#247150",
                 transition: "left 0.22s cubic-bezier(.4,0,.2,1)",
-                boxShadow: sidebarOpen
-                  ? "2px 0 12px rgba(0,0,0,0.18)"
-                  : "none",
+                boxShadow: sidebarOpen ? "2px 0 12px rgba(0,0,0,0.18)" : "none",
                 minHeight: "100vh",
               }
             : {
@@ -181,25 +171,9 @@ function Navbar() {
         }}
       >
         <div className="home-sidebar-header">
-          <label
-            htmlFor="profile-pic-upload"
-            style={{
-              cursor: "pointer",
-              marginBottom: 0,
-              position: "relative",
-              display: "inline-block",
-            }}
-          >
+          <label htmlFor="profile-pic-upload" style={{ cursor: "pointer", marginBottom: 0, position: "relative", display: "inline-block" }}>
             <img
-              src={
-                profilePicUrl
-                  ? profilePicUrl.startsWith("http")
-                    ? profilePicUrl
-                    : `${API_BASE_URL}${
-                        profilePicUrl.startsWith("/") ? "" : "/"
-                      }${profilePicUrl}`
-                  : "https://randomuser.me/api/portraits/men/1.jpg"
-              }
+              src={profilePicUrl || "https://randomuser.me/api/portraits/men/1.jpg"}
               alt="avatar"
               className="home-avatar"
               style={{
@@ -252,7 +226,6 @@ function Navbar() {
           </label>
           <div className="home-welcome">
             HI {username && <span>{username.toUpperCase()}</span>}
-            {error && <p className="home-error">{error}</p>}
           </div>
         </div>
 
@@ -265,31 +238,21 @@ function Navbar() {
         )}
 
         <div className="home-menu">
-          {error ? (
-            <div style={{ color: "#ff4d4f", padding: "16px" }}>
-              Error loading menu. {error}
+          {menu.map((item) => (
+            <div
+              key={item.label}
+              className={
+                "home-menu-item" +
+                (location.pathname === item.path ? " home-menu-item-active" : "")
+              }
+              onClick={() => {
+                navigate(item.path);
+                if (isMobile) setSidebarOpen(false);
+              }}
+            >
+              {item.label}
             </div>
-          ) : (
-            <>
-              {menu.map((item, idx) => (
-                <div
-                  key={item.label}
-                  className={
-                    "home-menu-item" +
-                    (location.pathname === item.path
-                      ? " home-menu-item-active"
-                      : "")
-                  }
-                  onClick={() => {
-                    navigate(item.path);
-                    if (isMobile) setSidebarOpen(false); // Only close sidebar on mobile
-                  }}
-                >
-                  {item.label}
-                </div>
-              ))}
-            </>
-          )}
+          ))}
         </div>
 
         <div

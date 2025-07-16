@@ -9,9 +9,11 @@ import "../styles/AdminUser.css";
 function AdminDevices() {
   const [devices, setDevices] = useState([]);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("")
   const [editingId, setEditingId] = useState(null);
   const [editDevice, setEditDevice] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [isloading, setIsloading] = useState(false)
   const [newDevice, setNewDevice] = useState({
     device_name: "",
     serial_number: "",
@@ -100,6 +102,9 @@ function AdminDevices() {
   };
 
   const handleUpdate = async (id) => {
+    setError("")
+    setSuccessMessage("")
+    setIsloading(true)
     try {
       const token = Cookies.get("token");
       await axios.patch(
@@ -111,10 +116,12 @@ function AdminDevices() {
       setEditDevice({});
       setShowEditModal(false);
       fetchDevices();
+      setSuccessMessage("Device updated successfully");
     } catch (err) {
       setError("Failed to update device.");
       console.error("Update device error:", err);
     }
+    setIsloading(false);
   };
 
   const handleDelete = (id) => {
@@ -123,6 +130,9 @@ function AdminDevices() {
   };
 
   const confirmDelete = async () => {
+    setError("")
+    setSuccessMessage("")
+    setIsloading(true)
     try {
       const token = Cookies.get("token");
       await axios.delete(`${API_BASE_URL}/api/devices/${deleteId}/`, {
@@ -131,12 +141,14 @@ function AdminDevices() {
       setShowDeleteModal(false);
       setDeleteId(null);
       fetchDevices();
+      setSuccessMessage("Device updated successfully")
     } catch (err) {
       setError("Failed to delete device.");
       setShowDeleteModal(false);
       setDeleteId(null);
       console.error("Delete device error:", err);
     }
+    setIsloading(false)
   };
 
   const cancelDelete = () => {
@@ -146,6 +158,10 @@ function AdminDevices() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    setError("")
+    setSuccessMessage("")
+    setIsloading(true)
+    
     try {
       const token = Cookies.get("token");
       await axios.post(
@@ -162,10 +178,12 @@ function AdminDevices() {
       });
       setShowModal(false);
       fetchDevices();
+      setSuccessMessage("Device Registered successfully");
     } catch (err) {
       setError("Failed to create device.");
       console.error("Create device error:", err);
     }
+    setIsloading(false);
   };
 
   // Filtered devices
@@ -309,8 +327,8 @@ function AdminDevices() {
                 </label>
               </div>
               <div className="adminuser-modal-btn-row">
-                <button type="submit" className="login-btn adminuser-create-btn">
-                  Create
+                <button type="submit" className="login-btn adminuser-create-btn" disabled={isloading}>
+                  {isloading?"Registering...":"Add "}
                 </button>
                 <button
                   type="button"
@@ -401,8 +419,8 @@ function AdminDevices() {
                 </label>
               </div>
               <div className="adminuser-modal-btn-row">
-                <button type="submit" className="login-btn adminuser-create-btn">
-                  Save
+                <button type="submit" className="login-btn adminuser-create-btn" disabled={isloading}>
+                  {isloading?"Save...":"Save"}
                 </button>
                 <button
                   type="button"
@@ -426,8 +444,9 @@ function AdminDevices() {
               <button
                 className="login-btn adminuser-create-btn"
                 onClick={confirmDelete}
+                disabled={isloading}
               >
-                Yes, Delete
+                {isloading?"Deleting...":"Delete"}
               </button>
               <button
                 className="login-btn adminuser-cancel-btn"
@@ -439,7 +458,8 @@ function AdminDevices() {
           </div>
         </div>
       )}
-      {error && <div style={{ color: "red", marginBottom: 10 }}>{error}</div>}
+      {successMessage && <div style={{ color: "green" }}>{successMessage}</div>}
+      {error && <div style={{ color: "red" }}>{error}</div>}
       <table className="admin-table">
         <thead>
           <tr>

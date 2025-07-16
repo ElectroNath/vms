@@ -9,6 +9,7 @@ import "../styles/AdminUser.css"; // For add button style
 function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editUser, setEditUser] = useState({});
   const [creating, setCreating] = useState(false);
@@ -17,6 +18,9 @@ function AdminUsers() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
   const [filter, setFilter] = useState({
     username: "",
     email: "",
@@ -64,6 +68,9 @@ function AdminUsers() {
   };
 
   const handleUpdate = async (id) => {
+    setError("");
+    setSuccessMessage("");
+    setLoadingUpdate(true);
     try {
       const token = Cookies.get("token");
       await axios.patch(
@@ -75,10 +82,12 @@ function AdminUsers() {
       setEditUser({});
       setShowEditModal(false);
       fetchUsers();
+      setSuccessMessage("User updated successfully.");
     } catch (err) {
       setError("Failed to update user.");
       console.error("Update user error:", err);
     }
+    setLoadingUpdate(false);
   };
 
   const handleDelete = (id) => {
@@ -87,6 +96,9 @@ function AdminUsers() {
   };
 
   const confirmDelete = async () => {
+    setError("");
+    setSuccessMessage("");
+    setLoadingDelete(true);
     try {
       const token = Cookies.get("token");
       await axios.delete(`${API_BASE_URL}/api/employees/${deleteId}/`, {
@@ -95,12 +107,15 @@ function AdminUsers() {
       setShowDeleteModal(false);
       setDeleteId(null);
       fetchUsers();
+      setSuccessMessage("User deleted successfully.");
+
     } catch (err) {
       setError("Failed to delete user.");
       setShowDeleteModal(false);
       setDeleteId(null);
       console.error("Delete user error:", err);
     }
+    setLoadingDelete(false);
   };
 
   const cancelDelete = () => {
@@ -110,12 +125,16 @@ function AdminUsers() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(newUser.email)) {
-    setError("Please enter a valid email address.");
-    setShowModal(true);
-    return;
-  }
+    setError("");
+    setSuccessMessage("");
+    setLoadingCreate(true);
+
+    if (!/\S+@\S+\.\S+/.test(newUser.email)) {
+      setError("Please enter a valid email address.");
+      setShowModal(true);
+      setLoadingCreate(false);
+      return;
+    }
     try {
       const token = Cookies.get("token");
       await axios.post(
@@ -127,10 +146,12 @@ function AdminUsers() {
     
       setShowModal(false);
       fetchUsers();
+      setSuccessMessage("User created successfully.");
     } catch (err) {
       setError("Failed to create user.");
       console.error("Create user error:", err);
-    }
+    } 
+    setLoadingCreate(false);
   };
 
   // Filtered users
@@ -201,6 +222,7 @@ function AdminUsers() {
       >
         Add User
       </button>
+      
       {showModal && (
         <div className="qr-modal-overlay adminuser-modal-overlay">
           <div className="qr-modal-content adminuser-modal-content">
@@ -256,8 +278,8 @@ function AdminUsers() {
                 </label>
               </div>
               <div className="adminuser-modal-btn-row">
-                <button type="submit" className="login-btn adminuser-create-btn">
-                  Create
+                <button type="submit" className="login-btn adminuser-create-btn" disabled={loadingCreate}>
+                  {loadingCreate ? "Creating..." : "Create"}
                 </button>
                 <button
                   type="button"
@@ -336,8 +358,8 @@ function AdminUsers() {
                   type="button"
                   className="login-btn adminuser-cancel-btn"
                   onClick={handleEditModalClose}
-                >
-                  Cancel
+                  disabled={loadingUpdate}>
+                    {loadingUpdate ? "Saving..." : "Save"}
                 </button>
               </div>
               {error && <div className="login-error">{error}</div>}
@@ -354,20 +376,22 @@ function AdminUsers() {
               <button
                 className="login-btn adminuser-create-btn"
                 onClick={confirmDelete}
-              >
-                Yes, Delete
+                disabled={loadingDelete}>
+                  {loadingDelete ? "Deleting..." : "Delete"}
+                
               </button>
               <button
                 className="login-btn adminuser-cancel-btn"
                 onClick={cancelDelete}
-              >
-                Cancel
+                >
+                  Cancel
               </button>
             </div>
           </div>
         </div>
       )}
-      {error && <div style={{ color: "red", marginBottom: 10 }}>{error}</div>}
+      {successMessage && <div style={{ color: "green" }}>{successMessage}</div>}
+      {error && <div style={{ color: "red" }}>{error}</div>}
       <table className="admin-table">
         <thead>
           <tr>

@@ -12,10 +12,15 @@ function AdminMessages() {
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("")
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false)
+
 
   const fetchMessages = async () => {
     try {
@@ -36,6 +41,8 @@ function AdminMessages() {
   const handleCreate = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("")
+    setLoadingCreate(true)
     try {
       const token = Cookies.get("token");
       await axios.post(
@@ -46,10 +53,12 @@ function AdminMessages() {
       setContent("");
       setShowModal(false);
       fetchMessages();
+      setSuccessMessage("Message Added and Sent Succesfully")
     } catch (err) {
-      setError("Failed to create message.");
+      setError("Failed to Add message.");
       console.error("Create message error:", err);
     }
+    setLoadingCreate(false)
   };
 
   const handleEdit = (id, currentContent) => {
@@ -65,6 +74,9 @@ function AdminMessages() {
   };
 
   const handleUpdate = async (id) => {
+    setError("")
+    setSuccessMessage("")
+    setLoadingUpdate(true)
     try {
       const token = Cookies.get("token");
       await axios.patch(
@@ -76,10 +88,12 @@ function AdminMessages() {
       setEditContent("");
       setShowEditModal(false);
       fetchMessages();
+      setSuccessMessage("Message updated successfully")
     } catch (err) {
       setError("Failed to update message.");
       console.error("Update message error:", err);
     }
+    setLoadingUpdate(false)
   };
 
   const handleDelete = (id) => {
@@ -88,6 +102,9 @@ function AdminMessages() {
   };
 
   const confirmDelete = async () => {
+    setError("")
+    setSuccessMessage("")
+    setLoadingDelete("")
     try {
       const token = Cookies.get("token");
       await axios.delete(`${API_BASE_URL}/api/messages/${deleteId}/`, {
@@ -96,12 +113,14 @@ function AdminMessages() {
       setShowDeleteModal(false);
       setDeleteId(null);
       fetchMessages();
+      setSuccessMessage("Message deleted successfully")
     } catch (err) {
       setError("Failed to delete message.");
       setShowDeleteModal(false);
       setDeleteId(null);
       console.error("Delete message error:", err);
     }
+    setLoadingDelete(false)
   };
 
   const cancelDelete = () => {
@@ -139,8 +158,8 @@ function AdminMessages() {
                 <span className="login-input-label">New message</span>
               </div>
               <div className="adminuser-modal-btn-row">
-                <button type="submit" className="login-btn adminuser-create-btn">
-                  Create
+                <button type="submit" className="login-btn adminuser-create-btn" disabled={loadingCreate}>
+                  {loadingCreate?"Adding...":"Add"}
                 </button>
                 <button
                   type="button"
@@ -179,8 +198,8 @@ function AdminMessages() {
                 <span className="login-input-label">Edit message</span>
               </div>
               <div className="adminuser-modal-btn-row">
-                <button type="submit" className="login-btn adminuser-create-btn">
-                  Save
+                <button type="submit" className="login-btn adminuser-create-btn" disabled={loadingUpdate}>
+                  {loadingUpdate?"saving...":"Save"}
                 </button>
                 <button
                   type="button"
@@ -203,9 +222,9 @@ function AdminMessages() {
             <div className="adminuser-modal-btn-row">
               <button
                 className="login-btn adminuser-create-btn"
-                onClick={confirmDelete}
+                onClick={confirmDelete} disabled={loadingDelete}
               >
-                Yes, Delete
+                {loadingDelete?"Deleting...":"Delete"}
               </button>
               <button
                 className="login-btn adminuser-cancel-btn"
@@ -217,6 +236,8 @@ function AdminMessages() {
           </div>
         </div>
       )}
+      {successMessage && <div style={{ color: "green" }}>{successMessage}</div>}
+      {error && <div style={{ color: "red" }}>{error}</div>}
       <table className="admin-table">
         <thead>
           <tr>

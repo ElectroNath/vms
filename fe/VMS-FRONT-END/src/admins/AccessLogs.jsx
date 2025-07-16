@@ -8,6 +8,7 @@ function AdminAccessLogs() {
   const [logs, setLogs] = useState([]);
   const [filter, setFilter] = useState({
     person_type: "",
+    person_name: "",
     person_id: "",
     device_serial: "",
     scanned_by: "",
@@ -17,31 +18,32 @@ function AdminAccessLogs() {
   });
 
   useEffect(() => {
-  async function fetchLogs() {
-    try {
-      const token = Cookies.get("token");
-      const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    async function fetchLogs() {
+      try {
+        const token = Cookies.get("token");
+        const res = await axios.get(`${API_BASE_URL}/api/access-logs/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      const logsData = Array.isArray(res.data)
-        ? res.data
-        : res.data.logs || [];
+        const logsData = Array.isArray(res.data)
+          ? res.data
+          : res.data.logs || [];
 
-      setLogs(logsData);
-    } catch (err) {
-      console.error("Failed to fetch logs:", err);
-      setLogs([]);
+        setLogs(logsData);
+      } catch (err) {
+        console.error("Failed to fetch logs:", err);
+        setLogs([]);
+      }
     }
-  }
 
-  fetchLogs();
-}, []);
+    fetchLogs();
+  }, []);
 
   // Filtered logs
   const filteredLogs = logs.filter(l =>
-    (filter.person_type === "" || l.person_type.toLowerCase().includes(filter.person_type.toLowerCase())) &&
-    (filter.person_id === "" || String(l.person_id).toLowerCase().includes(filter.person_id.toLowerCase())) &&
+    (filter.person_type === "" || (l.person_type || "").toLowerCase().includes(filter.person_type.toLowerCase())) &&
+    (filter.person_name === "" || (l.person_name || "").toLowerCase().includes(filter.person_name.toLowerCase())) &&
+    (filter.person_id === "" || String(l.person_id || "").toLowerCase().includes(filter.person_id.toLowerCase())) &&
     (filter.device_serial === "" || (l.device_serial || "").toLowerCase().includes(filter.device_serial.toLowerCase())) &&
     (filter.scanned_by === "" || (l.scanned_by || "").toLowerCase().includes(filter.scanned_by.toLowerCase())) &&
     (filter.time_in === "" || (l.time_in || "").includes(filter.time_in)) &&
@@ -52,7 +54,8 @@ function AdminAccessLogs() {
   return (
     <div className="admin-table-page">
       <h2>Access Logs</h2>
-      <div style={{ marginBottom: 12, display: "flex", gap: 10, alignItems: "center" }}>
+
+      <div style={{ marginBottom: 12, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <span style={{ fontWeight: 500, marginRight: 8, color: "#444" }}>
           Filter logs by:
         </span>
@@ -65,6 +68,13 @@ function AdminAccessLogs() {
         />
         <input
           className="login-input"
+          style={{ width: 140 }}
+          placeholder="Person Name"
+          value={filter.person_name}
+          onChange={e => setFilter({ ...filter, person_name: e.target.value })}
+        />
+        <input
+          className="login-input"
           style={{ width: 90 }}
           placeholder="Person ID"
           value={filter.person_id}
@@ -72,28 +82,28 @@ function AdminAccessLogs() {
         />
         <input
           className="login-input"
-          style={{ width: 120 }}
+          style={{ width: 130 }}
           placeholder="Device Serial"
           value={filter.device_serial}
           onChange={e => setFilter({ ...filter, device_serial: e.target.value })}
         />
         <input
           className="login-input"
-          style={{ width: 110 }}
+          style={{ width: 120 }}
           placeholder="Scanned By"
           value={filter.scanned_by}
           onChange={e => setFilter({ ...filter, scanned_by: e.target.value })}
         />
         <input
           className="login-input"
-          style={{ width: 120 }}
+          style={{ width: 140 }}
           placeholder="Time In (YYYY-MM-DD)"
           value={filter.time_in}
           onChange={e => setFilter({ ...filter, time_in: e.target.value })}
         />
         <input
           className="login-input"
-          style={{ width: 120 }}
+          style={{ width: 140 }}
           placeholder="Time Out (YYYY-MM-DD)"
           value={filter.time_out}
           onChange={e => setFilter({ ...filter, time_out: e.target.value })}
@@ -110,6 +120,7 @@ function AdminAccessLogs() {
           style={{ background: "#aaa", fontSize: 14, padding: "6px 16px" }}
           onClick={() => setFilter({
             person_type: "",
+            person_name: "",
             person_id: "",
             device_serial: "",
             scanned_by: "",
@@ -122,11 +133,13 @@ function AdminAccessLogs() {
           Clear
         </button>
       </div>
+
       <table className="admin-table">
         <thead>
           <tr>
             <th>ID</th>
             <th>Person Type</th>
+            <th>Person Name</th>
             <th>Person ID</th>
             <th>Device Serial</th>
             <th>Scanned By</th>
@@ -140,6 +153,7 @@ function AdminAccessLogs() {
             <tr key={l.id}>
               <td>{l.id}</td>
               <td>{l.person_type}</td>
+              <td>{l.person_name || "N/A"}</td>
               <td>{l.person_id}</td>
               <td>{l.device_serial}</td>
               <td>{l.scanned_by}</td>

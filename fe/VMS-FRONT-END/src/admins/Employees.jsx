@@ -9,6 +9,7 @@ import "../styles/AdminUser.css";
 function AdminEmployees() {
   const [employees, setEmployees] = useState([]);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editEmployee, setEditEmployee] = useState({});
   const [showModal, setShowModal] = useState(false);
@@ -23,6 +24,9 @@ function AdminEmployees() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
   const [filter, setFilter] = useState({
     full_name: "",
     department: "",
@@ -82,6 +86,9 @@ function AdminEmployees() {
   };
 
   const handleUpdate = async (id) => {
+    setError("");
+    setSuccessMessage("");
+    setLoadingUpdate(true);
     try {
       const token = Cookies.get("token");
       await axios.patch(
@@ -93,10 +100,12 @@ function AdminEmployees() {
       setEditEmployee({});
       setShowEditModal(false);
       fetchEmployees();
+      setSuccessMessage("Employee updated successfully.");
     } catch (err) {
       setError("Failed to update employee.");
       console.error("Update employee error:", err);
     }
+    setLoadingUpdate(false);
   };
 
   const handleDelete = (id) => {
@@ -105,6 +114,9 @@ function AdminEmployees() {
   };
 
   const confirmDelete = async () => {
+    setError("");
+    setSuccessMessage("");
+    setLoadingDelete(true);
     try {
       const token = Cookies.get("token");
       await axios.delete(`${API_BASE_URL}/api/employee-profiles/${deleteId}/`, {
@@ -113,12 +125,14 @@ function AdminEmployees() {
       setShowDeleteModal(false);
       setDeleteId(null);
       fetchEmployees();
+      setSuccessMessage("Employee deleted succesfully")
     } catch (err) {
       setError("Failed to delete employee.");
       setShowDeleteModal(false);
       setDeleteId(null);
       console.error("Delete employee error:", err);
     }
+    setLoadingDelete(false);
   };
 
   const cancelDelete = () => {
@@ -128,6 +142,9 @@ function AdminEmployees() {
 
  const handleCreate = async (e) => {
   e.preventDefault();
+  setError("");
+  setSuccessMessage("");
+  setLoadingCreate(true);
   try {
     const token = Cookies.get("token");
 
@@ -137,8 +154,8 @@ function AdminEmployees() {
       user: parseInt(newEmployee.user) // ✅ Convert user ID to integer
     };
 
-    console.log("Submitting new employee data:", newEmployee);
-    console.log("📦 Payload being sent to backend:", payload);
+    // console.log("Submitting new employee data:", newEmployee);
+    // console.log("📦 Payload being sent to backend:", payload);
 
     await axios.post(
       `${API_BASE_URL}/api/employee-profiles/`,
@@ -161,18 +178,21 @@ function AdminEmployees() {
     });
     setShowModal(false);
     fetchEmployees();
+    setSuccessMessage("Employee created successfully.");
   } catch (err) {
     setError("Failed to create employee.");
 
-    if (err.response) {
-      console.error("🚫 Validation errors from backend:", err.response.data);
-      console.error("📦 Status Code:", err.response.status);
-    } else if (err.request) {
-      console.error("❌ No response from server. Request:", err.request);
-    } else {
-      console.error("⚠️ Error setting up request:", err.message);
-    }
+
+    // if (err.response) {
+    //   console.error("🚫 Validation errors from backend:", err.response.data);
+    //   console.error("📦 Status Code:", err.response.status);
+    // } else if (err.request) {
+    //   console.error("❌ No response from server. Request:", err.request);
+    // } else {
+    //   console.error("⚠️ Error setting up request:", err.message);
+    // }
   }
+  setLoadingCreate(false);
 };
 
 
@@ -314,8 +334,8 @@ function AdminEmployees() {
                 <span className="login-input-label">Staff ID</span>
               </div>
               <div className="adminuser-modal-btn-row">
-                <button type="submit" className="login-btn adminuser-create-btn">
-                  Create
+                <button type="submit" className="login-btn adminuser-create-btn" disabled={loadingCreate}>
+                  {loadingCreate?"Creating...":"Create"}
                 </button>
                 <button
                   type="button"
@@ -386,8 +406,8 @@ function AdminEmployees() {
                 <span className="login-input-label">Staff ID</span>
               </div>
               <div className="adminuser-modal-btn-row">
-                <button type="submit" className="login-btn adminuser-create-btn">
-                  Save
+                <button type="submit" className="login-btn adminuser-create-btn" disabled={loadingUpdate}>
+                  {loadingUpdate?"Saving...":"Save"}
                 </button>
                 <button
                   type="button"
@@ -411,8 +431,9 @@ function AdminEmployees() {
               <button
                 className="login-btn adminuser-create-btn"
                 onClick={confirmDelete}
+                disabled={loadingDelete}
               >
-                Yes, Delete
+                {loadingDelete?"Deleting...":"Delete"}
               </button>
               <button
                 className="login-btn adminuser-cancel-btn"
@@ -424,7 +445,8 @@ function AdminEmployees() {
           </div>
         </div>
       )}
-      {error && <div style={{ color: "red", marginBottom: 10 }}>{error}</div>}
+      {successMessage && <div style={{ color: "green" }}>{successMessage}</div>}
+      {error && <div style={{ color: "red" }}>{error}</div>}
       <table className="admin-table">
         <thead>
           <tr>
