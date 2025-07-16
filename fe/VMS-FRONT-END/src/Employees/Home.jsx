@@ -213,6 +213,7 @@ function Home() {
       {/* Overlay for loading */}
       {/* Spinner removed as requested */}
       {/* Main Content */}
+
       <div className={`home-main${loading ? " blurred" : ""}`}>
         {/* Notification Bell Icon at top right */}
         <div className="notification-bell-container">

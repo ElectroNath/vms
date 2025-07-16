@@ -27,7 +27,6 @@ body {
 .home-root {
   display: flex;
   height: 100vh;
-  background: green;
 }
 
 .home-sidebar {
@@ -821,8 +820,8 @@ body {
 
   .dashboard-profile {
     width: 94vw !important;
-    max-width: 420px;
-
+    max-width: 364px;
+    height: 107px !important;
     border-radius: 18px !important;
     box-shadow: 0 4px 24px #0002 !important;
     padding: 18px 12px 14px 12px !important;
@@ -855,17 +854,19 @@ body {
   }
 
   .dashboard-metrics {
-    flex-direction: row !important;
-    gap: 12px !important;
-    width: 94vw !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+    width: 94vw;
     max-width: 420px;
-    margin: 0 auto !important;
-    justify-content: space-between !important;
+    margin: 0 auto;
+    flex-wrap: nowrap; /* <-- important to keep them on the same line */
   }
 
   .dashboard-card {
     min-width: 0 !important;
-    max-width: 100% !important;
+    max-width: 49% !important;
     width: 48vw !important;
     height: auto !important;
     padding: 18px 0 10px 0 !important;
@@ -969,4 +970,48 @@ body {
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
+}
+/* Mobile layout split */
+@media (max-width: 600px) {
+  .home-main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    border-radius: 35px 35px 0 0;
+  }
+
+  .ogin-top {
+    height: 15%;
+    background: linear-gradient(135deg, #1abc9c, #247150);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 16px;
+    position: relative;
+  }
+
+  .ogin-right {
+    .ogin-right {
+      padding: 16px 2vw;
+      align-items: flex-start;
+      height: auto;
+      min-height: 60vh;
+      border-radius: 32px 32px 0 0;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      margin-top: -24px;
+      z-index: 20;
+      background: #fff;
+      overflow: visible;
+      width: 100vw;
+      max-width: 100vw;
+      min-width: 0;
+      box-sizing: border-box;
+      flex: 1 1 auto;
+    }
+  }
+
+  .notification-bell-container {
+    position: relative;
+  }
 }

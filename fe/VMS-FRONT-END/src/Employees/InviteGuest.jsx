@@ -167,7 +167,7 @@ function InviteGuest({ profileImageUrl, userName }) {
           .invite-wrapper {
             width: 100vw;
             height: 100vh;
-            background: green;
+            
            
             overflow: hidden;
           }
@@ -216,7 +216,7 @@ function InviteGuest({ profileImageUrl, userName }) {
 
           .form-wrapper {
             position: absolute;
-            top: 12vh;
+            top: 9vh;
             left: 0;
             width: 100vw;
             height: 88vh;
