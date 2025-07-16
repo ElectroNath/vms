@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../styles/Form.css";
-import { API_BASE_URL } from "../api";
 import Cookies from "js-cookie";
-import Modal from "../components/Modals";
+import Modal from "../components/Modals"; // Ensure this is a styled modal
+import { API_BASE_URL } from "../api";
 
 function InviteGuest() {
   const [form, setForm] = useState({
@@ -20,7 +19,6 @@ function InviteGuest() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Fetch user ID
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -42,10 +40,7 @@ function InviteGuest() {
         if (res?.data?.id) {
           setForm((f) => ({ ...f, invited_by: String(res.data.id) }));
         } else {
-          setError(
-            "Could not determine your employee profile ID. Please contact admin."
-          );
-          setShowModal(true);
+          throw new Error();
         }
       } catch {
         setError(
@@ -157,95 +152,177 @@ function InviteGuest() {
   };
 
   return (
-    <div
-      className="form-root"
-      style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        position: "relative",
-        margin: "auto",
-        padding: 0,
-      }}
-    >
-      <div
-        className="form-container"
-        style={{ minWidth: 700, maxWidth: 1100, height: "100vh" }}
-      >
-        <div
-          className="login-form-title"
-          style={{ marginBottom: 30, textAlign: "left", fontSize: 30 }}
-        >
-          Invite Guest
-        </div>
+    <div className="form-root">
+      <style>{`
+        .form-root {
+          height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 0;
+          background-color: #f2f4f7;
+        }
 
+        .form-container {
+          min-width: 700px;
+          max-width: 1100px;
+          height: 100vh;
+          background: white;
+          padding: 40px;
+          border-radius: 12px;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .login-form-title {
+          font-size: 30px;
+          font-weight: bold;
+          margin-bottom: 30px;
+        }
+
+        .login-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .login-input-group {
+          position: relative;
+        }
+
+        .login-input {
+          width: 100%;
+          padding: 12px;
+          font-size: 18px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          outline: none;
+        }
+
+        .login-input-label {
+          position: absolute;
+          top: -10px;
+          left: 12px;
+          background: white;
+          padding: 0 4px;
+          font-size: 14px;
+          color: #666;
+        }
+
+        .login-btn {
+          padding: 12px;
+          background-color: #007bff;
+          color: white;
+          font-weight: bold;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+
+        .login-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+          .form-root {
+            height: auto !important;
+            padding: 20px;
+            align-items: flex-start !important;
+            background-color: white;
+            border
+          }
+
+          .form-container {
+            min-width: unset !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            height: auto !important;
+            margin-top: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 24px 20px;
+            border-radius: 12px;
+          }
+
+          .login-form-title {
+            text-align: center;
+            font-size: 22px !important;
+          }
+
+          .login-btn,
+          .login-input {
+            font-size: 16px;
+          }
+
+          .login-form {
+            gap: 1.1rem;
+          }
+        }
+      `}</style>
+
+      <div className="form-container">
+        <div className="login-form-title">Invite Guest</div>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-input-group">
             <input
               className="login-input"
               type="text"
-              id="fullName"
               name="fullName"
               value={form.fullName}
               onChange={handleChange}
-              autoComplete="off"
               placeholder=" "
               required
             />
             <span className="login-input-label">Full Name</span>
           </div>
+
           <div className="login-input-group">
             <input
               className="login-input"
               type="email"
-              id="email"
               name="email"
               value={form.email}
               onChange={handleChange}
-              autoComplete="off"
               placeholder=" "
               required
             />
             <span className="login-input-label">Email</span>
           </div>
+
           <div className="login-input-group">
             <input
               className="login-input"
               type="tel"
-              id="phone"
               name="phone"
               value={form.phone}
               onChange={handleChange}
-              autoComplete="off"
               placeholder=" "
               required
             />
             <span className="login-input-label">Phone</span>
           </div>
+
           <div className="login-input-group">
             <input
               className="login-input"
               type="text"
-              id="purpose"
               name="purpose"
               value={form.purpose}
               onChange={handleChange}
-              autoComplete="off"
               placeholder=" "
               required
             />
             <span className="login-input-label">Purpose</span>
           </div>
+
           <div className="login-input-group">
             <input
               className="login-input"
               type="date"
-              id="visitDate"
               name="visitDate"
               value={form.visitDate}
               onChange={handleChange}
-              autoComplete="off"
               placeholder=" "
               required
             />
