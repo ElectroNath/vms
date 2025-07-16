@@ -165,7 +165,7 @@ function AdminDevices() {
     try {
       const token = Cookies.get("token");
       await axios.post(
-        `${API_BASE_URL}/api/devices/`,
+        `${API_BASE_URL}/api/admin/devices/`,
         newDevice,
         { headers: { Authorization: `Bearer ${token}` } }
       );
