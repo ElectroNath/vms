@@ -27,7 +27,7 @@ body {
 .home-root {
   display: flex;
   height: 100vh;
-  background: #f5f5f5;
+  background: green;
 }
 
 .home-sidebar {
@@ -796,7 +796,7 @@ body {
     flex: 1;
     width: 100vw !important;
     min-height: 0;
-    background: #f5f5f5 !important;
+    background: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -822,7 +822,7 @@ body {
   .dashboard-profile {
     width: 94vw !important;
     max-width: 420px;
-    margin: 18px auto 0 auto !important;
+
     border-radius: 18px !important;
     box-shadow: 0 4px 24px #0002 !important;
     padding: 18px 12px 14px 12px !important;
@@ -949,7 +949,7 @@ body {
 .hamburger-bar {
   width: 24px;
   height: 3px;
-  background: white;
+  background: rgb(10, 5, 5);
   margin: 3px 0;
   border-radius: 2px;
 }

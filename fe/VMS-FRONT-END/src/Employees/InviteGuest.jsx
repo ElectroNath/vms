@@ -227,10 +227,10 @@ function InviteGuest() {
 
         @media (max-width: 768px) {
           .form-root {
-            height: auto !important;
+            height: 75px !important;
             padding: 20px;
             align-items: flex-start !important;
-            background-color: white;
+            background-color: green;
             border
           }
 
