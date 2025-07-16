@@ -154,6 +154,15 @@ function InviteGuest({ profileImageUrl, userName }) {
   return (
     <div className="invite-wrapper">
       <style>{`
+      .form-wrapper {
+  width: 700px;
+ 
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
         @media (max-width: 768px) {
           .invite-wrapper {
             width: 100vw;
