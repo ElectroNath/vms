@@ -868,7 +868,7 @@ body {
     min-width: 0 !important;
     max-width: 49% !important;
     width: 48vw !important;
-    height: auto !important;
+    height: 30 !important;
     padding: 18px 0 10px 0 !important;
     border-radius: 12px !important;
     margin: 0 !important;
@@ -990,7 +990,11 @@ body {
     padding: 0 16px;
     position: relative;
   }
-
+  .home-welcome {
+    margin-top: 35px;
+    position: relative;
+    z-index: 1000;
+  }
   .ogin-right {
     .ogin-right {
       padding: 16px 2vw;
@@ -1010,7 +1014,10 @@ body {
       flex: 1 1 auto;
     }
   }
-
+  .notification-bell-wrapper {
+    margin-top: 50px;
+    justify-content: flex-end;
+  }
   .notification-bell-container {
     position: relative;
   }

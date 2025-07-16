@@ -208,327 +208,348 @@ function Home() {
     window.location.pathname === "/invite-guest";
 
   return (
-    <div className="home-root">
-      {/* Navbar removed: now handled globally in AppLayout/AppRouter for employee pages */}
-      {/* Overlay for loading */}
-      {/* Spinner removed as requested */}
-      {/* Main Content */}
+    <div className="context">
+      <div className="home-root">
+        {/* Navbar removed: now handled globally in AppLayout/AppRouter for employee pages */}
+        {/* Overlay for loading */}
+        {/* Spinner removed as requested */}
+        {/* Main Content */}
 
-      <div className={`home-main${loading ? " blurred" : ""}`}>
-        {/* Notification Bell Icon at top right */}
-        <div className="notification-bell-container">
-          <div
-            className="notification-bell-wrapper"
-            style={{ cursor: "pointer" }}
-            onClick={handleNotificationClick}
-          >
-            {/* Modern Bell SVG icon with gradient and shadow */}
-            <svg
-              className="notification-bell-icon"
-              width="54"
-              height="59"
-              viewBox="0 0 44 44"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+        <div className={`home-main${loading ? " blurred" : ""}`}>
+          {/* Notification Bell Icon at top right */}
+
+          <div className="notification-bell-container">
+            <div
+              className="notification-bell-wrapper"
+              style={{ cursor: "pointer" }}
+              onClick={handleNotificationClick}
             >
-              <defs>
-                <radialGradient id="bellGlow" cx="50%" cy="50%" r="70%">
-                  <stop offset="0%" stopColor="#1abc9c" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#247150" stopOpacity="0.1" />
-                </radialGradient>
-                <linearGradient id="bellBody" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2ecc71" />
-                  <stop offset="100%" stopColor="#247150" />
-                </linearGradient>
-              </defs>
-              <ellipse cx="22" cy="22" rx="20" ry="20" fill="url(#bellGlow)" />
-              <g filter="url(#bellShadow)">
-                <path
-                  d="M32 30v-7a10 10 0 1 0-20 0v7c0 1.2-.9 2.1-1.5 3h23c-.6-.9-1.5-1.8-1.5-3"
-                  fill="url(#bellBody)"
-                  stroke="#247150"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M25.5 36a3.5 3.5 0 0 1-7 0"
-                  stroke="#247150"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-              </g>
-              <filter id="bellShadow" x="0" y="0" width="44" height="44">
-                <feDropShadow
-                  dx="0"
-                  dy="2"
-                  stdDeviation="2"
-                  floodColor="#247150"
-                  floodOpacity="0.18"
-                />
-              </filter>
-            </svg>
-            {/* Notification count circle (red) */}
-            {notificationCount > 0 && (
-              <span className="notification-bell-count">
-                {notificationCount}
-              </span>
-            )}
-            {/* Animated ping effect */}
-            {notificationCount > 0 && (
-              <span className="notification-bell-ping"></span>
-            )}
-          </div>
-        </div>
-        <div className="home-main-title"></div>
-        {loading ? (
-          <div className="dashboard-loader">
-            <div className="dashboard-spinner"></div>
-          </div>
-        ) : (
-          <div className="ogin-right">
-            <div className="dashboard-container">
-              <div
-                className="dashboard-profile"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
+              {/* Modern Bell SVG icon with gradient and shadow */}
+              <svg
+                className="notification-bell-icon"
+                width="54"
+                height="59"
+                viewBox="0 0 44 44"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <div>
-                  <p id="username">
-                    <strong>{fullName}</strong>
-                  </p>
-                  <p>
-                    <strong>{staffId}</strong>
-                  </p>
-                </div>
-                <button
-                  className="dashboard-qr-btn"
-                  onClick={handleShowQrModal}
-                  disabled={!qrCodeUrl}
-                  title={
-                    qrCodeUrl
-                      ? "Click to view QR Code"
-                      : "QR Code not available"
-                  }
-                >
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#fff"
+                <defs>
+                  <radialGradient id="bellGlow" cx="50%" cy="50%" r="70%">
+                    <stop offset="0%" stopColor="#1abc9c" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#247150" stopOpacity="0.1" />
+                  </radialGradient>
+                  <linearGradient id="bellBody" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2ecc71" />
+                    <stop offset="100%" stopColor="#247150" />
+                  </linearGradient>
+                </defs>
+                <ellipse
+                  cx="22"
+                  cy="22"
+                  rx="20"
+                  ry="20"
+                  fill="url(#bellGlow)"
+                />
+                <g filter="url(#bellShadow)">
+                  <path
+                    d="M32 30v-7a10 10 0 1 0-20 0v7c0 1.2-.9 2.1-1.5 3h23c-.6-.9-1.5-1.8-1.5-3"
+                    fill="url(#bellBody)"
+                    stroke="#247150"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M25.5 36a3.5 3.5 0 0 1-7 0"
+                    stroke="#247150"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ marginRight: 8, verticalAlign: "middle" }}
+                    fill="none"
+                  />
+                </g>
+                <filter id="bellShadow" x="0" y="0" width="44" height="44">
+                  <feDropShadow
+                    dx="0"
+                    dy="2"
+                    stdDeviation="2"
+                    floodColor="#247150"
+                    floodOpacity="0.18"
+                  />
+                </filter>
+              </svg>
+              {/* Notification count circle (red) */}
+              {notificationCount > 0 && (
+                <span className="notification-bell-count">
+                  {notificationCount}
+                </span>
+              )}
+              {/* Animated ping effect */}
+              {notificationCount > 0 && (
+                <span className="notification-bell-ping"></span>
+              )}
+            </div>
+          </div>
+
+          <div className="home-main-title"></div>
+          {loading ? (
+            <div className="dashboard-loader">
+              <div className="dashboard-spinner"></div>
+            </div>
+          ) : (
+            <div className="ogin-right">
+              <div className="dashboard-container">
+                <div
+                  className="dashboard-profile"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div>
+                    <p id="username">
+                      <strong>{fullName}</strong>
+                    </p>
+                    <p>
+                      <strong>{staffId}</strong>
+                    </p>
+                  </div>
+                  <button
+                    className="dashboard-qr-btn"
+                    onClick={handleShowQrModal}
+                    disabled={!qrCodeUrl}
+                    title={
+                      qrCodeUrl
+                        ? "Click to view QR Code"
+                        : "QR Code not available"
+                    }
                   >
-                    <rect x="3" y="3" width="7" height="7" rx="2" />
-                    <rect x="14" y="3" width="7" height="7" rx="2" />
-                    <rect x="14" y="14" width="7" height="7" rx="2" />
-                    <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
-                  </svg>
-                  Staff QR Code
-                </button>
-              </div>
-              <div className="dashboard-metrics">
-                <div
-                  className="dashboard-card"
-                  style={{ cursor: "pointer" }}
-                  onClick={handleShowDeviceModal}
-                  title="Click to view your registered devices"
-                >
-                  <span id="num">{deviceCount}</span>
-                  <span id="descrip">Registered Devices</span>
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#fff"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ marginRight: 8, verticalAlign: "middle" }}
+                    >
+                      <rect x="3" y="3" width="7" height="7" rx="2" />
+                      <rect x="14" y="3" width="7" height="7" rx="2" />
+                      <rect x="14" y="14" width="7" height="7" rx="2" />
+                      <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
+                    </svg>
+                    Staff QR Code
+                  </button>
                 </div>
-                <div
-                  className="dashboard-card"
-                  style={{ cursor: "pointer" }}
-                  onClick={handleShowGuestModal}
-                  title="Click to view your registered guests"
-                >
-                  <span id="num">{guestCount}</span>
-                  <span id="descrip">Registered Guests</span>
+                <div className="dashboard-metrics">
+                  <div
+                    className="dashboard-card"
+                    style={{ cursor: "pointer" }}
+                    onClick={handleShowDeviceModal}
+                    title="Click to view your registered devices"
+                  >
+                    <span id="num">{deviceCount}</span>
+                    <span id="descrip">Registered Devices</span>
+                  </div>
+                  <div
+                    className="dashboard-card"
+                    style={{ cursor: "pointer" }}
+                    onClick={handleShowGuestModal}
+                    title="Click to view your registered guests"
+                  >
+                    <span id="num">{guestCount}</span>
+                    <span id="descrip">Registered Guests</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Attendance Table */}
-              <div className="dashboard-attendance">
-                <h3>Attendance Logs</h3>
-                {attendanceLogs.length > 0 ? (
-                  <table className="attendance-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attendanceLogs.map((log, idx) => (
-                        <tr key={idx}>
-                          <td>{log.date}</td>
-                          <td>{log.time_in || "-"}</td>
-                          <td>{log.time_out || "-"}</td>
-                          <td>{log.status}</td>
+                {/* Attendance Table */}
+                <div className="dashboard-attendance">
+                  <h3>Attendance Logs</h3>
+                  {attendanceLogs.length > 0 ? (
+                    <table className="attendance-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Time In</th>
+                          <th>Time Out</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <p>No attendance records found.</p>
-                )}
-              </div>
+                      </thead>
+                      <tbody>
+                        {attendanceLogs.map((log, idx) => (
+                          <tr key={idx}>
+                            <td>{log.date}</td>
+                            <td>{log.time_in || "-"}</td>
+                            <td>{log.time_out || "-"}</td>
+                            <td>{log.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p>No attendance records found.</p>
+                  )}
+                </div>
 
-              {/* Remove messages section from homepage */}
+                {/* Remove messages section from homepage */}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Guest Modal */}
+        {showGuestModal && (
+          <div
+            className="qr-modal-overlay"
+            onClick={() => setShowGuestModal(false)}
+          >
+            <div
+              className="qr-modal-content"
+              style={{ maxWidth: 500 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Guests Registered</h3>
+              {guestList.length > 0 ? (
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr>
+                      <th
+                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
+                      >
+                        Name
+                      </th>
+                      <th
+                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
+                      >
+                        Token
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {guestList.map((guest, idx) => (
+                      <tr key={guest.id || idx}>
+                        <td style={{ padding: 8 }}>{guest.full_name}</td>
+                        <td style={{ padding: 8 }}>{guest.token}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No guests found.</p>
+              )}
+              <button
+                className="qr-modal-close-btn"
+                onClick={() => setShowGuestModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Device Modal */}
+        {showDeviceModal && (
+          <div
+            className="qr-modal-overlay"
+            onClick={() => setShowDeviceModal(false)}
+          >
+            <div
+              className="qr-modal-content"
+              style={{ maxWidth: 500 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Devices Registered</h3>
+              {deviceList.length > 0 ? (
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr>
+                      <th
+                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
+                      >
+                        Device Name
+                      </th>
+                      <th
+                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
+                      >
+                        Serial Number
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {deviceList.map((device, idx) => (
+                      <tr key={device.id || idx}>
+                        <td style={{ padding: 8 }}>
+                          {device.name || device.device_name}
+                        </td>
+                        <td style={{ padding: 8 }}>{device.serial_number}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>No devices found.</p>
+              )}
+              <button
+                className="qr-modal-close-btn"
+                onClick={() => setShowDeviceModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* QR Code Modal */}
+        {showQrModal && (
+          <div
+            className="qr-modal-overlay"
+            onClick={() => setShowQrModal(false)}
+          >
+            <div
+              className="qr-modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Your Staff ID QR Code</h3>
+              {modalQrUrl ? (
+                <>
+                  <img
+                    src={modalQrUrl}
+                    alt="Full QR Code"
+                    className="qr-modal-img"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      // Show a fallback message if the image fails to load
+                      const fallback = document.createElement("p");
+                      fallback.textContent =
+                        "QR Code not available (no id_qr_code found for your profile).";
+                      fallback.style.color = "#c00";
+                      e.target.parentNode.appendChild(fallback);
+                    }}
+                  />
+                  <button
+                    className="qr-modal-print-btn"
+                    style={{ marginRight: 10 }}
+                    onClick={handlePrintQr}
+                  >
+                    Print QR Code
+                  </button>
+                </>
+              ) : (
+                <p>
+                  QR Code not available (no id_qr_code found for your profile).
+                </p>
+              )}
+              <button
+                className="qr-modal-close-btn"
+                onClick={() => setShowQrModal(false)}
+              >
+                Close
+              </button>
             </div>
           </div>
         )}
       </div>
-
-      {/* Guest Modal */}
-      {showGuestModal && (
-        <div
-          className="qr-modal-overlay"
-          onClick={() => setShowGuestModal(false)}
-        >
-          <div
-            className="qr-modal-content"
-            style={{ maxWidth: 500 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>Guests Registered</h3>
-            {guestList.length > 0 ? (
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
-                      Name
-                    </th>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
-                      Token
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {guestList.map((guest, idx) => (
-                    <tr key={guest.id || idx}>
-                      <td style={{ padding: 8 }}>{guest.full_name}</td>
-                      <td style={{ padding: 8 }}>{guest.token}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No guests found.</p>
-            )}
-            <button
-              className="qr-modal-close-btn"
-              onClick={() => setShowGuestModal(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Device Modal */}
-      {showDeviceModal && (
-        <div
-          className="qr-modal-overlay"
-          onClick={() => setShowDeviceModal(false)}
-        >
-          <div
-            className="qr-modal-content"
-            style={{ maxWidth: 500 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>Devices Registered</h3>
-            {deviceList.length > 0 ? (
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
-                      Device Name
-                    </th>
-                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
-                      Serial Number
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deviceList.map((device, idx) => (
-                    <tr key={device.id || idx}>
-                      <td style={{ padding: 8 }}>
-                        {device.name || device.device_name}
-                      </td>
-                      <td style={{ padding: 8 }}>{device.serial_number}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p>No devices found.</p>
-            )}
-            <button
-              className="qr-modal-close-btn"
-              onClick={() => setShowDeviceModal(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* QR Code Modal */}
-      {showQrModal && (
-        <div className="qr-modal-overlay" onClick={() => setShowQrModal(false)}>
-          <div
-            className="qr-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>Your Staff ID QR Code</h3>
-            {modalQrUrl ? (
-              <>
-                <img
-                  src={modalQrUrl}
-                  alt="Full QR Code"
-                  className="qr-modal-img"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    // Show a fallback message if the image fails to load
-                    const fallback = document.createElement("p");
-                    fallback.textContent =
-                      "QR Code not available (no id_qr_code found for your profile).";
-                    fallback.style.color = "#c00";
-                    e.target.parentNode.appendChild(fallback);
-                  }}
-                />
-                <button
-                  className="qr-modal-print-btn"
-                  style={{ marginRight: 10 }}
-                  onClick={handlePrintQr}
-                >
-                  Print QR Code
-                </button>
-              </>
-            ) : (
-              <p>
-                QR Code not available (no id_qr_code found for your profile).
-              </p>
-            )}
-            <button
-              className="qr-modal-close-btn"
-              onClick={() => setShowQrModal(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
