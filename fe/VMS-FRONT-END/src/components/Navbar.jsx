@@ -165,7 +165,9 @@ function Navbar() {
                 minHeight: "100vh",
               }
             : {
-                position: "relative",
+                position: "fixed",
+                top: 0,
+                zIndex: 1001,
                 minHeight: "100vh",
               }),
         }}
