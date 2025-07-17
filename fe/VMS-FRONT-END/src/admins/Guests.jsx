@@ -62,42 +62,57 @@ function AdminGuests() {
         <span style={{ fontWeight: 500, marginRight: 8, color: "#444" }}>
           Filter guests by:
         </span>
-        <input
-          className="login-input"
-          style={{ width: 140 }}
-          placeholder="Full Name (type to filter)"
-          value={filter.full_name}
-          onChange={e => setFilter({ ...filter, full_name: e.target.value })}
-        />
-        <input
-          className="login-input"
-          style={{ width: 120 }}
-          placeholder="Phone (type to filter)"
-          value={filter.phone}
-          onChange={e => setFilter({ ...filter, phone: e.target.value })}
-        />
-        <input
-          className="login-input"
-          style={{ width: 120 }}
-          placeholder="Purpose (type to filter)"
-          value={filter.purpose}
-          onChange={e => setFilter({ ...filter, purpose: e.target.value })}
-        />
-        <input
-          className="login-input"
-          style={{ width: 120 }}
-          placeholder="Invited By (type to filter)"
-          value={filter.invited_by_name}
-          onChange={e => setFilter({ ...filter, invited_by_name: e.target.value })}
-        />
-        <input
-          className="login-input"
-          style={{ width: 120 }}
-          placeholder="Visit Date (YYYY-MM-DD)"
-          value={filter.visit_date}
-          onChange={e => setFilter({ ...filter, visit_date: e.target.value })}
-        />
-        <select
+        <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 140 }}
+            placeholder="Full Name (type to filter)"
+            value={filter.full_name}
+            onChange={e => setFilter({ ...filter, full_name: e.target.value })}
+          />
+          <span className="login-input-label">Full Name</span>
+        </div>
+        {/* <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 120 }}
+            placeholder="Phone (type to filter)"
+            value={filter.phone}
+            onChange={e => setFilter({ ...filter, phone: e.target.value })}
+          />
+          <span className="login-input-label">Phone</span>
+        </div> */}
+        {/* <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 120 }}
+            placeholder="Purpose (type to filter)"
+            value={filter.purpose}
+            onChange={e => setFilter({ ...filter, purpose: e.target.value })}
+          />
+          <span className="login-input-label">Purpose</span>
+        </div> */}
+        {/* <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 120 }}
+            placeholder="Invited By (type to filter)"
+            value={filter.invited_by_name}
+            onChange={e => setFilter({ ...filter, invited_by_name: e.target.value })}
+          />
+          <span className="login-input-label">Invited By</span>
+        </div> */}
+        <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 120 }}
+            placeholder="Visit Date (YYYY-MM-DD)"
+            value={filter.visit_date}
+            onChange={e => setFilter({ ...filter, visit_date: e.target.value })}
+          />
+          <span className="login-input-label">Visit Date</span>
+        </div>
+        {/* <select
           className="login-input"
           style={{ width: 120 }}
           value={filter.is_verified}
@@ -106,7 +121,7 @@ function AdminGuests() {
           <option value="">All Status</option>
           <option value="verified">Verified</option>
           <option value="unverified">Unverified</option>
-        </select>
+        </select> */}
         <button
           className="login-btn"
           style={{ background: "#aaa", fontSize: 14, padding: "6px 16px" }}

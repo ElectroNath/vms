@@ -221,34 +221,46 @@ function AdminEmployees() {
         <span style={{ fontWeight: 500, marginRight: 8, color: "#444" }}>
           Filter employees by:
         </span>
-        <input
-          className="login-input"
-          style={{ width: 140 }}
-          placeholder="Full Name (type to filter)"
-          value={filter.full_name}
+        <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 140 }}
+            placeholder="Full Name (type to filter)"
+            value={filter.full_name}
           onChange={e => setFilter({ ...filter, full_name: e.target.value })}
         />
-        <input
-          className="login-input"
-          style={{ width: 120 }}
-          placeholder="Department (type to filter)"
-          value={filter.department}
-          onChange={e => setFilter({ ...filter, department: e.target.value })}
-        />
-        <input
-          className="login-input"
-          style={{ width: 120 }}
-          placeholder="Position (type to filter)"
-          value={filter.position}
-          onChange={e => setFilter({ ...filter, position: e.target.value })}
-        />
-        <input
-          className="login-input"
-          style={{ width: 100 }}
-          placeholder="Staff ID (type to filter)"
-          value={filter.staff_id}
+        <span className="login-input-label">Full Name</span>
+        </div>
+        <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 120 }}
+            placeholder="Department (type to filter)"
+            value={filter.department}
+            onChange={e => setFilter({ ...filter, department: e.target.value })}
+          />
+          <span className="login-input-label">Department</span>
+        </div>
+        <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 120 }}
+            placeholder="Position (type to filter)"
+            value={filter.position}
+            onChange={e => setFilter({ ...filter, position: e.target.value })}
+          />
+          <span className="login-input-label">Position</span>
+        </div>
+        <div className="login-input-group-filter">
+          <input
+            className="login-input"
+            style={{ width: 100 }}
+            placeholder="Staff ID (type to filter)"
+            value={filter.staff_id}
           onChange={e => setFilter({ ...filter, staff_id: e.target.value })}
         />
+        <span className="login-input-label">Staff ID</span>
+        </div>
         <button
           className="login-btn"
           style={{ background: "#aaa", fontSize: 14, padding: "6px 16px" }}

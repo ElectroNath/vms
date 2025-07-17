@@ -172,6 +172,7 @@ function AdminUsers() {
         <span style={{ fontWeight: 500, marginRight: 8, color: "#444" }}>
           Filter users by:
         </span>
+        <div className="login-input-group-filter">
         <input
           className="login-input"
           style={{ width: 120 }}
@@ -179,6 +180,9 @@ function AdminUsers() {
           value={filter.username}
           onChange={e => setFilter({ ...filter, username: e.target.value })}
         />
+        <span className="login-input-label">Username</span>
+        </div>
+        <div className="login-input-group-filter">
         <input
           className="login-input"
           style={{ width: 160 }}
@@ -186,7 +190,9 @@ function AdminUsers() {
           value={filter.email}
           onChange={e => setFilter({ ...filter, email: e.target.value })}
         />
-        <select
+        <span className="login-input-label">Email</span>
+        </div>
+        {/* <select
           className="login-input"
           style={{ width: 120 }}
           value={filter.role}
@@ -196,8 +202,8 @@ function AdminUsers() {
           <option value="employee">Employee</option>
           <option value="admin">Admin</option>
           <option value="security">Security</option>
-        </select>
-        <select
+        </select> */}
+        {/* <select
           className="login-input"
           style={{ width: 120 }}
           value={filter.is_active}
@@ -206,10 +212,11 @@ function AdminUsers() {
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
-        </select>
+        </select> */}
+        
         <button
           className="login-btn"
-          style={{ background: "#aaa", fontSize: 14, padding: "6px 16px" }}
+          style={{ background: "#aaa", fontSize: 14, padding: "6px 16px", marginLeft: 20 }}
           onClick={() => setFilter({ username: "", email: "", role: "", is_active: "" })}
           type="button"
         >
