@@ -207,3 +207,53 @@
     justify-content: flex-start;
   }
 }
+
+
+@media (max-width: 768px) {
+  .admin-table-page {
+    margin-left: 0;
+    padding: 16px 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  .admin-table {
+    min-width: 600px;
+    width: 100%;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .admin-dashboard {
+    margin-left: 0;
+    margin-bottom: 24px;
+    padding: 20px 50px;
+  }
+
+  .admin-dashboard-cards {
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .admin-dashboard-card {
+    padding: 24px 18px;
+    min-width: 100%;
+    box-shadow: 0 1px 6px #24715022;
+  }
+
+  .admin-dashboard-card-title {
+    font-size: 1em;
+  }
+
+  .admin-dashboard-card-value {
+    font-size: 1.8em;
+  }
+}

@@ -55,7 +55,7 @@ function SecurityAccessLog() {
   );
 
   return (
-    <div className="attendance-log-page">
+    <div className="admin-table-page">
       <h2>Recent Access Logs</h2>
 
       {loading && <p>Loading logs...</p>}
@@ -63,9 +63,18 @@ function SecurityAccessLog() {
 
       {!loading && !error && (
         <>
-          {/* Filter Row */}
-          <div style={{ marginBottom: 12, display: "flex", gap: 10, alignItems: "center" }}>
-            <span style={{ fontWeight: 500, marginRight: 8, color: "#444" }}>Filter:</span>
+          <div
+            style={{
+              marginBottom: 12,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              alignItems: "center",
+            }}
+          >
+            <span style={{ fontWeight: 500, marginRight: 8, color: "#444" }}>
+              Filter:
+            </span>
             <input
               className="login-input"
               style={{ width: 110 }}
@@ -122,28 +131,38 @@ function SecurityAccessLog() {
           {filteredLogs.length === 0 ? (
             <p>No logs found.</p>
           ) : (
-            <table className="log-table">
-              <thead>
-                <tr>
-                  <th>Person</th>
-                  <th>Type</th>
-                  <th>Device</th>
-                  <th>Action</th>
-                  <th>Timestamp</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLogs.map((log, idx) => (
-                  <tr key={idx}>
-                    <td>{log.person_name || "N/A"}</td>
-                    <td style={{ textTransform: "capitalize" }}>{log.person_type || "N/A"}</td>
-                    <td>{log.device_serial || "—"}</td>
-                    <td style={{ textTransform: "capitalize" }}>{log.status || "—"}</td>
-                    <td>{log.timestamp ? new Date(log.timestamp).toLocaleString() : "N/A"}</td>
+            <div style={{ overflowX: "auto" }}>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Person</th>
+                    <th>Type</th>
+                    <th>Device</th>
+                    <th>Action</th>
+                    <th>Timestamp</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredLogs.map((log, idx) => (
+                    <tr key={idx}>
+                      <td>{log.person_name || "N/A"}</td>
+                      <td style={{ textTransform: "capitalize" }}>
+                        {log.person_type || "N/A"}
+                      </td>
+                      <td>{log.device_serial || "—"}</td>
+                      <td style={{ textTransform: "capitalize" }}>
+                        {log.status || "—"}
+                      </td>
+                      <td>
+                        {log.timestamp
+                          ? new Date(log.timestamp).toLocaleString()
+                          : "N/A"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </>
       )}
