@@ -13,9 +13,16 @@ body {
     color: blue;
     display: none !important;
   }
+  .dashboard-container {
+    margin: 0 auto; /* ✅ center it */
+    padding: 32px 24px;
+    max-width: 1000px; /* ✅ adjust as needed */
+    width: 100%;
+    box-sizing: border-box;
+  }
   .home-sidebar {
     display: flex !important;
-    position: relative !important;
+    position: fix !important;
     width: 20% !important;
     min-width: 180px;
     max-width: 320px;
@@ -1040,4 +1047,21 @@ body {
   .notification-bell-container {
     position: relative;
   }
+}
+/* === General Layout === */
+.context {
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f7f9;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Scroll fix === */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
 }

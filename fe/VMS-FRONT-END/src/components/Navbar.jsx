@@ -153,7 +153,7 @@ function Navbar() {
         style={{
           ...(isMobile
             ? {
-                position: "fixed",
+                position: "fixed !important",
                 top: 0,
                 left: sidebarOpen ? 0 : "-260px",
                 width: 240,
@@ -165,7 +165,7 @@ function Navbar() {
                 minHeight: "100vh",
               }
             : {
-                position: "relative",
+                position: "fixed",
                 minHeight: "100vh",
               }),
         }}
