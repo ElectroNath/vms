@@ -20,7 +20,7 @@ function Navbar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [modalMessage, setModalMessage] = useState(""); // ✅ modal text
-  const [showModal, setShowModal] = useState(false);     // ✅ modal trigger
+  const [showModal, setShowModal] = useState(false); // ✅ modal trigger
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,9 +112,9 @@ function Navbar() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        width: 40,
-        height: 40,
-        margin: 16,
+        width: 34,
+        height: 34,
+        margin: 2,
         zIndex: 1001,
       }}
     >
@@ -173,9 +173,19 @@ function Navbar() {
         }}
       >
         <div className="home-sidebar-header">
-          <label htmlFor="profile-pic-upload" style={{ cursor: "pointer", marginBottom: 0, position: "relative", display: "inline-block" }}>
+          <label
+            htmlFor="profile-pic-upload"
+            style={{
+              cursor: "pointer",
+              marginBottom: 0,
+              position: "relative",
+              display: "inline-block",
+            }}
+          >
             <img
-              src={profilePicUrl || "https://randomuser.me/api/portraits/men/1.jpg"}
+              src={
+                profilePicUrl || "https://randomuser.me/api/portraits/men/1.jpg"
+              }
               alt="avatar"
               className="home-avatar"
               style={{
@@ -245,7 +255,9 @@ function Navbar() {
               key={item.label}
               className={
                 "home-menu-item" +
-                (location.pathname === item.path ? " home-menu-item-active" : "")
+                (location.pathname === item.path
+                  ? " home-menu-item-active"
+                  : "")
               }
               onClick={() => {
                 navigate(item.path);
