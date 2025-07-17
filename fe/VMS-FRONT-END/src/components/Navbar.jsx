@@ -166,6 +166,8 @@ function Navbar() {
               }
             : {
                 position: "fixed",
+                top: 0,
+                zIndex: 1001,
                 minHeight: "100vh",
               }),
         }}
