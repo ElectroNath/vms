@@ -1,6 +1,16 @@
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 @media (min-width: 601px) {
   .mobile-hamburger-wrapper,
   .sidebar-overlay {
+    color: blue;
     display: none !important;
   }
   .home-sidebar {
@@ -26,7 +36,7 @@ body {
 }
 .home-root {
   display: flex;
-  height: 100vh;
+  min-height: 100vh; /* ✅ Allows scrolling if content is taller */
 }
 
 .home-sidebar {
@@ -499,6 +509,7 @@ body {
 .hamburger-btn {
   display: none;
   background: none;
+  background: #d9d9d9b2;
   border: none;
   flex-direction: column;
   justify-content: center;
@@ -528,7 +539,10 @@ body {
     display: flex !important;
   }
   .hamburger-btn {
+    background: #d9d9d9b2 !important;
+    border-radius: 5px !important;
     display: flex !important;
+    margin: 2px;
   }
   .home-sidebar {
     position: fixed !important;
@@ -819,13 +833,14 @@ body {
   }
 
   .dashboard-profile {
-    width: 94vw !important;
-    max-width: 364px;
+    width: 92vw !important;
+    max-width: 318px;
     height: 107px !important;
     border-radius: 18px !important;
-    box-shadow: 0 4px 24px #0002 !important;
+    box-shadow: 4px 4px 24px 4px #0002 !important;
     padding: 18px 12px 14px 12px !important;
-    display: flex !important;
+    display: flex !important
+;
     flex-direction: column !important;
     align-items: flex-start !important;
     position: relative;
@@ -976,9 +991,13 @@ body {
   .home-main {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+
     overflow: hidden;
     border-radius: 35px 35px 0 0;
+
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto; /* ✅ allow scroll */
   }
 
   .ogin-top {
