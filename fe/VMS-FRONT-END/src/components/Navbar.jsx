@@ -153,7 +153,7 @@ function Navbar() {
         style={{
           ...(isMobile
             ? {
-                position: "fixed",
+                position: "fixed !important",
                 top: 0,
                 left: sidebarOpen ? 0 : "-260px",
                 width: 240,

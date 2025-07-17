@@ -4,9 +4,16 @@
     color: blue;
     display: none !important;
   }
+  .dashboard-container {
+    margin: 0 auto; /* ✅ center it */
+    padding: 32px 24px;
+    max-width: 1000px; /* ✅ adjust as needed */
+    width: 100%;
+    box-sizing: border-box;
+  }
   .home-sidebar {
     display: flex !important;
-    position: relative !important;
+    position: fix !important;
     width: 20% !important;
     min-width: 180px;
     max-width: 320px;
@@ -29,15 +36,13 @@ body {
   overflow: hidden;
 }
 
-
-
 .home-root {
   display: flex;
   min-height: 100vh; /* ✅ Allows scrolling if content is taller */
 }
 
 .home-sidebar {
-  position: fixed ;
+  position: fixed;
   top: 0;
   z-index: 1000;
   width: 20%;
@@ -100,7 +105,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: whitesmoke;
+  background: #fff;
   align-content: center;
 }
 
@@ -116,11 +121,12 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 37px;
+  gap: 30px;
   width: 100%;
   max-width: 1200px;
   align-content: center;
   padding: 80px 30px;
+  padding-left: 200px;
 }
 
 .dashboard-profile {
@@ -360,13 +366,7 @@ body {
   max-height: 300px;
   /* overflow-y: auto; */
   border: 1px solid #ccc;
-
 }
-
-
-
-
-
 
 .context {
   height: 100vh;
@@ -1062,4 +1062,21 @@ body {
   .notification-bell-container {
     position: relative;
   }
+}
+/* === General Layout === */
+.context {
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f7f9;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Scroll fix === */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
 }

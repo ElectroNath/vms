@@ -160,7 +160,7 @@ function InviteGuest({ profileImageUrl, userName }) {
   background: white;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+ padding-left: 290px;
 }
 
         @media (max-width: 768px) {

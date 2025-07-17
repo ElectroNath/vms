@@ -214,12 +214,11 @@ function Home() {
     window.location.pathname === "/invite-guest";
 
   return (
-    <div className="context">
-      <div className="home-root">
-        {/* Navbar removed: now handled globally in AppLayout/AppRouter for employee pages */}
-        {/* Overlay for loading */}
-        {/* Spinner removed as requested */}
-        {/* Main Content */}
+    <div className="home-root">
+      {/* Navbar removed: now handled globally in AppLayout/AppRouter for employee pages */}
+      {/* Overlay for loading */}
+      {/* Spinner removed as requested */}
+      {/* Main Content */}
 
         <div className={`home-main${loading ? " blurred" : ""}`}>
           {/* Notification Bell Icon at top right */}
@@ -229,14 +228,6 @@ function Home() {
               className="notification-bell-wrapper"
               style={{ cursor: "pointer" }}
               onClick={handleNotificationClick}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleNotificationClick();
-                }
-              }}
             >
               {/* Modern Bell SVG icon with gradient and shadow */}
               <svg
@@ -377,193 +368,181 @@ function Home() {
                   </div>
                 </div>
 
-                {/* Attendance Table */}
-                <div className="dashboard-attendance">
-                  <h3>Attendance Logs</h3>
-                  {attendanceLogs.length > 0 ? (
-                    <table className="attendance-table">
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Time In</th>
-                          <th>Time Out</th>
-                          <th>Status</th>
+              {/* Attendance Table */}
+              <div className="dashboard-attendance">
+                <h3>Attendance Logs</h3>
+                {attendanceLogs.length > 0 ? (
+                  <table className="attendance-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Time In</th>
+                        <th>Time Out</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendanceLogs.map((log, idx) => (
+                        <tr key={idx}>
+                          <td>{log.date}</td>
+                          <td>{log.time_in || "-"}</td>
+                          <td>{log.time_out || "-"}</td>
+                          <td>{log.status}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {attendanceLogs.map((log, idx) => (
-                          <tr key={idx}>
-                            <td>{log.date}</td>
-                            <td>{log.time_in || "-"}</td>
-                            <td>{log.time_out || "-"}</td>
-                            <td>{log.status}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  ) : (
-                    <p>No attendance records found.</p>
-                  )}
-                </div>
-
-                {/* Remove messages section from homepage */}
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p>No attendance records found.</p>
+                )}
               </div>
-            </div>
-          )}
-        </div>
 
-        {/* Guest Modal */}
-        {showGuestModal && (
-          <div
-            className="qr-modal-overlay"
-            onClick={() => setShowGuestModal(false)}
-          >
-            <div
-              className="qr-modal-content"
-              style={{ maxWidth: 500 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3>Guests Registered</h3>
-              {guestList.length > 0 ? (
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      <th
-                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
-                      >
-                        Name
-                      </th>
-                      <th
-                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
-                      >
-                        Token
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {guestList.map((guest, idx) => (
-                      <tr key={guest.id || idx}>
-                        <td style={{ padding: 8 }}>{guest.full_name}</td>
-                        <td style={{ padding: 8 }}>{guest.token}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p>No guests found.</p>
-              )}
-              <button
-                className="qr-modal-close-btn"
-                onClick={() => setShowGuestModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Device Modal */}
-        {showDeviceModal && (
-          <div
-            className="qr-modal-overlay"
-            onClick={() => setShowDeviceModal(false)}
-          >
-            <div
-              className="qr-modal-content"
-              style={{ maxWidth: 500 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3>Devices Registered</h3>
-              {deviceList.length > 0 ? (
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      <th
-                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
-                      >
-                        Device Name
-                      </th>
-                      <th
-                        style={{ borderBottom: "1px solid #eee", padding: 8 }}
-                      >
-                        Serial Number
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {deviceList.map((device, idx) => (
-                      <tr key={device.id || idx}>
-                        <td style={{ padding: 8 }}>
-                          {device.name || device.device_name}
-                        </td>
-                        <td style={{ padding: 8 }}>{device.serial_number}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <p>No devices found.</p>
-              )}
-              <button
-                className="qr-modal-close-btn"
-                onClick={() => setShowDeviceModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* QR Code Modal */}
-        {showQrModal && (
-          <div
-            className="qr-modal-overlay"
-            onClick={() => setShowQrModal(false)}
-          >
-            <div
-              className="qr-modal-content"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3>Your Staff ID QR Code</h3>
-              {modalQrUrl ? (
-                <>
-                  <img
-                    src={modalQrUrl}
-                    alt="Full QR Code"
-                    className="qr-modal-img"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                      // Show a fallback message if the image fails to load
-                      const fallback = document.createElement("p");
-                      fallback.textContent =
-                        "QR Code not available (no id_qr_code found for your profile).";
-                      fallback.style.color = "#c00";
-                      e.target.parentNode.appendChild(fallback);
-                    }}
-                  />
-                  <button
-                    className="qr-modal-print-btn"
-                    style={{ marginRight: 10 }}
-                    onClick={handlePrintQr}
-                  >
-                    Print QR Code
-                  </button>
-                </>
-              ) : (
-                <p>
-                  QR Code not available (no id_qr_code found for your profile).
-                </p>
-              )}
-              <button
-                className="qr-modal-close-btn"
-                onClick={() => setShowQrModal(false)}
-              >
-                Close
-              </button>
+              {/* Remove messages section from homepage */}
             </div>
           </div>
         )}
       </div>
+
+      {/* Guest Modal */}
+      {showGuestModal && (
+        <div
+          className="qr-modal-overlay"
+          onClick={() => setShowGuestModal(false)}
+        >
+          <div
+            className="qr-modal-content"
+            style={{ maxWidth: 500 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Guests Registered</h3>
+            {guestList.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Name
+                    </th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Token
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {guestList.map((guest, idx) => (
+                    <tr key={guest.id || idx}>
+                      <td style={{ padding: 8 }}>{guest.full_name}</td>
+                      <td style={{ padding: 8 }}>{guest.token}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No guests found.</p>
+            )}
+            <button
+              className="qr-modal-close-btn"
+              onClick={() => setShowGuestModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Device Modal */}
+      {showDeviceModal && (
+        <div
+          className="qr-modal-overlay"
+          onClick={() => setShowDeviceModal(false)}
+        >
+          <div
+            className="qr-modal-content"
+            style={{ maxWidth: 500 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Devices Registered</h3>
+            {deviceList.length > 0 ? (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Device Name
+                    </th>
+                    <th style={{ borderBottom: "1px solid #eee", padding: 8 }}>
+                      Serial Number
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deviceList.map((device, idx) => (
+                    <tr key={device.id || idx}>
+                      <td style={{ padding: 8 }}>
+                        {device.name || device.device_name}
+                      </td>
+                      <td style={{ padding: 8 }}>{device.serial_number}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No devices found.</p>
+            )}
+            <button
+              className="qr-modal-close-btn"
+              onClick={() => setShowDeviceModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {showQrModal && (
+        <div className="qr-modal-overlay" onClick={() => setShowQrModal(false)}>
+          <div
+            className="qr-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Your Staff ID QR Code</h3>
+            {modalQrUrl ? (
+              <>
+                <img
+                  src={modalQrUrl}
+                  alt="Full QR Code"
+                  className="qr-modal-img"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    // Show a fallback message if the image fails to load
+                    const fallback = document.createElement("p");
+                    fallback.textContent =
+                      "QR Code not available (no id_qr_code found for your profile).";
+                    fallback.style.color = "#c00";
+                    e.target.parentNode.appendChild(fallback);
+                  }}
+                />
+                <button
+                  className="qr-modal-print-btn"
+                  style={{ marginRight: 10 }}
+                  onClick={handlePrintQr}
+                >
+                  Print QR Code
+                </button>
+              </>
+            ) : (
+              <p>
+                QR Code not available (no id_qr_code found for your profile).
+              </p>
+            )}
+            <button
+              className="qr-modal-close-btn"
+              onClick={() => setShowQrModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
