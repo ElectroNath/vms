@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
@@ -86,21 +86,31 @@ function Home() {
         );
         setAttendanceLogs(attendanceRes.data);
 
-        const msgRes = await axios.get(`${API_BASE_URL}/api/messages/`, {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        });
+        useEffect(() => {
+          if (!profileId) return;
+          const fetchMessages = async () => {
+            const token = Cookies.get("token");
+            try {
+              const msgRes = await axios.get(`${API_BASE_URL}/api/messages/`, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+              });
+              setMessages(msgRes.data || []);
+              const viewed = JSON.parse(
+                localStorage.getItem(`viewed_admin_msgs_${profileId}`) || "[]"
+              );
+              const unread = (msgRes.data || []).filter(
+                (msg) => !viewed.includes(msg.id)
+              );
+              setUnreadCount(unread.length);
+              setNotificationCount(unread.length);
+            } catch (err) {
+              console.error("Error fetching messages:", err);
+            }
+          };
 
-        setMessages(msgRes.data || []);
-        const viewed = JSON.parse(
-          localStorage.getItem(`viewed_admin_msgs_${profileRes.data.id}`) ||
-            "[]"
-        );
-        const unread = (msgRes.data || []).filter(
-          (msg) => !viewed.includes(msg.id)
-        );
-        setUnreadCount(unread.length);
-        setNotificationCount(unread.length);
+          fetchMessages();
+        }, [profileId]);
       } catch (err) {
         if (err.response?.status === 401 || err.response?.status === 403) {
           navigate("/login", { replace: true });
@@ -188,18 +198,14 @@ function Home() {
   };
 
   // Handler for notification bell click
-  const handleNotificationClick = () => {
-    // Mark all messages as viewed for this user
-    if (messages.length > 0 && profileId) {
-      localStorage.setItem(
-        viewedMsgsKey,
-        JSON.stringify(messages.map((msg) => msg.id))
-      );
-      setUnreadCount(0);
-      setNotificationCount(0); // reset notification count after viewing
-    }
+ const handleNotificationClick = useCallback(()=> {
+  if (messages.length > 0 && profileId) {
+    localStorage.setItem(`viewed_admin_msgs_${profileId}`, JSON.stringify(messages.map((msg) => msg.id)));
+    setUnreadCount(0);
+    setNotificationCount(0);
     navigate("/messages");
-  };
+  }
+ }, [messages, profileId, navigate])
 
   // Determine if user is employee
   const isEmployee = role === "employee";
@@ -223,6 +229,14 @@ function Home() {
               className="notification-bell-wrapper"
               style={{ cursor: "pointer" }}
               onClick={handleNotificationClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleNotificationClick();
+                }
+              }}
             >
               {/* Modern Bell SVG icon with gradient and shadow */}
               <svg
