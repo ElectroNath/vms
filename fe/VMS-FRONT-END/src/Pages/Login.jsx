@@ -22,63 +22,71 @@ const OutlookAuth = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  if (!form.username || !form.password) {
-    setError("Please enter both username and password.");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    // 🔁 Clear any previous session
-    Cookies.remove("token", { path: "/" });
-    Cookies.remove("user", { path: "/" });
-
-    // 🔐 Authenticate
-    const response = await axios.post(`${API_BASE_URL}/api/token/`, {
-      username: form.username,
-      password: form.password,
-    });
-
-    const { access, user } = response.data;
-    if (!access || !user) throw new Error("Invalid login response.");
-
-    const { role } = user;
-
-    // ✅ Save session cookies
-    Cookies.set("token", access, { path: "/", secure: false, sameSite: "Lax" });
-    Cookies.set("user", JSON.stringify(user), {
-      path: "/",
-      secure: false,
-      sameSite: "Lax",
-    });
-
-    // 👤 Handle employee change password prompt
-    if (role === "employee") {
-      const mustChangeRes = await axios.get(`${API_BASE_URL}/api/employee-profiles/prompt_change/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-
-      const mustChange = ["true", true, 1, "1"].includes(mustChangeRes.data.must_change_password);
-      if (mustChange) {
-        setMustChangePassword(true);
-        setShowModal(true);
-        return;
-      }
+    if (!form.username || !form.password) {
+      setError("Please enter both username and password.");
+      return;
     }
 
-    // 🚀 Force reload to target dashboard (avoid stale state)
-    window.location.href = `/${role}`;
+    setLoading(true);
 
-  } catch (err) {
-    setError(err.response?.data?.detail || "Login failed.");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      // 🔁 Clear any previous session
+      Cookies.remove("token", { path: "/" });
+      Cookies.remove("user", { path: "/" });
+
+      // 🔐 Authenticate
+      const response = await axios.post(`${API_BASE_URL}/api/token/`, {
+        username: form.username,
+        password: form.password,
+      });
+
+      const { access, user } = response.data;
+      if (!access || !user) throw new Error("Invalid login response.");
+
+      const { role } = user;
+
+      // ✅ Save session cookies
+      Cookies.set("token", access, {
+        path: "/",
+        secure: false,
+        sameSite: "Lax",
+      });
+      Cookies.set("user", JSON.stringify(user), {
+        path: "/",
+        secure: false,
+        sameSite: "Lax",
+      });
+
+      // 👤 Handle employee change password prompt
+      if (role === "employee") {
+        const mustChangeRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/prompt_change/`,
+          {
+            headers: { Authorization: `Bearer ${access}` },
+          }
+        );
+
+        const mustChange = ["true", true, 1, "1"].includes(
+          mustChangeRes.data.must_change_password
+        );
+        if (mustChange) {
+          setMustChangePassword(true);
+          setShowModal(true);
+          return;
+        }
+      }
+
+      // 🚀 Force reload to target dashboard (avoid stale state)
+      window.location.href = `/${role}`;
+    } catch (err) {
+      setError(err.response?.data?.detail || "Login failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-root">
@@ -98,7 +106,7 @@ const OutlookAuth = () => {
       <div className="login-right">
         <img
           className="login-nnpc-logo"
-          src="/src/assets/nnpc-logo.png"
+          src="/assets/pwa-512x512.png"
           alt="NNPC Logo"
         />
 
