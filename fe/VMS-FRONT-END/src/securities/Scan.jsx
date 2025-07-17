@@ -1,6 +1,4 @@
-// src/security/SecurityScan.jsx
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { QrReader } from "@blackbox-vision/react-qr-reader";
@@ -9,7 +7,7 @@ import "./security.css";
 import Modal from "../components/Modals";
 
 function SecurityScan() {
-  const [phase, setPhase] = useState(1); // 1: scan person, 2: scan device
+  const [phase, setPhase] = useState(1); // 1 = person, 2 = device
   const [qrValue, setQrValue] = useState("");
   const [deviceSerial, setDeviceSerial] = useState("");
   const [action, setAction] = useState("in");
@@ -18,18 +16,52 @@ function SecurityScan() {
   const [loading, setLoading] = useState(false);
   const [modalMsg, setModalMsg] = useState("");
   const [modalSuccess, setModalSuccess] = useState(false);
+  const [scannerReady, setScannerReady] = useState(true);
 
-  // Handles scan for both phases
-  const handleScan = (value) => {
-    if (phase === 1) {
-      setQrValue(value);
-      setPhase(2);
-    } else if (phase === 2) {
-      setDeviceSerial(value);
+  const personScanned = useRef(false);
+  const deviceScanned = useRef(false);
+  const lastScanned = useRef(null);
+
+
+  // Handle scan result
+const handleScan = async (value) => {
+  if (!value || lastScanned.current === value) return;
+  lastScanned.current = value;
+
+  const tokenVal = Cookies.get("token");
+
+  if (phase === 1 && !personScanned.current) {
+    personScanned.current = true;
+
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/security/scan/`,
+        { qr_value: value },
+        { headers: { Authorization: `Bearer ${tokenVal}` } }
+      );
+
+      if (res.data.type === "employee" || res.data.type === "guest") {
+        setQrValue(value);
+        setResult(res.data);
+        setPhase(2);
+        lastScanned.current = null; // clear for phase 2
+      } else {
+        throw new Error("Not a valid person QR.");
+      }
+    } catch (err) {
+      const errMsg = err?.response?.data?.detail || "Invalid or expired QR.";
+      setError(errMsg);
+      setModalMsg(errMsg);
+      setModalSuccess(false);
+      personScanned.current = false;
     }
-  };
+  } else if (phase === 2 && !deviceScanned.current) {
+    deviceScanned.current = true;
+    setDeviceSerial(value);
+  }
+};
 
-  // Submit after both scans (or skip device)
+  // Submit to backend
   const handleSubmit = async (e) => {
     e && e.preventDefault();
     setError("");
@@ -43,51 +75,53 @@ function SecurityScan() {
         device_serial: deviceSerial || null,
         action,
       };
-      const res = await axios.post(
-        `${API_BASE_URL}/api/security/scan/`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${tokenVal}`,
-          },
-        }
-      );
+
+      const res = await axios.post(`${API_BASE_URL}/api/security/scan/`, payload, {
+        headers: { Authorization: `Bearer ${tokenVal}` },
+      });
+
       setResult(res.data);
       setModalMsg(res.data.log || "Scan successful!");
       setModalSuccess(true);
-      setPhase(1);
-      setQrValue("");
-      setDeviceSerial("");
+      resetScanState();
     } catch (err) {
-      setError(err?.response?.data?.detail || "Scan failed.");
-      setModalMsg(err?.response?.data?.detail || "Scan failed.");
+      const errMsg = err?.response?.data?.detail || "Scan failed.";
+      setError(errMsg);
+      setModalMsg(errMsg);
       setModalSuccess(false);
     } finally {
       setLoading(false);
     }
   };
 
-  // Ensure modalMsg is set after submit
-  useEffect(() => {
-    if (result && result.log) {
-      setModalMsg(result.log);
-    }
-    if (error) {
-      setModalMsg(error);
-    }
-  }, [result, error]);
+  const resetScanState = () => {
+  setPhase(1);
+  setQrValue("");
+  setDeviceSerial("");
+  personScanned.current = false;
+  deviceScanned.current = false;
+  lastScanned.current = null; // Reset the last scanned value
+};
 
+  // Stop camera when leaving page
   useEffect(() => {
-    navigator.mediaDevices
-      ?.getUserMedia({ video: true })
-      .catch(() =>
-        alert("Camera access denied. Please allow camera permissions.")
-      );
+    setScannerReady(true);
+    return () => {
+      setScannerReady(false); // disables <QrReader />
+    };
+  }, []);
+
+  // Camera permission
+  useEffect(() => {
+    navigator.mediaDevices?.getUserMedia({ video: true }).catch(() =>
+      alert("Camera access denied. Please allow camera permissions.")
+    );
   }, []);
 
   return (
     <div className="security-scan-page">
       <h2>Security QR Scan</h2>
+
       {/* Modal for success/error */}
       {modalMsg && (
         <Modal
@@ -97,72 +131,84 @@ function SecurityScan() {
         />
       )}
 
-      {/* QR Scanner Phases */}
       <div className="security-qr-reader">
-        {phase === 1 ? (
+        {scannerReady && (
           <>
-            <p>Step 1: Scan Person QR/Token</p>
-            <QrReader
-              constraints={{ facingMode: "environment" }}
-              scanDelay={500}
-              onResult={(res) => {
-                if (res?.text && res.text !== qrValue) {
-                  handleScan(res.text);
-                }
-              }}
-              videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
-              containerStyle={{
-                width: "100%",
-                maxWidth: "750px",
-                height: "400px",
-                border: "2px solid #1abc9c",
-                borderRadius: "10px",
-                overflow: "hidden",
-              }}
-            />
-            <div className="scanner-line"></div>
-          </>
-        ) : (
-          <>
-            <p>Step 2: Scan Device QR (optional)</p>
-            <QrReader
-              constraints={{ facingMode: "environment" }}
-              scanDelay={500}
-              onResult={(res) => {
-                if (res?.text && res.text !== deviceSerial) {
-                  handleScan(res.text);
-                }
-              }}
-              videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
-              containerStyle={{
-                width: "100%",
-                maxWidth: "750px",
-                height: "400px",
-                border: "2px solid #1abc9c",
-                borderRadius: "10px",
-                overflow: "hidden",
-              }}
-            />
-            <div className="scanner-line"></div>
-            <button
-              style={{ marginTop: "20px" }}
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-            <button
-              style={{ marginLeft: "10px" }}
-              onClick={() => handleSubmit()}
-              disabled={loading}
-            >
-              Skip Device & Submit
-            </button>
+            {phase === 1 ? (
+              <>
+                <p>Step 1: Scan Person QR/Token</p>
+                <QrReader
+                  constraints={{ facingMode: "environment" }}
+                  scanDelay={1000}
+                  onResult={(res) => {
+                    if (res?.text && !personScanned.current) {
+                      handleScan(res.text);
+                    }
+                  }}
+                  containerStyle={{
+                    width: "100%",
+                    maxWidth: "700px",
+                    height: "400px",
+                    border: "2px solid #3498db",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                  videoStyle={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+                <div className="scanner-line"></div>
+              </>
+            ) : (
+              <>
+                <p>Step 2: Scan Device QR (Optional)</p>
+                <QrReader
+                  constraints={{ facingMode: "environment" }}
+                  scanDelay={800}
+                  onResult={(res) => {
+                    if (res?.text && !deviceScanned.current) {
+                      handleScan(res.text);
+                    }
+                  }}
+                  containerStyle={{
+                    width: "100%",
+                    maxWidth: "700px",
+                    height: "400px",
+                    border: "2px solid #2ecc71",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                  videoStyle={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+                {loading && <p style={{ color: "gray" }}>Validating QR code...</p>}
+                <div className="scanner-line"></div>
+                <button
+                  style={{ marginTop: "20px" }}
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? "Submitting..." : "Submit"}
+                </button>
+                <button
+                  style={{ marginLeft: "10px" }}
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  Skip Device & Submit
+                </button>
+              </>
+            )}
           </>
         )}
       </div>
 
-      {/* Manual Input */}
+      {/* Manual fallback */}
       <form onSubmit={handleSubmit} className="security-scan-form">
         <input
           type="text"
@@ -189,7 +235,7 @@ function SecurityScan() {
           <button
             type="button"
             style={{ marginLeft: "10px" }}
-            onClick={() => handleSubmit()}
+            onClick={handleSubmit}
             disabled={loading}
           >
             Skip Device & Submit
@@ -197,7 +243,7 @@ function SecurityScan() {
         )}
       </form>
 
-      {/* Error / Success */}
+      {/* Scan results */}
       {error && <div className="security-scan-error">{error}</div>}
       {result && (
         <div className="security-scan-result">
