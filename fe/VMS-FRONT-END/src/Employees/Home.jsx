@@ -198,14 +198,18 @@ function Home() {
   };
 
   // Handler for notification bell click
- const handleNotificationClick = useCallback(()=> {
+  const handleNotificationClick = () => {
   if (messages.length > 0 && profileId) {
-    localStorage.setItem(`viewed_admin_msgs_${profileId}`, JSON.stringify(messages.map((msg) => msg.id)));
+    localStorage.setItem(
+      viewedMsgsKey,
+      JSON.stringify(messages.map((msg) => msg.id))
+    );
     setUnreadCount(0);
     setNotificationCount(0);
-    navigate("/messages");
   }
- }, [messages, profileId, navigate])
+  navigate("/messages");
+};
+
 
   // Determine if user is employee
   const isEmployee = role === "employee";
@@ -220,153 +224,153 @@ function Home() {
       {/* Spinner removed as requested */}
       {/* Main Content */}
 
-        <div className={`home-main${loading ? " blurred" : ""}`}>
-          {/* Notification Bell Icon at top right */}
+      <div className={`home-main${loading ? " blurred" : ""}`}>
+        {/* Notification Bell Icon at top right */}
 
-          <div className="notification-bell-container">
-            <div
-              className="notification-bell-wrapper"
-              style={{ cursor: "pointer" }}
-              onClick={handleNotificationClick}
+        <div className="notification-bell-container">
+          <div
+            className="notification-bell-wrapper"
+            style={{ cursor: "pointer" }}
+            onClick={handleNotificationClick}
+            aria-label="View notifications"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleNotificationClick();
+            }}
+          >
+            {/* Modern Bell SVG icon with gradient and shadow */}
+            <svg
+              className="notification-bell-icon"
+              width="54"
+              height="59"
+              viewBox="0 0 44 44"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              {/* Modern Bell SVG icon with gradient and shadow */}
-              <svg
-                className="notification-bell-icon"
-                width="54"
-                height="59"
-                viewBox="0 0 44 44"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <radialGradient id="bellGlow" cx="50%" cy="50%" r="70%">
-                    <stop offset="0%" stopColor="#1abc9c" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#247150" stopOpacity="0.1" />
-                  </radialGradient>
-                  <linearGradient id="bellBody" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2ecc71" />
-                    <stop offset="100%" stopColor="#247150" />
-                  </linearGradient>
-                </defs>
-                <ellipse
-                  cx="22"
-                  cy="22"
-                  rx="20"
-                  ry="20"
-                  fill="url(#bellGlow)"
+              <defs>
+                <radialGradient id="bellGlow" cx="50%" cy="50%" r="70%">
+                  <stop offset="0%" stopColor="#1abc9c" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#247150" stopOpacity="0.1" />
+                </radialGradient>
+                <linearGradient id="bellBody" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#2ecc71" />
+                  <stop offset="100%" stopColor="#247150" />
+                </linearGradient>
+              </defs>
+              <ellipse cx="22" cy="22" rx="20" ry="20" fill="url(#bellGlow)" />
+              <g filter="url(#bellShadow)">
+                <path
+                  d="M32 30v-7a10 10 0 1 0-20 0v7c0 1.2-.9 2.1-1.5 3h23c-.6-.9-1.5-1.8-1.5-3"
+                  fill="url(#bellBody)"
+                  stroke="#247150"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
                 />
-                <g filter="url(#bellShadow)">
-                  <path
-                    d="M32 30v-7a10 10 0 1 0-20 0v7c0 1.2-.9 2.1-1.5 3h23c-.6-.9-1.5-1.8-1.5-3"
-                    fill="url(#bellBody)"
-                    stroke="#247150"
-                    strokeWidth="2"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M25.5 36a3.5 3.5 0 0 1-7 0"
-                    stroke="#247150"
+                <path
+                  d="M25.5 36a3.5 3.5 0 0 1-7 0"
+                  stroke="#247150"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </g>
+              <filter id="bellShadow" x="0" y="0" width="44" height="44">
+                <feDropShadow
+                  dx="0"
+                  dy="2"
+                  stdDeviation="2"
+                  floodColor="#247150"
+                  floodOpacity="0.18"
+                />
+              </filter>
+            </svg>
+            {/* Notification count circle (red) */}
+            {notificationCount > 0 && (
+              <span className="notification-bell-count">
+                {notificationCount}
+              </span>
+            )}
+            {/* Animated ping effect */}
+            {notificationCount > 0 && (
+              <span className="notification-bell-ping"></span>
+            )}
+          </div>
+        </div>
+
+        <div className="home-main-title"></div>
+        {loading ? (
+          <div className="dashboard-loader">
+            <div className="dashboard-spinner"></div>
+          </div>
+        ) : (
+          <div className="ogin-right">
+            <div className="dashboard-container">
+              <div
+                className="dashboard-profile"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  <p id="username">
+                    <strong>{fullName}</strong>
+                  </p>
+                  <p>
+                    <strong>{staffId}</strong>
+                  </p>
+                </div>
+                <button
+                  className="dashboard-qr-btn"
+                  onClick={handleShowQrModal}
+                  disabled={!qrCodeUrl}
+                  title={
+                    qrCodeUrl
+                      ? "Click to view QR Code"
+                      : "QR Code not available"
+                  }
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#fff"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    fill="none"
-                  />
-                </g>
-                <filter id="bellShadow" x="0" y="0" width="44" height="44">
-                  <feDropShadow
-                    dx="0"
-                    dy="2"
-                    stdDeviation="2"
-                    floodColor="#247150"
-                    floodOpacity="0.18"
-                  />
-                </filter>
-              </svg>
-              {/* Notification count circle (red) */}
-              {notificationCount > 0 && (
-                <span className="notification-bell-count">
-                  {notificationCount}
-                </span>
-              )}
-              {/* Animated ping effect */}
-              {notificationCount > 0 && (
-                <span className="notification-bell-ping"></span>
-              )}
-            </div>
-          </div>
-
-          <div className="home-main-title"></div>
-          {loading ? (
-            <div className="dashboard-loader">
-              <div className="dashboard-spinner"></div>
-            </div>
-          ) : (
-            <div className="ogin-right">
-              <div className="dashboard-container">
+                    strokeLinejoin="round"
+                    style={{ marginRight: 8, verticalAlign: "middle" }}
+                  >
+                    <rect x="3" y="3" width="7" height="7" rx="2" />
+                    <rect x="14" y="3" width="7" height="7" rx="2" />
+                    <rect x="14" y="14" width="7" height="7" rx="2" />
+                    <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
+                  </svg>
+                  Staff QR Code
+                </button>
+              </div>
+              <div className="dashboard-metrics">
                 <div
-                  className="dashboard-profile"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
+                  className="dashboard-card"
+                  style={{ cursor: "pointer" }}
+                  onClick={handleShowDeviceModal}
+                  title="Click to view your registered devices"
                 >
-                  <div>
-                    <p id="username">
-                      <strong>{fullName}</strong>
-                    </p>
-                    <p>
-                      <strong>{staffId}</strong>
-                    </p>
-                  </div>
-                  <button
-                    className="dashboard-qr-btn"
-                    onClick={handleShowQrModal}
-                    disabled={!qrCodeUrl}
-                    title={
-                      qrCodeUrl
-                        ? "Click to view QR Code"
-                        : "QR Code not available"
-                    }
-                  >
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{ marginRight: 8, verticalAlign: "middle" }}
-                    >
-                      <rect x="3" y="3" width="7" height="7" rx="2" />
-                      <rect x="14" y="3" width="7" height="7" rx="2" />
-                      <rect x="14" y="14" width="7" height="7" rx="2" />
-                      <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
-                    </svg>
-                    Staff QR Code
-                  </button>
+                  <span id="num">{deviceCount}</span>
+                  <span id="descrip">Registered Devices</span>
                 </div>
-                <div className="dashboard-metrics">
-                  <div
-                    className="dashboard-card"
-                    style={{ cursor: "pointer" }}
-                    onClick={handleShowDeviceModal}
-                    title="Click to view your registered devices"
-                  >
-                    <span id="num">{deviceCount}</span>
-                    <span id="descrip">Registered Devices</span>
-                  </div>
-                  <div
-                    className="dashboard-card"
-                    style={{ cursor: "pointer" }}
-                    onClick={handleShowGuestModal}
-                    title="Click to view your registered guests"
-                  >
-                    <span id="num">{guestCount}</span>
-                    <span id="descrip">Registered Guests</span>
-                  </div>
+                <div
+                  className="dashboard-card"
+                  style={{ cursor: "pointer" }}
+                  onClick={handleShowGuestModal}
+                  title="Click to view your registered guests"
+                >
+                  <span id="num">{guestCount}</span>
+                  <span id="descrip">Registered Guests</span>
                 </div>
+              </div>
 
               {/* Attendance Table */}
               <div className="dashboard-attendance">

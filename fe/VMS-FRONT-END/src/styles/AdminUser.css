@@ -78,3 +78,54 @@
 .adminuser-delete-btn:last-child {
   margin-right: 0;
 }
+
+
+@media (max-width: 768px) {
+  .adminuser-modal-content {
+    min-width: 90vw;
+    max-width: 95vw;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .adminuser-modal-title {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .adminuser-modal-form {
+    gap: 14px;
+  }
+
+  .adminuser-checkbox-row {
+    flex-wrap: wrap;
+    font-size: 14px;
+  }
+
+  .adminuser-modal-btn-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .adminuser-create-btn,
+  .adminuser-cancel-btn {
+    width: 100%;
+    font-size: 15px;
+  }
+
+  .adminuser-add-btn {
+    width: 100%;
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  .adminuser-action-btn {
+    margin-right: 6px;
+    padding: 4px;
+  }
+
+  .adminuser-modal-overlay {
+    padding: 10px;
+  }
+}
+

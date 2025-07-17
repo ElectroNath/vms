@@ -7,6 +7,7 @@
   box-shadow: 0 2px 8px #0001;
   max-height: 100vh;
   overflow-y: auto;
+
 }
 
 .security-scan-form {
@@ -65,8 +66,8 @@
 .scanner-line {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 30;
+  width: 700px;
   height: 4px;
   background: red;
   animation: scanLine 2s infinite;
@@ -74,14 +75,14 @@
 }
 
 @keyframes scanLine {
-  0% {
-    top: 0;
+  25% {
+    top: 25%;
   }
   50% {
     top: 50%;
   }
-  100% {
-    top: 100%;
+  75% {
+    top: 75%;
   }
 }
 
