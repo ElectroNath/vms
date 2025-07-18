@@ -225,7 +225,7 @@ function InviteGuest({ profileImageUrl, userName }) {
             padding: 30px 20px;
             z-index: 2;
             overflow-y: auto;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+           
             box-sizing: border-box;
           }
 
