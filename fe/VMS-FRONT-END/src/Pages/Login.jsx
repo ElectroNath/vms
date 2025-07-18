@@ -106,7 +106,7 @@ const OutlookAuth = () => {
       <div className="login-right">
         <img
           className="login-nnpc-logo"
-          src="/assets/nnpc-logo.png"
+          src="/assets/pwa-512x512.png"
           alt="NNPC Logo"
         />
 
