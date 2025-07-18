@@ -199,17 +199,16 @@ function Home() {
 
   // Handler for notification bell click
   const handleNotificationClick = () => {
-  if (messages.length > 0 && profileId) {
-    localStorage.setItem(
-      viewedMsgsKey,
-      JSON.stringify(messages.map((msg) => msg.id))
-    );
-    setUnreadCount(0);
-    setNotificationCount(0);
-  }
-  navigate("/messages");
-};
-
+    if (messages.length > 0 && profileId) {
+      localStorage.setItem(
+        viewedMsgsKey,
+        JSON.stringify(messages.map((msg) => msg.id))
+      );
+      setUnreadCount(0);
+      setNotificationCount(0);
+    }
+    navigate("/messages");
+  };
 
   // Determine if user is employee
   const isEmployee = role === "employee";
@@ -314,7 +313,7 @@ function Home() {
                   justifyContent: "space-between",
                 }}
               >
-                <div>
+                <div className="lost">
                   <p id="username">
                     <strong>{fullName}</strong>
                   </p>
@@ -322,6 +321,7 @@ function Home() {
                     <strong>{staffId}</strong>
                   </p>
                 </div>
+
                 <button
                   className="dashboard-qr-btn"
                   onClick={handleShowQrModal}

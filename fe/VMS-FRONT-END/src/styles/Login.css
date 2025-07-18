@@ -276,7 +276,13 @@ body {
   }
   body,
   html {
-    background: rgba(40, 114, 80, 1) !important;
+    background: linear-gradient(
+      to bottom,
+      #247150 2%,
+      #247150 5%,
+      white 36%,
+      white 100%
+    );
   }
   .login-right {
     padding: 16px 2vw;

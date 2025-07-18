@@ -803,6 +803,17 @@ body {
     flex-direction: column;
     gap: 10px;
   }
+  .my-background {
+    height: 100vh;
+    background: linear-gradient(
+      to bottom,
+      green 0%,
+      green 50%,
+      white 50%,
+      white 100%
+    );
+  }
+
   .dashboard-stat-box {
     padding: 14px 0;
     font-size: 1.1rem;
@@ -856,7 +867,7 @@ body {
 
   .dashboard-profile {
     width: 92vw !important;
-    max-width: 318px;
+    max-width: 348px;
     height: 107px !important;
     border-radius: 18px !important;
     box-shadow: 4px 4px 24px 4px #0002 !important;
@@ -868,7 +879,9 @@ body {
     position: relative;
     background: #fff !important;
   }
-
+  .lost {
+    font-size: 12px;
+  }
   .dashboard-profile p {
     font-size: 1.1em !important;
     margin: 2px 0 !important;
@@ -883,7 +896,7 @@ body {
     margin-left: 0 !important;
     margin-top: 10px !important;
     width: 116px !important;
-    height: 50px !important;
+    height: 30px !important;
     font-size: 0.98em !important;
     padding: 5px !important;
     border-radius: 8px !important;
