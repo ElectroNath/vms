@@ -2,14 +2,12 @@ body {
   font-family: "Montserrat", "Segoe UI", Arial, Helvetica, sans-serif;
 }
 
-
-
 .form-container {
   background: #fff;
-  padding: 48px 80px 48px 80px;
+  padding: 48px 80px 48px 79px;
   max-width: 900px;
   width: 100%;
-  margin-top: 60px;
+  margin-top: 59px;
 }
 
 .form-title {
@@ -19,7 +17,7 @@ body {
   margin-bottom: 40px;
   text-align: left;
   letter-spacing: 1px;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 
 .form-input-group {
@@ -36,7 +34,7 @@ body {
   background: #f8f8f8;
   outline: none;
   transition: border 0.2s;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 
 .form-input:focus {
@@ -54,7 +52,7 @@ body {
   pointer-events: none;
   transition: 0.18s;
   background: transparent;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 
 .form-input:focus + .form-input-label,
@@ -78,7 +76,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.18s;
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
   margin-top: 18px;
   display: block;
   margin-left: auto;
@@ -87,7 +85,6 @@ body {
 .form-btn:hover {
   background: #1a4e38;
 }
-
 
 .modal-overlay {
   position: fixed;
