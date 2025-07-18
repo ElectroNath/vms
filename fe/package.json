@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "qr-scanner": "^1.4.2",
+    "react-qr-scanner": "^1.0.0-alpha.11"
+  }
+}
