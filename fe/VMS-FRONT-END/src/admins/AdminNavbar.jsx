@@ -98,7 +98,10 @@ function AdminNavbar() {
               }),
         }}
       >
-        <div className="admin-navbar-title" style={{ padding: "1rem", color: "#fff", fontWeight: "bold" }}>
+        <div
+          className="admin-navbar-title"
+          style={{ padding: "1rem", color: "#fff", fontWeight: "bold" }}
+        >
           Admin Panel
         </div>
 
@@ -109,7 +112,8 @@ function AdminNavbar() {
               to={`/admin/${item.path}`}
               end={item.path === ""}
               className={({ isActive }) =>
-                "admin-navbar-link" + (isActive ? " admin-navbar-link-active" : "")
+                "admin-navbar-link" +
+                (isActive ? " admin-navbar-link-active" : "")
               }
               onClick={() => isMobile && setSidebarOpen(false)}
             >
