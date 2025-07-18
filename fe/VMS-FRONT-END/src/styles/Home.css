@@ -976,7 +976,7 @@ body {
 /* === Mobile Header Bar === */
 .mobile-header-bar {
   width: 100%;
-  background: #247150;
+
   color: #fff;
   display: flex;
   align-items: center;
@@ -1037,7 +1037,7 @@ body {
 
   .ogin-top {
     height: 15%;
-    background: linear-gradient(135deg, #1abc9c, #247150);
+
     display: flex;
     align-items: center;
     justify-content: flex-end;
