@@ -348,7 +348,7 @@ function Home() {
                     <rect x="14" y="14" width="7" height="7" rx="2" />
                     <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
                   </svg>
-                  Staff QR Code
+                  <span className="qr-label">Staff QR Code</span>
                 </button>
               </div>
               <div className="dashboard-metrics">
@@ -376,26 +376,28 @@ function Home() {
               <div className="dashboard-attendance">
                 <h3>Attendance Logs</h3>
                 {attendanceLogs.length > 0 ? (
-                  <table className="attendance-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {attendanceLogs.map((log, idx) => (
-                        <tr key={idx}>
-                          <td>{log.date}</td>
-                          <td>{log.time_in || "-"}</td>
-                          <td>{log.time_out || "-"}</td>
-                          <td>{log.status}</td>
+                  <div className="attendance-table-wrapper">
+                    <table className="attendance-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Time In</th>
+                          <th>Time Out</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {attendanceLogs.map((log, idx) => (
+                          <tr key={idx}>
+                            <td>{log.date}</td>
+                            <td>{log.time_in || "-"}</td>
+                            <td>{log.time_out || "-"}</td>
+                            <td>{log.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 ) : (
                   <p>No attendance records found.</p>
                 )}

@@ -134,7 +134,7 @@ body {
   width: 100%;
   padding: 20px;
   border-radius: 30px;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-profile p {
@@ -413,8 +413,8 @@ body {
 
 .notification-bell-icon {
   display: block;
-  width: 54px;
-  height: 54px;
+  width: 42px;
+  height: 45px;
   filter: drop-shadow(0 2px 12px #1abc9c33);
   transition: transform 0.18s cubic-bezier(0.4, 2, 0.6, 1);
   background: transparent;
@@ -835,6 +835,7 @@ body {
     align-items: stretch;
     height: 100vh;
     min-height: 100vh;
+    position: fixed;
   }
 
   .home-main {
@@ -858,7 +859,7 @@ body {
     min-width: 0 !important;
     margin: 0 auto !important;
     padding: 0 0 24px 0 !important;
-    gap: 18px !important;
+    gap: 8px !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -868,9 +869,9 @@ body {
   .dashboard-profile {
     width: 92vw !important;
     max-width: 348px;
-    height: 107px !important;
+    height: 68px !important;
     border-radius: 18px !important;
-    box-shadow: 4px 4px 24px 4px #0002 !important;
+
     padding: 18px 12px 14px 12px !important;
     display: flex !important
 ;
@@ -894,7 +895,7 @@ body {
 
   .dashboard-qr-btn {
     margin-left: 0 !important;
-    margin-top: 10px !important;
+
     width: 116px !important;
     height: 30px !important;
     font-size: 0.98em !important;
@@ -918,7 +919,7 @@ body {
     min-width: 0 !important;
     max-width: 49% !important;
     width: 48vw !important;
-    height: 30 !important;
+    height: 60px !important;
     padding: 18px 0 10px 0 !important;
     border-radius: 12px !important;
     margin: 0 !important;
@@ -932,7 +933,7 @@ body {
   }
 
   .dashboard-card #num {
-    font-size: 2.1em !important;
+    font-size: 1.6em !important;
     margin-right: 0 !important;
   }
 
@@ -950,7 +951,6 @@ body {
     padding: 12px 4px !important;
     box-shadow: 0 1px 6px #0001 !important;
     background: #fff !important;
-    margin-top: 18px !important;
   }
 
   .attendance-table {
@@ -1069,7 +1069,7 @@ body {
     }
   }
   .notification-bell-wrapper {
-    margin-top: 50px;
+    margin-top: -13px;
     justify-content: flex-end;
   }
   .notification-bell-container {
@@ -1093,4 +1093,81 @@ body {
   padding: 0;
   overflow-y: auto;
   max-height: 100%;
+}
+.attendance-table-wrapper {
+  max-height: 300px; /* adjust height as needed */
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+.attendance-table-wrapper {
+  max-height: 300px; /* or adjust based on your layout */
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+/* Table styles */
+.attendance-table {
+  width: 100%;
+  min-width: 500px; /* Ensures horizontal scroll on small screens */
+  border-collapse: collapse;
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap; /* Prevents wrapping */
+}
+
+/* Optional: make the table responsive and scrollable only on small screens */
+@media (max-width: 600px) {
+  .attendance-table-wrapper {
+    max-height: 250px;
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-qr-btn {
+    padding: 4px 8px;
+    font-size: 13px;
+    min-width: auto;
+  }
+
+  .qr-label::before {
+    content: "QR";
+    color: white;
+  }
+
+  .qr-label {
+    color: transparent;
+    position: relative;
+    width: auto;
+    display: inline-block;
+  }
+
+  .qr-label::before {
+    position: absolute;
+    left: 0;
+    top: 9px;
+  }
 }
