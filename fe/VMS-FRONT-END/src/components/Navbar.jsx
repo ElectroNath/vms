@@ -102,9 +102,13 @@ function Navbar() {
   const Hamburger = isMobile && (
     <button
       className="hamburger-btn"
-      aria-label="Open sidebar menu"
+      aria-label="Toggle sidebar menu"
       onClick={() => setSidebarOpen((open) => !open)}
       style={{
+        position: "fixed",
+        top: 10,
+        left: sidebarOpen ? "auto" : 10, // Initial on left
+        right: sidebarOpen ? 10 : "auto", // After click, move to right
         background: "none",
         border: "none",
         cursor: "pointer",
@@ -114,13 +118,55 @@ function Navbar() {
         alignItems: "center",
         width: 34,
         height: 34,
-        margin: 2,
         zIndex: 1001,
+        padding: 0,
+        transition: "left 0.3s ease, right 0.3s ease", // Smooth transition
       }}
     >
-      <span className="hamburger-bar" />
-      <span className="hamburger-bar" />
-      <span className="hamburger-bar" />
+      {/* Top bar */}
+      <span
+        style={{
+          position: "absolute",
+          width: 22,
+          height: 2,
+          backgroundColor: "#000",
+          borderRadius: 1,
+          top: sidebarOpen ? "50%" : 8,
+          transform: sidebarOpen
+            ? "translateY(-50%) rotate(45deg)"
+            : "rotate(0deg)",
+          transition: "transform 0.3s ease, top 0.3s ease",
+        }}
+      />
+      {/* Middle bar */}
+      <span
+        style={{
+          position: "absolute",
+          width: 22,
+          height: 2,
+          backgroundColor: "#000",
+          borderRadius: 1,
+          top: "50%",
+          opacity: sidebarOpen ? 0 : 1,
+          transform: "translateY(-50%)",
+          transition: "opacity 0.3s ease",
+        }}
+      />
+      {/* Bottom bar */}
+      <span
+        style={{
+          position: "absolute",
+          width: 22,
+          height: 2,
+          backgroundColor: "#000",
+          borderRadius: 1,
+          bottom: sidebarOpen ? "50%" : 8,
+          transform: sidebarOpen
+            ? "translateY(50%) rotate(-45deg)"
+            : "rotate(0deg)",
+          transition: "transform 0.3s ease, bottom 0.3s ease",
+        }}
+      />
     </button>
   );
 
@@ -274,10 +320,10 @@ function Navbar() {
           style={{
             position: "absolute",
             bottom: 80,
-            left: 0,
+            left: 16,
             width: "100%",
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "left",
           }}
         >
           <Logout
