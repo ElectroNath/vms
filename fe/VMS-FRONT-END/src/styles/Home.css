@@ -1,3 +1,8 @@
+td,
+th {
+  border: none;
+}
+
 @media (min-width: 601px) {
   .mobile-hamburger-wrapper,
   .sidebar-overlay {
@@ -27,6 +32,10 @@
     align-items: flex-start;
     padding: 32px 0 0 0;
     z-index: 10;
+  }
+  .qr-label::before {
+    content: "Staff QR Code";
+    color: white;
   }
 }
 body {
@@ -515,8 +524,7 @@ body {
   transition: background 0.18s, opacity 0.18s;
   display: flex;
   align-items: center;
-  height: 55px;
-  width: 210px;
+  margin: 0 25px;
 }
 .dashboard-qr-btn:disabled {
   cursor: not-allowed;
@@ -872,13 +880,13 @@ body {
   .dashboard-profile {
     width: 92vw !important;
     max-width: 348px;
-    height: 68px !important;
+    height: 39px !important;
     border-radius: 18px !important;
 
     padding: 18px 12px 14px 12px !important;
     display: flex !important
 ;
-    flex-direction: column !important;
+    flex-direction: row !important;
     align-items: flex-start !important;
     position: relative;
     background: #fff !important;
@@ -898,9 +906,6 @@ body {
 
   .dashboard-qr-btn {
     margin-left: 0 !important;
-
-    width: 116px !important;
-    height: 30px !important;
     font-size: 0.98em !important;
     padding: 5px !important;
     border-radius: 8px !important;
@@ -1152,8 +1157,6 @@ body {
 @media (max-width: 600px) {
   .dashboard-qr-btn {
     padding: 4px 8px;
-    font-size: 13px;
-    min-width: auto;
   }
 
   .qr-label::before {
@@ -1169,8 +1172,5 @@ body {
   }
 
   .qr-label::before {
-    position: absolute;
-    left: 0;
-    top: 9px;
   }
 }

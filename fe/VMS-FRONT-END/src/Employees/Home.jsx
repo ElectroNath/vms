@@ -4,8 +4,11 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import "../styles/Home.css";
 import { API_BASE_URL } from "../api";
+import { useUserData } from "../components/UserDataContext";
 
 function Home() {
+  const { userData, setUserData } = useUserData();
+
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [staffId, setStaffId] = useState("");
@@ -36,47 +39,74 @@ function Home() {
   // Get unique key for viewed messages per user
   const viewedMsgsKey = `viewed_admin_msgs_${profileId || "nouser"}`;
 
+  // First useEffect: Runs on mount to fetch dashboard and profile
   useEffect(() => {
     let ignore = false;
-    setLoading(true); // Always trigger loading on mount
+    const token = Cookies.get("token");
+
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
 
     const fetchDashboard = async () => {
-      const token = Cookies.get("token");
-      if (!token) {
-        navigate("/login", { replace: true });
-        return;
-      }
-
+      setLoading(true);
       try {
-        const profileRes = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/me/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
+        // Only fetch if userData is not already available
+        if (!userData || !userData.profile || !userData.dashboard) {
+          const profileRes = await axios.get(
+            `${API_BASE_URL}/api/employee-profiles/me/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+            }
+          );
+
+          const dashboardRes = await axios.get(
+            `${API_BASE_URL}/api/employee-profiles/dashboard/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              withCredentials: true,
+            }
+          );
+
+          // Store both in context
+          setUserData({
+            profile: profileRes.data,
+            dashboard: dashboardRes.data,
+          });
+
+          if (!ignore) {
+            setUsername(profileRes.data.username);
+            setProfileId(profileRes.data.id);
+            setRole(profileRes.data.role);
+            setQrCodeUrl(profileRes.data.id_qr_code_url || "");
+
+            setFullName(dashboardRes.data.full_name);
+            setStaffId(dashboardRes.data.staff_id);
+            setDeviceCount(dashboardRes.data.device_count);
+            setGuestCount(dashboardRes.data.guest_count);
+            setAttendanceIn(dashboardRes.data.attendance_in);
+            setAttendanceOut(dashboardRes.data.attendance_out);
+            setDevices(dashboardRes.data.devices);
           }
-        );
+        } else {
+          const { profile, dashboard } = userData;
+          setUsername(profile.username);
+          setProfileId(profile.id);
+          setRole(profile.role);
+          setQrCodeUrl(profile.id_qr_code_url || "");
 
-        setUsername(profileRes.data.username);
-        setProfileId(profileRes.data.id);
-        setRole(profileRes.data.role);
-        setQrCodeUrl(profileRes.data.id_qr_code_url || "");
+          setFullName(dashboard.full_name);
+          setStaffId(dashboard.staff_id);
+          setDeviceCount(dashboard.device_count);
+          setGuestCount(dashboard.guest_count);
+          setAttendanceIn(dashboard.attendance_in);
+          setAttendanceOut(dashboard.attendance_out);
+          setDevices(dashboard.devices);
+        }
 
-        const dashboardRes = await axios.get(
-          `${API_BASE_URL}/api/employee-profiles/dashboard/`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            withCredentials: true,
-          }
-        );
-
-        setFullName(dashboardRes.data.full_name);
-        setStaffId(dashboardRes.data.staff_id);
-        setDeviceCount(dashboardRes.data.device_count);
-        setGuestCount(dashboardRes.data.guest_count);
-        setAttendanceIn(dashboardRes.data.attendance_in);
-        setAttendanceOut(dashboardRes.data.attendance_out);
-        setDevices(dashboardRes.data.devices);
-
+        // Always fetch fresh attendance (you can cache this too if needed)
         const attendanceRes = await axios.get(
           `${API_BASE_URL}/api/employee-profiles/attendance/`,
           {
@@ -85,32 +115,6 @@ function Home() {
           }
         );
         setAttendanceLogs(attendanceRes.data);
-
-        useEffect(() => {
-          if (!profileId) return;
-          const fetchMessages = async () => {
-            const token = Cookies.get("token");
-            try {
-              const msgRes = await axios.get(`${API_BASE_URL}/api/messages/`, {
-                headers: { Authorization: `Bearer ${token}` },
-                withCredentials: true,
-              });
-              setMessages(msgRes.data || []);
-              const viewed = JSON.parse(
-                localStorage.getItem(`viewed_admin_msgs_${profileId}`) || "[]"
-              );
-              const unread = (msgRes.data || []).filter(
-                (msg) => !viewed.includes(msg.id)
-              );
-              setUnreadCount(unread.length);
-              setNotificationCount(unread.length);
-            } catch (err) {
-              console.error("Error fetching messages:", err);
-            }
-          };
-
-          fetchMessages();
-        }, [profileId]);
       } catch (err) {
         if (err.response?.status === 401 || err.response?.status === 403) {
           navigate("/login", { replace: true });
@@ -126,7 +130,36 @@ function Home() {
     return () => {
       ignore = true;
     };
-  }, [navigate]);
+  }, [navigate, setUserData, userData]);
+
+  // Second useEffect: Waits until profileId is set, then loads messages
+  useEffect(() => {
+    if (!profileId) return;
+
+    const fetchMessages = async () => {
+      const token = Cookies.get("token");
+      try {
+        const msgRes = await axios.get(`${API_BASE_URL}/api/messages/`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+
+        setMessages(msgRes.data || []);
+        const viewed = JSON.parse(
+          localStorage.getItem(`viewed_admin_msgs_${profileId}`) || "[]"
+        );
+        const unread = (msgRes.data || []).filter(
+          (msg) => !viewed.includes(msg.id)
+        );
+        setUnreadCount(unread.length);
+        setNotificationCount(unread.length);
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+      }
+    };
+
+    fetchMessages();
+  }, [profileId]);
 
   // Handler to open modal and fetch QR code using staffId dynamically in the path
   const handleShowQrModal = async () => {
@@ -322,7 +355,12 @@ function Home() {
                   </p>
                 </div>
 
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleShowQrModal();
+                  }}
                   className="dashboard-qr-btn"
                   onClick={handleShowQrModal}
                   disabled={!qrCodeUrl}
@@ -348,8 +386,8 @@ function Home() {
                     <rect x="14" y="14" width="7" height="7" rx="2" />
                     <path d="M7 17v.01M7 14v.01M3 14v.01M3 17v.01M10 17v.01M10 14v.01" />
                   </svg>
-                  <span className="qr-label">Staff QR Code</span>
-                </button>
+                  <span className="qr-label"></span>
+                </div>
               </div>
               <div className="dashboard-metrics">
                 <div
