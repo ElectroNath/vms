@@ -392,7 +392,6 @@ body {
 
 .attendance-table th,
 .attendance-table td {
-  border: 1px solid #e0e0e0;
   padding: 8px 12px;
   text-align: center;
 }
