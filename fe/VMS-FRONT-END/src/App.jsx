@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Routes,
   Route,
   Navigate,
@@ -72,8 +72,8 @@ function App() {
   };
 
   return (
-    <ErrorBoundary>
-      <Router>
+    // <ErrorBoundary>
+      <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -120,8 +120,8 @@ function App() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           )}
         </Routes>
-      </Router>
-    </ErrorBoundary>
+      </BrowserRouter>
+  //</ErrorBoundary> 
   );
 }
 

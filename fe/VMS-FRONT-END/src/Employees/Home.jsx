@@ -24,11 +24,11 @@ function Home() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [modalQrUrl, setModalQrUrl] = useState(""); // For modal QR
   const [attendanceLogs, setAttendanceLogs] = useState([]);
-  const [activeMenu, setActiveMenu] = useState(0);
+
   const [role, setRole] = useState("");
   const [notificationCount, setNotificationCount] = useState(0); // notificationCount now tracks unread messages
   const navigate = useNavigate();
-  const [initialLoad, setInitialLoad] = useState(true);
+
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showDeviceModal, setShowDeviceModal] = useState(false);
   const [guestList, setGuestList] = useState([]);
@@ -41,96 +41,96 @@ function Home() {
 
   // First useEffect: Runs on mount to fetch dashboard and profile
   useEffect(() => {
-    let ignore = false;
     const token = Cookies.get("token");
+    if (!token || userData?.profile) return;
 
-    if (!token) {
-      navigate("/login", { replace: true });
-      return;
-    }
-
-    const fetchDashboard = async () => {
+    const fetchProfileAndDashboard = async () => {
       setLoading(true);
       try {
-        // Only fetch if userData is not already available
-        if (!userData || !userData.profile || !userData.dashboard) {
-          const profileRes = await axios.get(
-            `${API_BASE_URL}/api/employee-profiles/me/`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              withCredentials: true,
-            }
-          );
-
-          const dashboardRes = await axios.get(
-            `${API_BASE_URL}/api/employee-profiles/dashboard/`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              withCredentials: true,
-            }
-          );
-
-          // Store both in context
-          setUserData({
-            profile: profileRes.data,
-            dashboard: dashboardRes.data,
-          });
-
-          if (!ignore) {
-            setUsername(profileRes.data.username);
-            setProfileId(profileRes.data.id);
-            setRole(profileRes.data.role);
-            setQrCodeUrl(profileRes.data.id_qr_code_url || "");
-
-            setFullName(dashboardRes.data.full_name);
-            setStaffId(dashboardRes.data.staff_id);
-            setDeviceCount(dashboardRes.data.device_count);
-            setGuestCount(dashboardRes.data.guest_count);
-            setAttendanceIn(dashboardRes.data.attendance_in);
-            setAttendanceOut(dashboardRes.data.attendance_out);
-            setDevices(dashboardRes.data.devices);
+        const profileRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/me/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
           }
+        );
+        const dashboardRes = await axios.get(
+          `${API_BASE_URL}/api/employee-profiles/dashboard/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+
+        setUserData({
+          profile: profileRes.data,
+          dashboard: dashboardRes.data,
+        });
+
+        setUsername(profileRes.data.username);
+        setProfileId(profileRes.data.id);
+        setRole(profileRes.data.role);
+        setQrCodeUrl(profileRes.data.id_qr_code_url || "");
+
+        setFullName(dashboardRes.data.full_name);
+        setStaffId(dashboardRes.data.staff_id);
+        setDeviceCount(dashboardRes.data.device_count);
+        setGuestCount(dashboardRes.data.guest_count);
+        setAttendanceIn(dashboardRes.data.attendance_in);
+        setAttendanceOut(dashboardRes.data.attendance_out);
+        setDevices(dashboardRes.data.devices);
+      } catch (err) {
+        if (err.response?.status === 401) {
+          navigate("/login", { replace: true });
         } else {
-          const { profile, dashboard } = userData;
-          setUsername(profile.username);
-          setProfileId(profile.id);
-          setRole(profile.role);
-          setQrCodeUrl(profile.id_qr_code_url || "");
-
-          setFullName(dashboard.full_name);
-          setStaffId(dashboard.staff_id);
-          setDeviceCount(dashboard.device_count);
-          setGuestCount(dashboard.guest_count);
-          setAttendanceIn(dashboard.attendance_in);
-          setAttendanceOut(dashboard.attendance_out);
-          setDevices(dashboard.devices);
+          console.error("Failed to load profile/dashboard", err);
         }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        // Always fetch fresh attendance (you can cache this too if needed)
-        const attendanceRes = await axios.get(
+    fetchProfileAndDashboard();
+  }, [userData, navigate, setUserData]);
+
+  useEffect(() => {
+    if (userData?.profile && userData?.dashboard) {
+      const { profile, dashboard } = userData;
+      setUsername(profile.username);
+      setProfileId(profile.id);
+      setRole(profile.role);
+      setQrCodeUrl(profile.id_qr_code_url || "");
+
+      setFullName(dashboard.full_name);
+      setStaffId(dashboard.staff_id);
+      setDeviceCount(dashboard.device_count);
+      setGuestCount(dashboard.guest_count);
+      setAttendanceIn(dashboard.attendance_in);
+      setAttendanceOut(dashboard.attendance_out);
+      setDevices(dashboard.devices);
+    }
+  }, [userData]);
+
+  // 3. Fetch attendance logs (can be moved to lazy-load or paginated)
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        const token = Cookies.get("token");
+        const res = await axios.get(
           `${API_BASE_URL}/api/employee-profiles/attendance/`,
           {
             headers: { Authorization: `Bearer ${token}` },
             withCredentials: true,
           }
         );
-        setAttendanceLogs(attendanceRes.data);
+        setAttendanceLogs(res.data);
       } catch (err) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          navigate("/login", { replace: true });
-        } else {
-          setError("Unable to fetch dashboard. Please log in again.");
-        }
-      } finally {
-        if (!ignore) setLoading(false);
+        console.error("Failed to fetch attendance logs", err);
       }
     };
 
-    fetchDashboard();
-    return () => {
-      ignore = true;
-    };
-  }, [navigate, setUserData, userData]);
+    if (profileId) fetchAttendance();
+  }, [profileId]);
 
   // Second useEffect: Waits until profileId is set, then loads messages
   useEffect(() => {
@@ -144,13 +144,16 @@ function Home() {
           withCredentials: true,
         });
 
-        setMessages(msgRes.data || []);
+        const messages = msgRes.data?.data || []; // <-- safely extract the actual messages array
+
+        setMessages(messages);
+
         const viewed = JSON.parse(
           localStorage.getItem(`viewed_admin_msgs_${profileId}`) || "[]"
         );
-        const unread = (msgRes.data || []).filter(
-          (msg) => !viewed.includes(msg.id)
-        );
+
+        const unread = messages.filter((msg) => !viewed.includes(msg.id));
+
         setUnreadCount(unread.length);
         setNotificationCount(unread.length);
       } catch (err) {
