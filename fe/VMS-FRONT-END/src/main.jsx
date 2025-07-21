@@ -1,14 +1,13 @@
 import React from "react";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.jsx";
-import { UserDataProvider } from "./components/UserDataContext.jsx"; // <-- import your provider
+import ReactDOM from "react-dom/client";
+import App from "./App";
+// import { BrowserRouter } from "react-router-dom";
+import { AppProvider } from "./components/UserDataContext";
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <UserDataProvider>
-      <App />
-    </UserDataProvider>
-  </StrictMode>
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+      <AppProvider>
+        <App />
+      </AppProvider>
+  </React.StrictMode>
 );
