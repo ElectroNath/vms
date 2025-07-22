@@ -95,7 +95,7 @@ const OutlookAuth = () => {
           className="login-title"
           style={{ marginTop: "2.5rem", marginBottom: "auto" }}
         >
-          VISITORS MANAGEMENT
+          ACCESS MANAGEMENT
           <br />
           SYSTEM (NETCO)
         </div>

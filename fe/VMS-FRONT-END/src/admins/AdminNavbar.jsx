@@ -81,7 +81,7 @@ function AdminNavbar() {
                 position: "fixed",
                 top: 0,
                 left: sidebarOpen ? 0 : "-260px",
-                width: 240,
+                width: 200,
                 height: "100vh",
                 zIndex: 1001,
                 background: "#247150",
