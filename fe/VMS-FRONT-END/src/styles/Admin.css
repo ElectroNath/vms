@@ -51,7 +51,6 @@
 
 .admin-main {
   flex: 1;
-  padding: 40px 40px;
 }
 
 .admin-dashboard {
@@ -140,7 +139,7 @@
 @media (max-width: 768px) {
   .admin-root {
     flex-direction: column;
-    padding-top: 60px; /* space for hamburger */
+    /* space for hamburger */
   }
 
   .admin-navbar {
@@ -166,7 +165,6 @@
   }
 
   .admin-main {
-    padding: 24px 16px;
   }
 
   .admin-dashboard-cards {
