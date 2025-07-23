@@ -185,7 +185,7 @@ function SecurityScan() {
           <div
             style={{
               position: "absolute",
-              bottom: "40px",
+              bottom: "60px",
               zIndex: 10,
               display: "flex",
               gap: "20px",
