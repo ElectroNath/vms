@@ -55,7 +55,7 @@
 
 .admin-dashboard {
   margin-bottom: 40px;
-  margin-left: 220px;
+  margin-left: 280px;
 }
 
 .admin-dashboard-cards {
@@ -237,6 +237,7 @@
     flex-direction: column;
     gap: 16px;
     margin-top: 16px;
+    margin-left: -37px;
   }
 
   .admin-dashboard-card {
