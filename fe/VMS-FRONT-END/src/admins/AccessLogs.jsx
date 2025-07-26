@@ -83,7 +83,7 @@ function AdminAccessLogs() {
               <th>Device Serial</th>
               <th>Scanned By</th>
               <th>Time In</th>
-              <th>Time Out</th>
+              
               <th>Status</th>
             </tr>
           </thead>
@@ -96,7 +96,7 @@ function AdminAccessLogs() {
                 <td>${log.device}</td>
                 <td>${log.scanned_by}</td>
                 <td>${log.time_in}</td>
-                <td>${log.time_out}</td>
+                // <td>${log.time_out}</td>
                 <td>${log.status}</td>
               </tr>
             `).join("")}
@@ -265,8 +265,8 @@ function AdminAccessLogs() {
             <th>Device Serial</th>
             <th>Scanned By</th>
             <th>Date</th>
-            <th>Time In</th>
-            <th>Time Out</th>
+            <th>Time</th>
+            {/* <th>Time Out</th> */}
             <th>Status</th>
           </tr>
         </thead>
@@ -289,7 +289,7 @@ function AdminAccessLogs() {
                 <td>{l.scanned_by}</td>
                 <td>{date}</td>
                 <td>{timeInStr}</td>
-                <td>{timeOutStr}</td>
+                {/* <td>{timeOutStr}</td> */}
                 <td>{l.status}</td>
               </tr>
             );

@@ -7,8 +7,10 @@ import "./security.css";
 import Modal from "../components/Modals";
 
 function SecurityScan() {
-  const [phase, setPhase] = useState(1);
+  const [phase, setPhase] = useState(1); // 1 = token/ID, 2 = device
   const [qrValue, setQrValue] = useState("");
+  const [manualToken, setManualToken] = useState("");
+  const [manualValid, setManualValid] = useState(null);
   const [deviceSerial, setDeviceSerial] = useState("");
   const [action, setAction] = useState("in");
   const [result, setResult] = useState(null);
@@ -21,69 +23,66 @@ function SecurityScan() {
   const personScanned = useRef(false);
   const deviceScanned = useRef(false);
   const lastScanned = useRef(null);
+  const tokenValidateTimer = useRef(null);
+
+  // Validate token or QR for phase 1
+  const validatePersonToken = async (value) => {
+    const tokenVal = Cookies.get("token");
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/security/validate-token/`,
+        { qr_value: value },
+        { headers: { Authorization: `Bearer ${tokenVal}` } }
+      );
+
+      if (res.data.type === "employee" || res.data.type === "guest") {
+        setQrValue(value);
+        setResult(res.data);
+        setPhase(2);
+        personScanned.current = true;
+        setManualValid(true);
+        lastScanned.current = null;
+      } else {
+        setManualValid(false);
+      }
+    } catch (err) {
+      setManualValid(false);
+      personScanned.current = false;
+    }
+  };
 
   const handleScan = async (value) => {
     if (!value || lastScanned.current === value) return;
     lastScanned.current = value;
 
-    const tokenVal = Cookies.get("token");
-
     if (phase === 1 && !personScanned.current) {
-      personScanned.current = true;
-
-      try {
-        const res = await axios.post(
-          `${API_BASE_URL}/api/security/scan/`,
-          { qr_value: value },
-          { headers: { Authorization: `Bearer ${tokenVal}` } }
-        );
-
-        if (res.data.type === "employee" || res.data.type === "guest") {
-          setQrValue(value);
-          setResult(res.data);
-          setPhase(2);
-          lastScanned.current = null;
-        } else {
-          throw new Error("Not a valid person QR.");
-        }
-      } catch (err) {
-        const errMsg = err?.response?.data?.detail || "Invalid or expired QR.";
-        setError(errMsg);
-        setModalMsg(errMsg);
-        setModalSuccess(false);
-        personScanned.current = false;
-      }
+      await validatePersonToken(value);
     } else if (phase === 2 && !deviceScanned.current) {
       deviceScanned.current = true;
       setDeviceSerial(value);
+      await handleSubmit(); // auto submit
     }
   };
 
-  const handleSubmit = async (e) => {
-    e && e.preventDefault();
-    setError("");
-    setResult(null);
+  const handleSubmit = async () => {
+    const tokenVal = Cookies.get("token");
     setLoading(true);
+    setError("");
 
     try {
-      const tokenVal = Cookies.get("token");
-      const payload = {
-        qr_value: qrValue,
-        device_serial: deviceSerial || null,
-        action,
-      };
-
       const res = await axios.post(
         `${API_BASE_URL}/api/security/scan/`,
-        payload,
         {
-          headers: { Authorization: `Bearer ${tokenVal}` },
-        }
+          qr_value: qrValue,
+          device_serial: deviceSerial || null,
+          action,
+        },
+        { headers: { Authorization: `Bearer ${tokenVal}` } }
       );
 
-      setResult(res.data);
-      setModalMsg(res.data.log || "Scan successful!");
+      setModalMsg(res.data.log || "Scan successful");
       setModalSuccess(true);
+      setResult(res.data);
       resetScanState();
     } catch (err) {
       const errMsg = err?.response?.data?.detail || "Scan failed.";
@@ -95,43 +94,47 @@ function SecurityScan() {
     }
   };
 
+  const skipDeviceScan = async () => {
+    await handleSubmit();
+  };
+
   const resetScanState = () => {
     setPhase(1);
     setQrValue("");
     setDeviceSerial("");
+    setManualToken("");
+    setManualValid(null);
     personScanned.current = false;
     deviceScanned.current = false;
     lastScanned.current = null;
   };
 
+  // Manual token validation
+  useEffect(() => {
+    if (manualToken.trim().length < 3) {
+      setManualValid(null);
+      return;
+    }
+
+    clearTimeout(tokenValidateTimer.current);
+    tokenValidateTimer.current = setTimeout(() => {
+      validatePersonToken(manualToken.trim());
+    }, 500);
+  }, [manualToken]);
+
   useEffect(() => {
     setScannerReady(true);
-    return () => {
-      setScannerReady(false);
-    };
+    return () => setScannerReady(false);
   }, []);
 
   useEffect(() => {
-    navigator.mediaDevices
-      ?.getUserMedia({ video: true })
-      .catch(() =>
-        alert("Camera access denied. Please allow camera permissions.")
-      );
+    navigator.mediaDevices?.getUserMedia({ video: true }).catch(() => {
+      alert("Camera access denied. Please allow camera permissions.");
+    });
   }, []);
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "#000",
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <div className="scanner-container">
       {modalMsg && (
         <Modal
           message={modalMsg}
@@ -140,92 +143,78 @@ function SecurityScan() {
         />
       )}
 
-      {scannerReady && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              top: "20%",
-              zIndex: 10,
-              textAlign: "center",
-              color: "white",
-            }}
-          >
-            <h2 style={{ fontSize: "24px", fontWeight: "bold" }}>
-              Scan QR Code
-            </h2>
-            <p>
-              Scan the code to authenticate
-              <br />
-              users /employees/guests
-            </p>
-          </div>
+      <div className="scanner-header">
+        <h2>Scan QR Code</h2>
+        <p>
+          {phase === 1
+            ? "Scan ID or Token QR or enter manually"
+            : "Scan Device QR (or skip)"}
+        </p>
 
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              position: "absolute",
-              top: 0,
-              left: 0,
-              zIndex: 1,
-            }}
-          >
-            <QrReader
-              constraints={{ facingMode: "environment" }}
-              onResult={(result, error) => {
-                if (!!result) handleScan(result.getText());
-                if (!!error) console.error(error);
+        <select
+          value={action}
+          onChange={(e) => setAction(e.target.value)}
+          style={{
+            padding: "8px",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            marginTop: "10px",
+          }}
+        >
+          <option value="in">Check In</option>
+          <option value="out">Check Out</option>
+        </select>
+
+        {phase === 1 && (
+          <div style={{ marginTop: "20px" }}>
+            <input
+              type="text"
+              value={manualToken}
+              onChange={(e) => setManualToken(e.target.value)}
+              placeholder="Enter ID/Token manually"
+              style={{
+                padding: "10px",
+                width: "260px",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
               }}
-              videoContainerStyle={{ width: "100%", height: "100%" }}
-              videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
+            {manualValid === true && (
+              <div style={{ color: "lightgreen", marginTop: "5px" }}>
+                ✓ Token is valid
+              </div>
+            )}
+            {manualValid === false && (
+              <div style={{ color: "red", marginTop: "5px" }}>
+                ✗ Invalid or expired token
+              </div>
+            )}
           </div>
+        )}
+      </div>
 
-          <div
-            style={{
-              position: "absolute",
-              bottom: "60px",
-              zIndex: 10,
-              display: "flex",
-              gap: "20px",
-            }}
+      <div className="scanner-video">
+        <QrReader
+          constraints={{ facingMode: "environment" }}
+          onResult={(result, error) => {
+            if (!!result) handleScan(result.getText());
+          }}
+          videoContainerStyle={{ width: "100%", height: "100%" }}
+          videoStyle={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+
+      <div className="scanner-controls">
+        {phase === 2 && (
+          <button
+            onClick={skipDeviceScan}
+            className="scanner-button"
+            disabled={loading}
           >
-            <button
-              style={{
-                background: "white",
-                border: "none",
-                borderRadius: "12px",
-                padding: "12px 24px",
-                fontSize: "14px",
-                fontWeight: "bold",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                cursor: "pointer",
-              }}
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? "Submitting..." : "Scan code"}
-            </button>
-            <button
-              style={{
-                background: "white",
-                border: "none",
-                borderRadius: "12px",
-                padding: "12px 24px",
-                fontSize: "14px",
-                fontWeight: "bold",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                cursor: "pointer",
-              }}
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              Enter Code
-            </button>
-          </div>
-        </>
-      )}
+            {loading ? "Submitting..." : "Skip Device Scan"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

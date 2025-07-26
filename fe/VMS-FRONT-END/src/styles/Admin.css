@@ -164,9 +164,7 @@
     padding: 24px 16px;
   }
 
-  .admin-main {
-  }
-
+  
   .admin-dashboard-cards {
     flex-direction: column;
     gap: 16px;

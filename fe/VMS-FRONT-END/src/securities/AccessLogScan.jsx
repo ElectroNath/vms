@@ -13,7 +13,7 @@ function SecurityAccessLog() {
     device: "",
     scanned_by: "",
     time_in: "",
-    time_out: "",
+    // time_out: "",
     status: "",
   });
 
@@ -43,7 +43,7 @@ function SecurityAccessLog() {
     (filter.device === "" || (l.device || "").toLowerCase().includes(filter.device.toLowerCase())) &&
     (filter.scanned_by === "" || (l.scanned_by || "").toLowerCase().includes(filter.scanned_by.toLowerCase())) &&
     (filter.time_in === "" || (l.time_in || "").includes(filter.time_in)) &&
-    (filter.time_out === "" || (l.time_out || "").includes(filter.time_out)) &&
+    // (filter.time_out === "" || (l.time_out || "").includes(filter.time_out)) &&
     (filter.status === "" || (l.status || "").toLowerCase().includes(filter.status.toLowerCase()))
   );
 
@@ -96,7 +96,7 @@ function SecurityAccessLog() {
                 <td>${log.device}</td>
                 <td>${log.scanned_by}</td>
                 <td>${log.time_in}</td>
-                <td>${log.time_out}</td>
+                
                 <td>${log.status}</td>
               </tr>
             `).join("")}
@@ -207,7 +207,7 @@ function SecurityAccessLog() {
               device: "",
               scanned_by: "",
               time_in: "",
-              time_out: "",
+              // time_out: "",
               status: "",
             })
           }
@@ -265,8 +265,8 @@ function SecurityAccessLog() {
             <th>Device Serial</th>
             <th>Scanned By</th>
             <th>Date</th>
-            <th>Time In</th>
-            <th>Time Out</th>
+            <th>Time</th>
+            {/* <th>Time Out</th> */}
             <th>Status</th>
           </tr>
         </thead>
@@ -289,7 +289,7 @@ function SecurityAccessLog() {
                 <td>{l.scanned_by}</td>
                 <td>{date}</td>
                 <td>{timeInStr}</td>
-                <td>{timeOutStr}</td>
+                {/* <td>{timeOutStr}</td> */}
                 <td>{l.status}</td>
               </tr>
             );
